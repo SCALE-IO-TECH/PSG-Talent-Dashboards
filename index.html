@@ -161,17 +161,32 @@
     }
 
     /* Candidate sources smaller */
-    .chart-placeholder{
+    .chart-wrap{
       height:110px;
       border-radius:14px;
       background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
       display:flex;
       align-items:center;
       justify-content:center;
+      position:relative;
+    }
+
+    .chart-empty{
       color:var(--muted);
       font-size:12px;
       letter-spacing:.14em;
       text-transform:uppercase;
+      text-align:center;
+      padding:0 12px;
+    }
+
+    /* Make canvas fit nicely */
+    #candidateSourcesChart{
+      width:100% !important;
+      height:100% !important;
+      display:block;
     }
 
     .list-item{
@@ -249,7 +264,10 @@
       <div class="right-col">
         <div class="card">
           <h2>Candidate Sources</h2>
-          <div class="chart-placeholder">Source Chart</div>
+          <div class="chart-wrap">
+            <canvas id="candidateSourcesChart" aria-label="Candidate sources chart"></canvas>
+            <div id="candidateSourcesEmpty" class="chart-empty">Loading…</div>
+          </div>
         </div>
 
         <div class="card">
@@ -259,7 +277,7 @@
       </div>
     </div>
 
-    <!-- REINSTATED: Progress / Challenges -->
+    <!-- Progress / Challenges -->
     <div class="two-col">
       <div class="card">
         <h2>Progress</h2>
@@ -276,7 +294,7 @@
       </div>
     </div>
 
-    <!-- REINSTATED: Actions -->
+    <!-- Actions -->
     <div class="card">
       <h2>Actions Next</h2>
       <div id="actionsList">
@@ -285,6 +303,9 @@
     </div>
 
   </div>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <script src="dashboard.js"></script>
 </body>
