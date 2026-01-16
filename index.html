@@ -1,3 +1,4 @@
+<!-- index.html (REPLACE ENTIRE FILE) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -121,27 +122,22 @@
       font-size:12px;
     }
 
+    /* Neutral pill style (for Location) */
     .pill{
       display:inline-flex;
       align-items:center;
-      padding:5px 10px;
+      padding:6px 12px;
       border-radius:999px;
       font-size:11px;
       font-weight:800;
-      letter-spacing:.10em;
+      letter-spacing:.12em;
       text-transform:uppercase;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.16);
-      color:rgba(255,255,255,.85);
+      background:rgba(255,255,255,.12);
       white-space:nowrap;
+      color:rgba(255,255,255,.92);
     }
 
-    .pill.location{
-      border-color: rgba(247,142,98,.28);
-      background: rgba(247,142,98,.12);
-      color: rgba(255,255,255,.92);
-    }
-
+    /* Stage pill */
     .stage{
       padding:6px 12px;
       border-radius:999px;
@@ -151,18 +147,19 @@
       text-transform:uppercase;
       background:rgba(255,255,255,.12);
       white-space:nowrap;
+      color:rgba(255,255,255,.92);
     }
 
     /* Offer = Pole Star orange */
     .stage.offer{
-      background:rgba(247,142,98,.20);
+      background:rgba(247,142,98,.18);
       color:var(--accent);
       border:1px solid rgba(247,142,98,.35);
     }
 
     /* Hired stays green */
     .stage.hired{
-      background:rgba(22,163,74,.28);
+      background:rgba(22,163,74,.22);
       color:#16a34a;
       border:1px solid rgba(22,163,74,.35);
     }
@@ -200,7 +197,6 @@
     @media (max-width:900px){
       .kpi-grid{ grid-template-columns:1fr 1fr; }
       .two-col{ grid-template-columns:1fr; }
-      .role{ align-items:flex-start; }
     }
   </style>
 </head>
@@ -220,7 +216,7 @@
       <img src="scaleio.svg" alt="ScaleIO">
     </div>
 
-    <!-- KPI BAR (STATUS TAB ONLY) -->
+    <!-- KPI BAR (PULLS FROM status TAB ONLY) -->
     <div class="card">
       <div class="kpi-grid">
         <div class="kpi">
@@ -242,7 +238,7 @@
       </div>
     </div>
 
-    <!-- Live Roles -->
+    <!-- Live roles + sources -->
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
@@ -253,6 +249,24 @@
         <h2>Candidate Sources</h2>
         <div class="chart-placeholder">Source Chart</div>
       </div>
+    </div>
+
+    <!-- Progress / Challenges -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Progress</h2>
+        <div id="progressList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Challenges</h2>
+        <div id="challengesList"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Actions Next</h2>
+      <div id="actionsList"></div>
     </div>
 
   </div>
