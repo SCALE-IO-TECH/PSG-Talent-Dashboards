@@ -1,12 +1,12 @@
 // dashboard.js (REPLACE ENTIRE FILE)
+
 const BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=";
 
-const STATUS_SHEET = "status";       // MUST match your 2nd tab name exactly
+const STATUS_SHEET_CANDIDATES = ["status", "Status", "STATUS"]; // your 2nd tab name
 const LIVE_ROLES_SHEET = "live_roles";
 
 function csvToRows(text) {
-  // Handles quoted commas properly
   const rows = [];
   let row = [];
   let cur = "";
@@ -37,6 +37,15 @@ function csvToRows(text) {
   return rows;
 }
 
+function normHeader(h) {
+  // trim + remove BOM + collapse spaces + keep underscores
+  return String(h || "")
+    .replace(/^\uFEFF/, "")
+    .trim()
+    .replace(/\s+/g, "_")
+    .toLowerCase();
+}
+
 function toNumber(v) {
   const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? n : 0;
@@ -56,49 +65,79 @@ function esc(s) {
 }
 
 async function fetchSheet(sheetName) {
-  const res = await fetch(BASE + encodeURIComponent(sheetName), { cache: "no-store" });
-  if (!res.ok) throw new Error("Fetch failed: " + sheetName);
+  // cache-bust so you always see latest
+  const url = BASE + encodeURIComponent(sheetName) + "&t=" + Date.now();
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fetch failed (${res.status}) for sheet: ${sheetName}`);
   const text = await res.text();
-  return csvToRows(text.trim());
+  const rows = csvToRows(text.trim());
+  if (!rows.length) throw new Error(`No data returned for sheet: ${sheetName}`);
+  return rows;
+}
+
+/* ---------- STATUS KPI BAR (MUST COME FROM status TAB) ---------- */
+
+function setKpi(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
 
 async function loadStatusKpis() {
-  const rows = await fetchSheet(STATUS_SHEET);
-  if (rows.length < 2) return;
+  // Try candidate sheet names until one works
+  let rows = null;
+  let usedSheet = null;
 
-  const headers = rows.shift().map(h => String(h).trim());
-  const idx = (name) => headers.indexOf(name);
+  for (const name of STATUS_SHEET_CANDIDATES) {
+    try {
+      rows = await fetchSheet(name);
+      usedSheet = name;
+      break;
+    } catch (e) {
+      // try next
+    }
+  }
 
-  // Find the first non-empty data row (so blanks above don't break it)
+  if (!rows) {
+    // hard fail visible
+    setKpi("kpiLiveRoles", "ERR");
+    setKpi("kpiOnHold", "ERR");
+    setKpi("kpiOffers", "ERR");
+    setKpi("kpiHires", "ERR");
+    throw new Error("Could not load status tab (tried: " + STATUS_SHEET_CANDIDATES.join(", ") + ")");
+  }
+
+  const headersRaw = rows.shift();
+  const headers = headersRaw.map(normHeader);
+
+  // Find first non-empty data row
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  const get = (name) => {
-    const i = idx(name);
-    return i >= 0 ? toNumber(dataRow[i]) : 0;
+  const get = (headerName) => {
+    const idx = headers.indexOf(normHeader(headerName));
+    return idx >= 0 ? toNumber(dataRow[idx]) : 0;
   };
 
-  // These must match your status headers exactly:
+  // These are your exact headers (robust to spaces/case):
   const liveRoles = get("Live_Roles");
   const onHold = get("On_Hold");
   const offers = get("Offers");
   const hires = get("Hires");
 
-  const set = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = String(val);
-  };
+  setKpi("kpiLiveRoles", String(liveRoles));
+  setKpi("kpiOnHold", String(onHold));
+  setKpi("kpiOffers", String(offers));
+  setKpi("kpiHires", String(hires));
 
-  set("kpiLiveRoles", liveRoles);
-  set("kpiOnHold", onHold);
-  set("kpiOffers", offers);
-  set("kpiHires", hires);
+  // If you ever need to verify it’s reading the right sheet:
+  // console.log("Loaded KPIs from sheet:", usedSheet);
 }
+
+/* ---------- LIVE ROLES LIST ---------- */
 
 async function loadLiveRoles() {
   const rows = await fetchSheet(LIVE_ROLES_SHEET);
-  if (rows.length < 2) return;
-
-  const headers = rows.shift().map(h => String(h).trim());
+  const headersRaw = rows.shift();
+  const headers = headersRaw.map(h => String(h).replace(/^\uFEFF/, "").trim());
   const idx = (name) => headers.indexOf(name);
 
   const list = document.getElementById("liveRolesList");
@@ -131,4 +170,7 @@ async function loadLiveRoles() {
   });
 }
 
-Promise.all([loadStatusKpis(), loadLiveRoles()]).catch(() => {});
+Promise.all([loadStatusKpis(), loadLiveRoles()]).catch((e) => {
+  // Visible failure already sets ERR for KPIs; keep console for debug.
+  console.error(e);
+});
