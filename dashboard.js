@@ -1,16 +1,16 @@
-const SHEET_BASE =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=";
+const LIVE_ROLES_CSV =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=live_roles";
 
-function csvToRows(csvText) {
+function csvToRows(text) {
   // Handles quoted commas
   const rows = [];
   let row = [];
   let cur = "";
   let inQuotes = false;
 
-  for (let i = 0; i < csvText.length; i++) {
-    const ch = csvText[i];
-    const next = csvText[i + 1];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
 
     if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
     if (ch === '"') { inQuotes = !inQuotes; continue; }
@@ -33,36 +33,9 @@ function csvToRows(csvText) {
   return rows;
 }
 
-async function fetchSheet(sheetName) {
-  const res = await fetch(SHEET_BASE + encodeURIComponent(sheetName));
-  if (!res.ok) throw new Error(`Failed to fetch sheet: ${sheetName}`);
-  const text = await res.text();
-
-  const raw = csvToRows(text.trim());
-  const headers = raw.shift().map(h => h.trim());
-
-  return raw.map(r => {
-    const obj = {};
-    headers.forEach((h, idx) => (obj[h] = (r[idx] ?? "").trim()));
-    return obj;
-  });
-}
-
 function toNumber(x) {
   const n = Number(String(x ?? "").replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? n : 0;
-}
-
-function setKpi(labelText, valueText) {
-  const kpis = document.querySelectorAll(".kpi");
-  for (const kpi of kpis) {
-    const label = kpi.querySelector(".label")?.textContent?.trim().toLowerCase();
-    if (label === labelText.toLowerCase()) {
-      const v = kpi.querySelector(".value");
-      if (v) v.textContent = valueText;
-      return;
-    }
-  }
 }
 
 function stageClass(stage) {
@@ -72,53 +45,66 @@ function stageClass(stage) {
   return "";
 }
 
-function getLiveRolesCard() {
-  const cards = document.querySelectorAll(".card");
-  for (const c of cards) {
-    const h2 = c.querySelector("h2");
-    if (h2 && h2.textContent.trim().toLowerCase() === "live roles") return c;
-  }
-  return null;
-}
+async function loadLiveRoles() {
+  const list = document.getElementById("liveRolesList");
+  if (!list) return;
 
-function renderLiveRoles(roles) {
-  const card = getLiveRolesCard();
-  if (!card) return;
+  const res = await fetch(LIVE_ROLES_CSV, { cache: "no-store" });
+  const text = await res.text();
 
-  // Remove any existing role rows (placeholders or old render)
-  card.querySelectorAll(".role").forEach(r => r.remove());
+  const raw = csvToRows(text.trim());
+  if (!raw.length) return;
+
+  const headers = raw.shift().map(h => h.trim());
+  const idx = (name) => headers.indexOf(name);
+
+  const roles = raw
+    .map(r => ({
+      Job_Title: (r[idx("Job_Title")] ?? "").trim(),
+      Team: (r[idx("Team")] ?? "").trim(),
+      Location: (r[idx("Location")] ?? "").trim(),
+      Applicants: (r[idx("Applicants")] ?? "").trim(),
+      Current_Stage: (r[idx("Current_Stage")] ?? "").trim(),
+    }))
+    .filter(r => r.Job_Title);
+
+  // KPIs
+  const applicantsTotal = roles.reduce((sum, r) => sum + toNumber(r.Applicants), 0);
+
+  const kpiLiveRoles = document.getElementById("kpiLiveRoles");
+  const kpiApplicants = document.getElementById("kpiApplicants");
+  const kpiOffers = document.getElementById("kpiOffers");
+  const kpiHires = document.getElementById("kpiHires");
+
+  if (kpiLiveRoles) kpiLiveRoles.textContent = String(roles.length);
+  if (kpiApplicants) kpiApplicants.textContent = applicantsTotal ? String(applicantsTotal) : "—";
+
+  // Offers & Hires from Current_Stage
+  const offers = roles.filter(r => String(r.Current_Stage).trim().toLowerCase() === "offer").length;
+  const hires = roles.filter(r => String(r.Current_Stage).trim().toLowerCase() === "hired").length;
+
+  if (kpiOffers) kpiOffers.textContent = String(offers);
+  if (kpiHires) kpiHires.textContent = String(hires);
+
+  // Render
+  list.innerHTML = "";
 
   roles.forEach(r => {
-    const title = r["Job_Title"] || "—";
-    const team = r["Team"] || "—";
-    const location = r["Location"] || "—";
-    const applicantsRaw = r["Applicants"] || "0";
-    const applicantsNum = toNumber(applicantsRaw);
-    const stage = r["Current_Stage"] || "—";
-
     const el = document.createElement("div");
     el.className = "role";
     el.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:6px;">
-        <div class="title">${title}</div>
-        <div style="font-size:12px; color:rgba(255,255,255,.65); letter-spacing:.02em;">
-          ${team} • ${location} • ${applicantsNum} applicants
+        <div class="title">${r.Job_Title}</div>
+        <div style="font-size:12px; color:rgba(255,255,255,.65);">
+          ${r.Team || "—"} • ${r.Location || "—"} • ${toNumber(r.Applicants)} applicants
         </div>
       </div>
-      <span class="stage ${stageClass(stage)}">${stage}</span>
+      <span class="stage ${stageClass(r.Current_Stage)}">${r.Current_Stage || "—"}</span>
     `;
-    card.appendChild(el);
+    list.appendChild(el);
   });
 }
 
-(async function init() {
-  const liveRoles = await fetchSheet("live_roles");
-  const roles = liveRoles.filter(r => (r["Job_Title"] || "").trim() !== "");
-
-  const applicantsTotal = roles.reduce((sum, r) => sum + toNumber(r["Applicants"]), 0);
-
-  setKpi("Live Roles", String(roles.length));
-  setKpi("Applicants", applicantsTotal ? String(applicantsTotal) : "—");
-
-  renderLiveRoles(roles);
-})();
+loadLiveRoles().catch(() => {
+  // do nothing
+});
