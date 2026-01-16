@@ -127,7 +127,7 @@ async function loadLiveRoles() {
       <div style="min-width:0;">
         <div class="title">${esc(title)}</div>
         <div class="meta">
-          ${team ? `<span>${esc(team)}</span>` : ``}
+          ${team ? `<span class="team">${esc(team)}</span>` : ``}
           ${location ? `<span class="pill">${esc(location)}</span>` : ``}
           <span>${applicants} applicants</span>
         </div>
@@ -170,7 +170,7 @@ async function loadNewStarters() {
         <div class="title">${esc(name)}</div>
         <div class="meta">
           ${role ? `<span>${esc(role)}</span>` : ``}
-          ${team ? `<span>${esc(team)}</span>` : ``}
+          ${team ? `<span class="team">${esc(team)}</span>` : ``}
         </div>
       </div>
       <span class="pill">${esc(start || "—")}</span>
@@ -184,14 +184,14 @@ let candidateSourcesChart = null;
 
 function modernPalette(n) {
   const base = [
-    "rgba(247,142,98,.95)",   // orange
-    "rgba(34,211,238,.85)",   // cyan
-    "rgba(56,189,248,.85)",   // sky
-    "rgba(129,140,248,.85)",  // indigo
-    "rgba(94,234,212,.80)",   // teal
-    "rgba(167,139,250,.80)",  // violet
-    "rgba(110,231,183,.80)",  // mint
-    "rgba(251,191,36,.75)"    // amber
+    "rgba(247,142,98,.95)",
+    "rgba(34,211,238,.85)",
+    "rgba(56,189,248,.85)",
+    "rgba(129,140,248,.85)",
+    "rgba(94,234,212,.80)",
+    "rgba(167,139,250,.80)",
+    "rgba(110,231,183,.80)",
+    "rgba(251,191,36,.75)"
   ];
   const out = [];
   for (let i = 0; i < n; i++) out.push(base[i % base.length]);
@@ -277,13 +277,10 @@ async function loadCandidateSourcesChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "52%",          // larger donut (thicker ring)
-      layout: { padding: 2 }, // chart already padded by CSS container
+      cutout: "46%",     // bigger donut ring
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` }
-        }
+        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }
       }
     }
   });
@@ -295,9 +292,7 @@ function renderSimpleList(containerId, items) {
   if (!el) return;
   el.innerHTML = "";
 
-  const cleaned = items
-    .map(x => String(x || "").trim())
-    .filter(Boolean);
+  const cleaned = items.map(x => String(x || "").trim()).filter(Boolean);
 
   if (!cleaned.length) {
     el.innerHTML = `<div class="list-item">—</div>`;
@@ -320,8 +315,6 @@ async function loadTextListFromSheet(gid, containerId) {
     return;
   }
 
-  // If there's a header row, ignore it; otherwise still safe.
-  // We take the first non-empty cell per row (so it works with 1 or many columns).
   const body = rows.slice(1); // skip header row
   const items = [];
 
