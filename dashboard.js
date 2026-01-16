@@ -1,7 +1,9 @@
-// ===== CONFIG (DO NOT CHANGE) =====
-const STATUS_GID = "1256252635";   // status tab
-const LIVE_ROLES_GID = "0";        // live_roles tab
+// ===== GIDs =====
+const STATUS_GID = "1256252635";
+const LIVE_ROLES_GID = "0";
+const NEW_STARTERS_GID = "2080311953";
 
+// Published CSV endpoint (gid-based)
 const PUB_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&gid=";
 
@@ -16,14 +18,10 @@ function csvToRows(text) {
     const ch = text[i];
     const next = text[i + 1];
 
-    if (ch === '"' && inQuotes && next === '"') {
-      cur += '"'; i++; continue;
-    }
+    if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
     if (ch === '"') { inQuotes = !inQuotes; continue; }
 
-    if (ch === "," && !inQuotes) {
-      row.push(cur); cur = ""; continue;
-    }
+    if (ch === "," && !inQuotes) { row.push(cur); cur = ""; continue; }
 
     if ((ch === "\n" || ch === "\r") && !inQuotes) {
       if (ch === "\r" && next === "\n") i++;
@@ -69,6 +67,16 @@ async function fetchCsvByGid(gid) {
   return res.text();
 }
 
+function pickIndex(headers, candidates) {
+  const norm = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, "_");
+  const H = headers.map(norm);
+  for (const c of candidates) {
+    const i = H.indexOf(norm(c));
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
 // ===== STATUS KPI BAR =====
 async function loadStatusKpis() {
   const text = await fetchCsvByGid(STATUS_GID);
@@ -80,17 +88,10 @@ async function loadStatusKpis() {
 
   const idx = (name) => headers.indexOf(name);
 
-  document.getElementById("kpiLiveRoles").textContent =
-    toNumber(dataRow[idx("Live_Roles")]);
-
-  document.getElementById("kpiOnHold").textContent =
-    toNumber(dataRow[idx("On_Hold")]);
-
-  document.getElementById("kpiOffers").textContent =
-    toNumber(dataRow[idx("Offers")]);
-
-  document.getElementById("kpiHires").textContent =
-    toNumber(dataRow[idx("Hires")]);
+  document.getElementById("kpiLiveRoles").textContent = String(toNumber(dataRow[idx("Live_Roles")]));
+  document.getElementById("kpiOnHold").textContent  = String(toNumber(dataRow[idx("On_Hold")]));
+  document.getElementById("kpiOffers").textContent  = String(toNumber(dataRow[idx("Offers")]));
+  document.getElementById("kpiHires").textContent   = String(toNumber(dataRow[idx("Hires")]));
 }
 
 // ===== LIVE ROLES LIST =====
@@ -131,14 +132,49 @@ async function loadLiveRoles() {
   });
 }
 
-// ===== INIT =====
-Promise.all([
-  loadStatusKpis(),
-  loadLiveRoles()
-]).catch(err => {
-  console.error(err);
-  ["kpiLiveRoles","kpiOnHold","kpiOffers","kpiHires"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = "ERR";
+// ===== NEW STARTERS =====
+async function loadNewStarters() {
+  const text = await fetchCsvByGid(NEW_STARTERS_GID);
+  const rows = csvToRows(text.trim());
+  if (rows.length < 2) return;
+
+  const headers = rows.shift().map(h => String(h).trim());
+
+  const iName = pickIndex(headers, ["Name", "Candidate", "New_Starter", "Employee", "Full_Name"]);
+  const iRole = pickIndex(headers, ["Role", "Job_Title", "Job", "Position"]);
+  const iTeam = pickIndex(headers, ["Team", "Department"]);
+  const iStart = pickIndex(headers, ["Start_Date", "Start Date", "Start", "Joining_Date", "Join_Date"]);
+
+  const list = document.getElementById("newStartersList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  rows.forEach(r => {
+    const name = (r[iName] ?? "").trim();
+    if (!name) return;
+
+    const role = (r[iRole] ?? "").trim();
+    const team = (r[iTeam] ?? "").trim();
+    const start = (r[iStart] ?? "").trim();
+
+    const el = document.createElement("div");
+    el.className = "role";
+    el.innerHTML = `
+      <div style="min-width:0;">
+        <div class="title">${esc(name)}</div>
+        <div class="roleMeta">
+          ${role ? `<span>${esc(role)}</span>` : ``}
+          ${team ? `<span>${esc(team)}</span>` : ``}
+          ${start ? `<span class="pill">${esc(start)}</span>` : ``}
+        </div>
+      </div>
+      <span class="stage">${start ? "Starting" : "—"}</span>
+    `;
+    list.appendChild(el);
   });
+}
+
+// ===== INIT =====
+Promise.all([loadStatusKpis(), loadLiveRoles(), loadNewStarters()]).catch(err => {
+  console.error(err);
 });
