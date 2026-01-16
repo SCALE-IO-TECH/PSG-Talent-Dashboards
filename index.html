@@ -40,7 +40,7 @@
 
     h1{
       font-size:clamp(22px,3vw,32px);
-      margin-bottom:24px;
+      margin-bottom:10px;
       text-align:center;
     }
 
@@ -115,6 +115,7 @@
       letter-spacing:.12em;
       text-transform:uppercase;
       background:rgba(255,255,255,.12);
+      white-space:nowrap;
     }
 
     .stage.offer{
@@ -149,19 +150,15 @@
     }
 
     .powered-by{
-      position:fixed;
-      left:0;
-      right:0;
-      bottom:36px;
       display:flex;
       justify-content:center;
       align-items:center;
       gap:10px;
+      margin-bottom:22px;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
       color:rgba(255,255,255,.55);
-      pointer-events:none;
     }
 
     .powered-by img{
@@ -189,30 +186,39 @@
 
     <h1>Hiring Dashboard</h1>
 
+    <!-- Powered by under heading -->
+    <div class="powered-by">
+      <span>Powered by</span>
+      <img src="scaleio.svg" alt="ScaleIO">
+    </div>
+
+    <!-- KPIs -->
     <div class="card">
       <div class="kpi-grid">
         <div class="kpi">
           <div class="label">Live Roles</div>
-          <div class="value">—</div>
+          <div class="value" id="kpiLiveRoles">—</div>
         </div>
         <div class="kpi">
           <div class="label">Applicants</div>
-          <div class="value">—</div>
+          <div class="value" id="kpiApplicants">—</div>
         </div>
         <div class="kpi">
           <div class="label">Offers</div>
-          <div class="value">—</div>
+          <div class="value" id="kpiOffers">—</div>
         </div>
         <div class="kpi">
           <div class="label">Hires</div>
-          <div class="value">—</div>
+          <div class="value" id="kpiHires">—</div>
         </div>
       </div>
     </div>
 
+    <!-- Live roles + sources -->
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
+        <div id="liveRolesList"></div>
       </div>
 
       <div class="card">
@@ -221,26 +227,24 @@
       </div>
     </div>
 
+    <!-- Progress / Challenges -->
     <div class="two-col">
       <div class="card">
         <h2>Progress</h2>
+        <div id="progressList"></div>
       </div>
 
       <div class="card">
         <h2>Challenges</h2>
+        <div id="challengesList"></div>
       </div>
     </div>
 
     <div class="card">
       <h2>Actions Next</h2>
+      <div id="actionsList"></div>
     </div>
 
-  </div>
-
-  <!-- Powered by -->
-  <div class="powered-by">
-    <span>Powered by</span>
-    <img src="scaleio.svg" alt="ScaleIO">
   </div>
 
   <script src="dashboard.js"></script>
