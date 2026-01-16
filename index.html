@@ -1,247 +1,84 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hiring Dashboard</title>
+const BASE =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=";
 
-  <style>
-    :root{
-      --bg:#0c2f33;
-      --accent:#f78e62;
-      --text:#ffffff;
-      --muted:rgba(255,255,255,.65);
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.12);
-      --shadow:0 18px 50px rgba(0,0,0,.35);
-      --radius:18px;
+const STATUS_SHEET = "status";
+const LIVE_ROLES_SHEET = "live_roles";
+
+function csvToRows(text){
+  const rows=[], row=[];
+  let cur="", inQuotes=false;
+
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c==='"' && inQuotes && n==='"'){cur+='"';i++;continue;}
+    if(c==='"'){inQuotes=!inQuotes;continue;}
+    if(c==="," && !inQuotes){row.push(cur);cur="";continue;}
+    if((c==="\n"||c==="\r")&&!inQuotes){
+      if(c==="\r"&&n==="\n")i++;
+      row.push(cur);cur="";
+      rows.push([...row]);row.length=0;continue;
     }
+    cur+=c;
+  }
+  row.push(cur); rows.push([...row]);
+  return rows.filter(r=>r.some(v=>String(v).trim()));
+}
 
-    *{ box-sizing:border-box; }
+function toNumber(v){
+  const n=Number(String(v).replace(/[^\d.-]/g,""));
+  return Number.isFinite(n)?n:0;
+}
 
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
-        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
-        var(--bg);
-      color:var(--text);
-      padding:28px;
-    }
+function stageClass(stage){
+  stage=String(stage).toLowerCase();
+  if(stage==="offer") return "offer";
+  if(stage==="hired") return "hired";
+  return "";
+}
 
-    h1, h2{
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-weight:800;
-      margin:0;
-    }
+async function fetchSheet(name){
+  const res=await fetch(BASE+name,{cache:"no-store"});
+  return csvToRows(await res.text());
+}
 
-    h1{
-      font-size:clamp(22px,3vw,32px);
-      margin-bottom:10px;
-      text-align:center;
-    }
+async function loadStatus(){
+  const rows=await fetchSheet(STATUS_SHEET);
+  const headers=rows.shift();
+  const row=rows[0]||[];
+  const i=n=>headers.indexOf(n);
 
-    h2{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:12px;
-    }
+  document.getElementById("kpiLiveRoles").textContent=toNumber(row[i("Live_Roles")]);
+  document.getElementById("kpiOnHold").textContent=toNumber(row[i("On_Hold")]);
+  document.getElementById("kpiOffers").textContent=toNumber(row[i("Offers")]);
+  document.getElementById("kpiHires").textContent=toNumber(row[i("Hires")]);
+}
 
-    .dashboard{
-      max-width:1200px;
-      margin:0 auto;
-      display:grid;
-      gap:20px;
-    }
+async function loadLiveRoles(){
+  const rows=await fetchSheet(LIVE_ROLES_SHEET);
+  const headers=rows.shift();
+  const i=n=>headers.indexOf(n);
+  const list=document.getElementById("liveRolesList");
+  list.innerHTML="";
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:20px;
-    }
+  rows.forEach(r=>{
+    const title=r[i("Job_Title")];
+    if(!title) return;
 
-    /* KPIs */
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:16px;
-    }
-
-    .kpi{
-      text-align:center;
-    }
-
-    .kpi .label{
-      font-size:12px;
-      color:var(--muted);
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-
-    .kpi .value{
-      margin-top:10px;
-      font-size:clamp(28px,4vw,36px);
-      font-weight:900;
-    }
-
-    /* Two column sections */
-    .two-col{
-      display:grid;
-      grid-template-columns:2fr 1fr;
-      gap:16px;
-    }
-
-    /* Live roles rows */
-    .role{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:12px 0;
-      border-bottom:1px solid var(--stroke);
-    }
-    .role:last-child{ border-bottom:none; }
-
-    .role .title{
-      font-weight:700;
-    }
-
-    .stage{
-      padding:6px 12px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      background:rgba(255,255,255,.12);
-      white-space:nowrap;
-    }
-
-    .stage.offer{
-      background:rgba(34,197,94,.22);
-      color:#22c55e;
-    }
-
-    .stage.hired{
-      background:rgba(22,163,74,.28);
-      color:#16a34a;
-    }
-
-    .chart-placeholder{
-      height:220px;
-      border-radius:14px;
-      background:
-        linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--muted);
-      font-size:12px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-
-    .powered-by{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:10px;
-      margin-bottom:22px;
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,.55);
-    }
-
-    .powered-by img{
-      height:22px;
-      width:auto;
-      opacity:.9;
-    }
-
-    @media (max-width:900px){
-      .kpi-grid{ grid-template-columns:1fr 1fr; }
-      .two-col{ grid-template-columns:1fr; }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="dashboard">
-
-    <!-- Pole Star Logo -->
-    <div style="display:flex; justify-content:center; margin-bottom:16px;">
-      <img src="PSG Logo - White With Orange (1).png"
-           alt="Pole Star Global"
-           style="height:64px;">
-    </div>
-
-    <h1>Hiring Dashboard</h1>
-
-    <!-- Powered by under heading -->
-    <div class="powered-by">
-      <span>Powered by</span>
-      <img src="scaleio.svg" alt="ScaleIO">
-    </div>
-
-    <!-- KPIs (FROM STATUS TAB) -->
-    <div class="card">
-      <div class="kpi-grid">
-        <div class="kpi">
-          <div class="label">Live Roles</div>
-          <div class="value" id="kpiLiveRoles">—</div>
-        </div>
-        <div class="kpi">
-          <div class="label">On Hold</div>
-          <div class="value" id="kpiOnHold">—</div>
-        </div>
-        <div class="kpi">
-          <div class="label">Offers</div>
-          <div class="value" id="kpiOffers">—</div>
-        </div>
-        <div class="kpi">
-          <div class="label">Hires</div>
-          <div class="value" id="kpiHires">—</div>
+    const el=document.createElement("div");
+    el.className="role";
+    el.innerHTML=`
+      <div>
+        <div class="title">${title}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.65);">
+          ${r[i("Team")]} • ${r[i("Location")]} • ${toNumber(r[i("Applicants")])} applicants
         </div>
       </div>
-    </div>
+      <span class="stage ${stageClass(r[i("Current_Stage")])}">
+        ${r[i("Current_Stage")]}
+      </span>
+    `;
+    list.appendChild(el);
+  });
+}
 
-    <!-- Live roles + sources -->
-    <div class="two-col">
-      <div class="card">
-        <h2>Live Roles</h2>
-        <div id="liveRolesList"></div>
-      </div>
-
-      <div class="card">
-        <h2>Candidate Sources</h2>
-        <div class="chart-placeholder">Source Chart</div>
-      </div>
-    </div>
-
-    <div class="two-col">
-      <div class="card">
-        <h2>Progress</h2>
-        <div id="progressList"></div>
-      </div>
-
-      <div class="card">
-        <h2>Challenges</h2>
-        <div id="challengesList"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Actions Next</h2>
-      <div id="actionsList"></div>
-    </div>
-
-  </div>
-
-  <script src="dashboard.js"></script>
-</body>
-</html>
+Promise.all([loadStatus(), loadLiveRoles()]);
