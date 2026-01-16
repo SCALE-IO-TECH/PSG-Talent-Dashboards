@@ -1,4 +1,3 @@
-<!-- index.html (REPLACE ENTIRE FILE) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -73,9 +72,7 @@
       gap:16px;
     }
 
-    .kpi{
-      text-align:center;
-    }
+    .kpi{ text-align:center; }
 
     .kpi .label{
       font-size:12px;
@@ -97,7 +94,7 @@
       gap:16px;
     }
 
-    /* Live Roles */
+    /* Rows (used for roles + starters) */
     .role{
       display:flex;
       justify-content:space-between;
@@ -108,9 +105,7 @@
     }
     .role:last-child{ border-bottom:none; }
 
-    .role .title{
-      font-weight:700;
-    }
+    .role .title{ font-weight:700; }
 
     .roleMeta{
       margin-top:6px;
@@ -122,7 +117,7 @@
       font-size:12px;
     }
 
-    /* Neutral pill style (for Location) */
+    /* Neutral pill style (Location + Start Date) */
     .pill{
       display:inline-flex;
       align-items:center;
@@ -216,7 +211,7 @@
       <img src="scaleio.svg" alt="ScaleIO">
     </div>
 
-    <!-- KPI BAR (PULLS FROM status TAB ONLY) -->
+    <!-- KPI BAR (status tab) -->
     <div class="card">
       <div class="kpi-grid">
         <div class="kpi">
@@ -251,22 +246,10 @@
       </div>
     </div>
 
-    <!-- Progress / Challenges -->
-    <div class="two-col">
-      <div class="card">
-        <h2>Progress</h2>
-        <div id="progressList"></div>
-      </div>
-
-      <div class="card">
-        <h2>Challenges</h2>
-        <div id="challengesList"></div>
-      </div>
-    </div>
-
+    <!-- New starters -->
     <div class="card">
-      <h2>Actions Next</h2>
-      <div id="actionsList"></div>
+      <h2>New Starters</h2>
+      <div id="newStartersList"></div>
     </div>
 
   </div>
