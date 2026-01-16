@@ -117,11 +117,11 @@ async function loadLiveRoles() {
     const stage = (r[idx("Current_Stage")] ?? "").trim();
 
     const el = document.createElement("div");
-    el.className = "role";
+    el.className = "row";
     el.innerHTML = `
       <div style="min-width:0;">
         <div class="title">${esc(title)}</div>
-        <div class="roleMeta">
+        <div class="meta">
           ${team ? `<span>${esc(team)}</span>` : ``}
           ${location ? `<span class="pill">${esc(location)}</span>` : ``}
           <span>${applicants} applicants</span>
@@ -133,7 +133,7 @@ async function loadLiveRoles() {
   });
 }
 
-// ===== NEW STARTERS (RIGHT COLUMN) =====
+// ===== NEW STARTERS (RIGHT COLUMN, DATE ON RIGHT) =====
 async function loadNewStarters() {
   const text = await fetchCsvByGid(NEW_STARTERS_GID);
   const rows = csvToRows(text.trim());
@@ -159,22 +159,22 @@ async function loadNewStarters() {
     const start = (r[iStart] ?? "").trim();
 
     const el = document.createElement("div");
-    el.className = "role";
+    el.className = "row";
     el.innerHTML = `
       <div style="min-width:0;">
         <div class="title">${esc(name)}</div>
-        <div class="roleMeta">
+        <div class="meta">
           ${role ? `<span>${esc(role)}</span>` : ``}
           ${team ? `<span>${esc(team)}</span>` : ``}
-          ${start ? `<span class="pill">${esc(start)}</span>` : ``}
         </div>
       </div>
-      <span class="stage">Starting</span>
+      <span class="pill">${esc(start || "—")}</span>
     `;
     list.appendChild(el);
   });
 }
 
+// ===== INIT =====
 Promise.all([loadStatusKpis(), loadLiveRoles(), loadNewStarters()]).catch(err => {
   console.error(err);
 });
