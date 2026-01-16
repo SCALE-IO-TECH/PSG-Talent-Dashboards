@@ -97,7 +97,7 @@
     }
 
     /* Rows (used for roles + starters) */
-    .role{
+    .row{
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
@@ -105,10 +105,10 @@
       border-bottom:1px solid var(--stroke);
       gap:14px;
     }
-    .role:last-child{ border-bottom:none; }
-    .role .title{ font-weight:700; }
+    .row:last-child{ border-bottom:none; }
+    .row .title{ font-weight:700; }
 
-    .roleMeta{
+    .meta{
       margin-top:6px;
       display:flex;
       flex-wrap:wrap;
@@ -160,8 +160,9 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
+    /* Candidate sources smaller */
     .chart-placeholder{
-      height:140px; /* smaller: we don't need much room */
+      height:110px;
       border-radius:14px;
       background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
       display:flex;
@@ -258,12 +259,11 @@
       </div>
     </div>
 
-    <!-- Progress / Challenges -->
+    <!-- REINSTATED: Progress / Challenges -->
     <div class="two-col">
       <div class="card">
         <h2>Progress</h2>
         <div id="progressList">
-          <!-- optional placeholders -->
           <div class="list-item">—</div>
         </div>
       </div>
@@ -271,16 +271,15 @@
       <div class="card">
         <h2>Challenges</h2>
         <div id="challengesList">
-          <!-- optional placeholders -->
           <div class="list-item">—</div>
         </div>
       </div>
     </div>
 
+    <!-- REINSTATED: Actions -->
     <div class="card">
       <h2>Actions Next</h2>
       <div id="actionsList">
-        <!-- optional placeholders -->
         <div class="list-item">—</div>
       </div>
     </div>
