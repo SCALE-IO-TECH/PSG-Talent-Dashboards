@@ -1,11 +1,11 @@
-// dashboard.js (REPLACE ENTIRE FILE)
+// ===== CONFIG (DO NOT CHANGE) =====
+const STATUS_GID = "1256252635";   // status tab
+const LIVE_ROLES_GID = "0";        // live_roles tab
 
-const BASE =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=";
+const PUB_BASE =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&gid=";
 
-const STATUS_SHEET_CANDIDATES = ["status", "Status", "STATUS"]; // your 2nd tab name
-const LIVE_ROLES_SHEET = "live_roles";
-
+// ===== CSV PARSER =====
 function csvToRows(text) {
   const rows = [];
   let row = [];
@@ -16,17 +16,20 @@ function csvToRows(text) {
     const ch = text[i];
     const next = text[i + 1];
 
-    if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
+    if (ch === '"' && inQuotes && next === '"') {
+      cur += '"'; i++; continue;
+    }
     if (ch === '"') { inQuotes = !inQuotes; continue; }
 
-    if (ch === "," && !inQuotes) { row.push(cur); cur = ""; continue; }
+    if (ch === "," && !inQuotes) {
+      row.push(cur); cur = ""; continue;
+    }
 
     if ((ch === "\n" || ch === "\r") && !inQuotes) {
       if (ch === "\r" && next === "\n") i++;
       row.push(cur); cur = "";
       if (row.some(v => String(v).trim() !== "")) rows.push(row);
-      row = [];
-      continue;
+      row = []; continue;
     }
 
     cur += ch;
@@ -35,15 +38,6 @@ function csvToRows(text) {
   row.push(cur);
   if (row.some(v => String(v).trim() !== "")) rows.push(row);
   return rows;
-}
-
-function normHeader(h) {
-  // trim + remove BOM + collapse spaces + keep underscores
-  return String(h || "")
-    .replace(/^\uFEFF/, "")
-    .trim()
-    .replace(/\s+/g, "_")
-    .toLowerCase();
 }
 
 function toNumber(v) {
@@ -60,88 +54,55 @@ function stageClass(stage) {
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[m]));
 }
 
-async function fetchSheet(sheetName) {
-  // cache-bust so you always see latest
-  const url = BASE + encodeURIComponent(sheetName) + "&t=" + Date.now();
+async function fetchCsvByGid(gid) {
+  const url = PUB_BASE + gid + "&t=" + Date.now();
   const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Fetch failed (${res.status}) for sheet: ${sheetName}`);
-  const text = await res.text();
-  const rows = csvToRows(text.trim());
-  if (!rows.length) throw new Error(`No data returned for sheet: ${sheetName}`);
-  return rows;
+  if (!res.ok) throw new Error(`Failed to fetch gid=${gid}`);
+  return res.text();
 }
 
-/* ---------- STATUS KPI BAR (MUST COME FROM status TAB) ---------- */
-
-function setKpi(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
-
+// ===== STATUS KPI BAR =====
 async function loadStatusKpis() {
-  // Try candidate sheet names until one works
-  let rows = null;
-  let usedSheet = null;
+  const text = await fetchCsvByGid(STATUS_GID);
+  const rows = csvToRows(text.trim());
+  if (rows.length < 2) throw new Error("Status tab has no data");
 
-  for (const name of STATUS_SHEET_CANDIDATES) {
-    try {
-      rows = await fetchSheet(name);
-      usedSheet = name;
-      break;
-    } catch (e) {
-      // try next
-    }
-  }
-
-  if (!rows) {
-    // hard fail visible
-    setKpi("kpiLiveRoles", "ERR");
-    setKpi("kpiOnHold", "ERR");
-    setKpi("kpiOffers", "ERR");
-    setKpi("kpiHires", "ERR");
-    throw new Error("Could not load status tab (tried: " + STATUS_SHEET_CANDIDATES.join(", ") + ")");
-  }
-
-  const headersRaw = rows.shift();
-  const headers = headersRaw.map(normHeader);
-
-  // Find first non-empty data row
+  const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  const get = (headerName) => {
-    const idx = headers.indexOf(normHeader(headerName));
-    return idx >= 0 ? toNumber(dataRow[idx]) : 0;
-  };
+  const idx = (name) => headers.indexOf(name);
 
-  // These are your exact headers (robust to spaces/case):
-  const liveRoles = get("Live_Roles");
-  const onHold = get("On_Hold");
-  const offers = get("Offers");
-  const hires = get("Hires");
+  document.getElementById("kpiLiveRoles").textContent =
+    toNumber(dataRow[idx("Live_Roles")]);
 
-  setKpi("kpiLiveRoles", String(liveRoles));
-  setKpi("kpiOnHold", String(onHold));
-  setKpi("kpiOffers", String(offers));
-  setKpi("kpiHires", String(hires));
+  document.getElementById("kpiOnHold").textContent =
+    toNumber(dataRow[idx("On_Hold")]);
 
-  // If you ever need to verify it’s reading the right sheet:
-  // console.log("Loaded KPIs from sheet:", usedSheet);
+  document.getElementById("kpiOffers").textContent =
+    toNumber(dataRow[idx("Offers")]);
+
+  document.getElementById("kpiHires").textContent =
+    toNumber(dataRow[idx("Hires")]);
 }
 
-/* ---------- LIVE ROLES LIST ---------- */
-
+// ===== LIVE ROLES LIST =====
 async function loadLiveRoles() {
-  const rows = await fetchSheet(LIVE_ROLES_SHEET);
-  const headersRaw = rows.shift();
-  const headers = headersRaw.map(h => String(h).replace(/^\uFEFF/, "").trim());
+  const text = await fetchCsvByGid(LIVE_ROLES_GID);
+  const rows = csvToRows(text.trim());
+  if (rows.length < 2) throw new Error("Live roles tab has no data");
+
+  const headers = rows.shift().map(h => String(h).trim());
   const idx = (name) => headers.indexOf(name);
 
   const list = document.getElementById("liveRolesList");
-  if (!list) return;
   list.innerHTML = "";
 
   rows.forEach(r => {
@@ -170,7 +131,14 @@ async function loadLiveRoles() {
   });
 }
 
-Promise.all([loadStatusKpis(), loadLiveRoles()]).catch((e) => {
-  // Visible failure already sets ERR for KPIs; keep console for debug.
-  console.error(e);
+// ===== INIT =====
+Promise.all([
+  loadStatusKpis(),
+  loadLiveRoles()
+]).catch(err => {
+  console.error(err);
+  ["kpiLiveRoles","kpiOnHold","kpiOffers","kpiHires"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = "ERR";
+  });
 });
