@@ -1,110 +1,95 @@
-const LIVE_ROLES_CSV =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=live_roles";
+const BASE =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&sheet=";
 
-function csvToRows(text) {
-  // Handles quoted commas
-  const rows = [];
-  let row = [];
-  let cur = "";
-  let inQuotes = false;
+const STATUS_SHEET = "status";
+const LIVE_ROLES_SHEET = "live_roles";
 
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
+function csvToRows(text){
+  const rows=[], row=[];
+  let cur="", inQuotes=false;
 
-    if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
-    if (ch === '"') { inQuotes = !inQuotes; continue; }
-
-    if (ch === "," && !inQuotes) { row.push(cur); cur = ""; continue; }
-
-    if ((ch === "\n" || ch === "\r") && !inQuotes) {
-      if (ch === "\r" && next === "\n") i++;
-      row.push(cur); cur = "";
-      if (row.some(c => String(c).trim() !== "")) rows.push(row);
-      row = [];
-      continue;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c==='"' && inQuotes && n==='"'){cur+='"';i++;continue;}
+    if(c==='"'){inQuotes=!inQuotes;continue;}
+    if(c==="," && !inQuotes){row.push(cur);cur="";continue;}
+    if((c==="\n"||c==="\r")&&!inQuotes){
+      if(c==="\r"&&n==="\n")i++;
+      row.push(cur);cur="";
+      rows.push([...row]);row.length=0;continue;
     }
-
-    cur += ch;
+    cur+=c;
   }
-
-  row.push(cur);
-  if (row.some(c => String(c).trim() !== "")) rows.push(row);
-  return rows;
+  row.push(cur); rows.push([...row]);
+  return rows.filter(r=>r.some(v=>String(v).trim()));
 }
 
-function toNumber(x) {
-  const n = Number(String(x ?? "").replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : 0;
+function toNumber(v){
+  const n=Number(String(v).replace(/[^\d.-]/g,""));
+  return Number.isFinite(n)?n:0;
 }
 
-function stageClass(stage) {
-  const s = String(stage || "").trim().toLowerCase();
-  if (s === "offer") return "offer";
-  if (s === "hired") return "hired";
+function stageClass(stage){
+  stage=String(stage||"").trim().toLowerCase();
+  if(stage==="offer") return "offer";
+  if(stage==="hired") return "hired";
   return "";
 }
 
-async function loadLiveRoles() {
-  const list = document.getElementById("liveRolesList");
-  if (!list) return;
+async function fetchSheet(name){
+  const res=await fetch(BASE+name,{cache:"no-store"});
+  return csvToRows(await res.text());
+}
 
-  const res = await fetch(LIVE_ROLES_CSV, { cache: "no-store" });
-  const text = await res.text();
+async function loadStatus(){
+  const rows=await fetchSheet(STATUS_SHEET);
+  const headers=rows.shift();
+  const row=rows[0]||[];
+  const i=n=>headers.indexOf(n);
 
-  const raw = csvToRows(text.trim());
-  if (!raw.length) return;
+  document.getElementById("kpiLiveRoles").textContent=toNumber(row[i("Live_Roles")]);
+  document.getElementById("kpiOnHold").textContent=toNumber(row[i("On_Hold")]);
+  document.getElementById("kpiOffers").textContent=toNumber(row[i("Offers")]);
+  document.getElementById("kpiHires").textContent=toNumber(row[i("Hires")]);
+}
 
-  const headers = raw.shift().map(h => h.trim());
-  const idx = (name) => headers.indexOf(name);
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
 
-  const roles = raw
-    .map(r => ({
-      Job_Title: (r[idx("Job_Title")] ?? "").trim(),
-      Team: (r[idx("Team")] ?? "").trim(),
-      Location: (r[idx("Location")] ?? "").trim(),
-      Applicants: (r[idx("Applicants")] ?? "").trim(),
-      Current_Stage: (r[idx("Current_Stage")] ?? "").trim(),
-    }))
-    .filter(r => r.Job_Title);
+async function loadLiveRoles(){
+  const rows=await fetchSheet(LIVE_ROLES_SHEET);
+  const headers=rows.shift();
+  const i=n=>headers.indexOf(n);
+  const list=document.getElementById("liveRolesList");
+  list.innerHTML="";
 
-  // KPIs
-  const applicantsTotal = roles.reduce((sum, r) => sum + toNumber(r.Applicants), 0);
+  rows.forEach(r=>{
+    const title=(r[i("Job_Title")]||"").trim();
+    if(!title) return;
 
-  const kpiLiveRoles = document.getElementById("kpiLiveRoles");
-  const kpiApplicants = document.getElementById("kpiApplicants");
-  const kpiOffers = document.getElementById("kpiOffers");
-  const kpiHires = document.getElementById("kpiHires");
+    const team=(r[i("Team")]||"").trim();
+    const location=(r[i("Location")]||"").trim();
+    const applicants=toNumber(r[i("Applicants")]);
+    const stage=(r[i("Current_Stage")]||"").trim();
 
-  if (kpiLiveRoles) kpiLiveRoles.textContent = String(roles.length);
-  if (kpiApplicants) kpiApplicants.textContent = applicantsTotal ? String(applicantsTotal) : "—";
-
-  // Offers & Hires from Current_Stage
-  const offers = roles.filter(r => String(r.Current_Stage).trim().toLowerCase() === "offer").length;
-  const hires = roles.filter(r => String(r.Current_Stage).trim().toLowerCase() === "hired").length;
-
-  if (kpiOffers) kpiOffers.textContent = String(offers);
-  if (kpiHires) kpiHires.textContent = String(hires);
-
-  // Render
-  list.innerHTML = "";
-
-  roles.forEach(r => {
-    const el = document.createElement("div");
-    el.className = "role";
-    el.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <div class="title">${r.Job_Title}</div>
-        <div style="font-size:12px; color:rgba(255,255,255,.65);">
-          ${r.Team || "—"} • ${r.Location || "—"} • ${toNumber(r.Applicants)} applicants
+    const el=document.createElement("div");
+    el.className="role";
+    el.innerHTML=`
+      <div style="min-width:0;">
+        <div class="title">${esc(title)}</div>
+        <div class="roleMeta">
+          ${team ? `<span>${esc(team)}</span>` : ``}
+          ${location ? `<span class="pill location">${esc(location)}</span>` : ``}
+          <span>${applicants} applicants</span>
         </div>
       </div>
-      <span class="stage ${stageClass(r.Current_Stage)}">${r.Current_Stage || "—"}</span>
+      <span class="stage ${stageClass(stage)}">${esc(stage || "—")}</span>
     `;
     list.appendChild(el);
   });
 }
 
-loadLiveRoles().catch(() => {
-  // do nothing
-});
+Promise.all([loadStatus(), loadLiveRoles()]).catch(() => {});
