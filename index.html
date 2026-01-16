@@ -8,7 +8,7 @@
   <style>
     :root{
       --bg:#0c2f33;
-      --accent:#f78e62; /* Pole Star orange */
+      --accent:#f78e62;
       --text:#ffffff;
       --muted:rgba(255,255,255,.65);
       --card:rgba(255,255,255,.06);
@@ -146,35 +146,27 @@
       color:rgba(255,255,255,.92);
     }
 
-    /* Offer = Pole Star orange */
     .stage.offer{
       background:rgba(247,142,98,.18);
       color:var(--accent);
       border:1px solid rgba(247,142,98,.35);
     }
 
-    /* Hired stays green */
     .stage.hired{
       background:rgba(22,163,74,.22);
       color:#16a34a;
       border:1px solid rgba(22,163,74,.35);
     }
 
-    /* Candidate sources smaller + padded so chart doesn't touch edges */
+    /* Candidate sources: larger donut + padding */
     .chart-wrap{
-      height:120px;
+      height:190px;                /* bigger */
       border-radius:14px;
       background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
       border:1px solid rgba(255,255,255,.08);
-      padding:10px 12px;              /* <-- padding left/right */
+      padding:12px 16px;           /* more padding left/right */
       overflow:hidden;
       position:relative;
-    }
-
-    /* Chart area */
-    .chart-canvas{
-      height:100%;
-      width:100%;
     }
 
     #candidateSourcesChart{
@@ -264,7 +256,7 @@
     @media (max-width:900px){
       .kpi-grid{ grid-template-columns:1fr 1fr; }
       .two-col{ grid-template-columns:1fr; }
-      .chart-wrap{ height:140px; }
+      .chart-wrap{ height:220px; }
     }
   </style>
 </head>
@@ -272,7 +264,6 @@
 <body>
   <div class="dashboard">
 
-    <!-- Logo -->
     <div style="display:flex; justify-content:center; margin-bottom:16px;">
       <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" style="height:64px;">
     </div>
@@ -284,7 +275,6 @@
       <img src="scaleio.svg" alt="ScaleIO">
     </div>
 
-    <!-- KPI BAR (status tab) -->
     <div class="card">
       <div class="kpi-grid">
         <div class="kpi">
@@ -306,7 +296,6 @@
       </div>
     </div>
 
-    <!-- Live Roles (left) + Candidate Sources + New Starters (right) -->
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
@@ -316,14 +305,10 @@
       <div class="right-col">
         <div class="card">
           <h2>Candidate Sources</h2>
-
           <div class="chart-wrap">
-            <div class="chart-canvas">
-              <canvas id="candidateSourcesChart" aria-label="Candidate sources chart"></canvas>
-            </div>
+            <canvas id="candidateSourcesChart" aria-label="Candidate sources chart"></canvas>
             <div id="candidateSourcesEmpty" class="chart-empty">Loading…</div>
           </div>
-
           <div id="candidateSourcesLegend" class="legend"></div>
         </div>
 
@@ -334,7 +319,6 @@
       </div>
     </div>
 
-    <!-- Progress / Challenges -->
     <div class="two-col">
       <div class="card">
         <h2>Progress</h2>
@@ -351,20 +335,16 @@
       </div>
     </div>
 
-    <!-- Actions -->
     <div class="card">
-      <h2>Actions Next</h2>
-      <div id="actionsList">
+      <h2>Key Focus</h2>
+      <div id="keyFocusList">
         <div class="list-item">—</div>
       </div>
     </div>
 
   </div>
 
-  <!-- Chart.js + datalabels plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-
   <script src="dashboard.js"></script>
 </body>
 </html>
