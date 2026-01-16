@@ -4,6 +4,10 @@ const LIVE_ROLES_GID = "0";
 const NEW_STARTERS_GID = "2080311953";
 const CANDIDATE_SOURCES_GID = "1950940614";
 
+const PROGRESS_GID = "322463420";
+const CHALLENGES_GID = "868728520";
+const KEY_FOCUS_GID = "575160875";
+
 // Published CSV endpoint (gid-based)
 const PUB_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&gid=";
@@ -134,7 +138,7 @@ async function loadLiveRoles() {
   });
 }
 
-// ===== NEW STARTERS (RIGHT COLUMN, DATE ON RIGHT) =====
+// ===== NEW STARTERS =====
 async function loadNewStarters() {
   const text = await fetchCsvByGid(NEW_STARTERS_GID);
   const rows = csvToRows(text.trim());
@@ -175,20 +179,19 @@ async function loadNewStarters() {
   });
 }
 
-// ===== CANDIDATE SOURCES (% CHART) =====
+// ===== CANDIDATE SOURCES CHART =====
 let candidateSourcesChart = null;
 
 function modernPalette(n) {
-  // Techy palette: teal/blue/indigo + Pole Star orange accents (no childish rainbow)
   const base = [
-    "rgba(247,142,98,.95)",   // Pole Star orange
-    "rgba(110,231,183,.85)",  // mint
+    "rgba(247,142,98,.95)",   // orange
+    "rgba(34,211,238,.85)",   // cyan
     "rgba(56,189,248,.85)",   // sky
     "rgba(129,140,248,.85)",  // indigo
-    "rgba(34,211,238,.80)",   // cyan
     "rgba(94,234,212,.80)",   // teal
     "rgba(167,139,250,.80)",  // violet
-    "rgba(251,191,36,.75)"    // amber (subtle)
+    "rgba(110,231,183,.80)",  // mint
+    "rgba(251,191,36,.75)"    // amber
   ];
   const out = [];
   for (let i = 0; i < n; i++) out.push(base[i % base.length]);
@@ -223,8 +226,6 @@ async function loadCandidateSourcesChart() {
   }
 
   const headers = rows.shift().map(h => String(h).trim());
-
-  // Your headers: source, amount
   const iSource = pickIndex(headers, ["source"]);
   const iAmount = pickIndex(headers, ["amount"]);
 
@@ -247,7 +248,6 @@ async function loadCandidateSourcesChart() {
     return;
   }
 
-  // Calculate % and sort desc for cleaner legend
   const items = raw
     .map(x => ({ source: x.source, pct: +(x.amount / total * 100).toFixed(1) }))
     .sort((a,b) => b.pct - a.pct);
@@ -257,8 +257,6 @@ async function loadCandidateSourcesChart() {
   const colors = modernPalette(items.length);
 
   if (empty) empty.style.display = "none";
-
-  // Legend underneath
   renderCandidateLegend(items, colors);
 
   if (candidateSourcesChart) candidateSourcesChart.destroy();
@@ -272,34 +270,67 @@ async function loadCandidateSourcesChart() {
         backgroundColor: colors,
         borderColor: "rgba(255,255,255,.10)",
         borderWidth: 1,
-        spacing: 2,
-        hoverOffset: 6
+        spacing: 3,
+        hoverOffset: 8
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "62%",
-      layout: { padding: 6 }, // extra breathing room inside canvas
+      cutout: "52%",          // larger donut (thicker ring)
+      layout: { padding: 2 }, // chart already padded by CSS container
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: {
-            label: (ctx) => `${ctx.label}: ${ctx.raw}%`
-          }
-        },
-        datalabels: {
-          color: "rgba(255,255,255,.92)",
-          font: { weight: "800", size: 10 },
-          formatter: (value) => (value >= 6 ? `${value}%` : ""), // hide tiny slices
-          anchor: "center",
-          align: "center",
-          clamp: true
+          callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` }
         }
       }
-    },
-    plugins: [ChartDataLabels]
+    }
   });
+}
+
+// ===== SIMPLE LIST RENDERERS (Progress / Challenges / Key Focus) =====
+function renderSimpleList(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = "";
+
+  const cleaned = items
+    .map(x => String(x || "").trim())
+    .filter(Boolean);
+
+  if (!cleaned.length) {
+    el.innerHTML = `<div class="list-item">—</div>`;
+    return;
+  }
+
+  cleaned.forEach(txt => {
+    const div = document.createElement("div");
+    div.className = "list-item";
+    div.textContent = txt;
+    el.appendChild(div);
+  });
+}
+
+async function loadTextListFromSheet(gid, containerId) {
+  const text = await fetchCsvByGid(gid);
+  const rows = csvToRows(text.trim());
+  if (!rows.length) {
+    renderSimpleList(containerId, ["—"]);
+    return;
+  }
+
+  // If there's a header row, ignore it; otherwise still safe.
+  // We take the first non-empty cell per row (so it works with 1 or many columns).
+  const body = rows.slice(1); // skip header row
+  const items = [];
+
+  for (const r of body) {
+    const cell = (r.find(v => String(v).trim() !== "") ?? "").trim();
+    if (cell) items.push(cell);
+  }
+
+  renderSimpleList(containerId, items);
 }
 
 // ===== INIT =====
@@ -307,7 +338,8 @@ Promise.all([
   loadStatusKpis(),
   loadLiveRoles(),
   loadNewStarters(),
-  loadCandidateSourcesChart()
-]).catch(err => {
-  console.error(err);
-});
+  loadCandidateSourcesChart(),
+  loadTextListFromSheet(PROGRESS_GID, "progressList"),
+  loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
+  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList")
+]).catch(err => console.error(err));
