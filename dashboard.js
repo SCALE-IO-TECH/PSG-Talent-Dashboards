@@ -178,6 +178,38 @@ async function loadNewStarters() {
 // ===== CANDIDATE SOURCES (% CHART) =====
 let candidateSourcesChart = null;
 
+function modernPalette(n) {
+  // Techy palette: teal/blue/indigo + Pole Star orange accents (no childish rainbow)
+  const base = [
+    "rgba(247,142,98,.95)",   // Pole Star orange
+    "rgba(110,231,183,.85)",  // mint
+    "rgba(56,189,248,.85)",   // sky
+    "rgba(129,140,248,.85)",  // indigo
+    "rgba(34,211,238,.80)",   // cyan
+    "rgba(94,234,212,.80)",   // teal
+    "rgba(167,139,250,.80)",  // violet
+    "rgba(251,191,36,.75)"    // amber (subtle)
+  ];
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(base[i % base.length]);
+  return out;
+}
+
+function renderCandidateLegend(items, colors) {
+  const el = document.getElementById("candidateSourcesLegend");
+  if (!el) return;
+
+  el.innerHTML = items.map((it, idx) => `
+    <div class="legend-item">
+      <div class="legend-left">
+        <span class="legend-dot" style="background:${colors[idx]};"></span>
+        <span class="legend-name">${esc(it.source)}</span>
+      </div>
+      <span class="legend-pct">${it.pct}%</span>
+    </div>
+  `).join("");
+}
+
 async function loadCandidateSourcesChart() {
   const empty = document.getElementById("candidateSourcesEmpty");
   const canvas = document.getElementById("candidateSourcesChart");
@@ -192,7 +224,7 @@ async function loadCandidateSourcesChart() {
 
   const headers = rows.shift().map(h => String(h).trim());
 
-  // Your tab is EXACTLY: source + amount
+  // Your headers: source, amount
   const iSource = pickIndex(headers, ["source"]);
   const iAmount = pickIndex(headers, ["amount"]);
 
@@ -201,24 +233,33 @@ async function loadCandidateSourcesChart() {
     return;
   }
 
-  const data = [];
+  const raw = [];
   for (const r of rows) {
     const source = String(r[iSource] ?? "").trim();
     const amount = toNumber(r[iAmount]);
     if (!source || amount <= 0) continue;
-    data.push({ source, amount });
+    raw.push({ source, amount });
   }
 
-  const total = data.reduce((s, x) => s + x.amount, 0);
+  const total = raw.reduce((s, x) => s + x.amount, 0);
   if (!total) {
     if (empty) empty.textContent = "No data";
     return;
   }
 
-  const labels = data.map(d => d.source);
-  const perc = data.map(d => +(d.amount / total * 100).toFixed(1));
+  // Calculate % and sort desc for cleaner legend
+  const items = raw
+    .map(x => ({ source: x.source, pct: +(x.amount / total * 100).toFixed(1) }))
+    .sort((a,b) => b.pct - a.pct);
+
+  const labels = items.map(i => i.source);
+  const data = items.map(i => i.pct);
+  const colors = modernPalette(items.length);
 
   if (empty) empty.style.display = "none";
+
+  // Legend underneath
+  renderCandidateLegend(items, colors);
 
   if (candidateSourcesChart) candidateSourcesChart.destroy();
 
@@ -227,24 +268,37 @@ async function loadCandidateSourcesChart() {
     data: {
       labels,
       datasets: [{
-        data: perc,
-        borderWidth: 0,
-        hoverOffset: 4
+        data,
+        backgroundColor: colors,
+        borderColor: "rgba(255,255,255,.10)",
+        borderWidth: 1,
+        spacing: 2,
+        hoverOffset: 6
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       cutout: "62%",
+      layout: { padding: 6 }, // extra breathing room inside canvas
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
             label: (ctx) => `${ctx.label}: ${ctx.raw}%`
           }
+        },
+        datalabels: {
+          color: "rgba(255,255,255,.92)",
+          font: { weight: "800", size: 10 },
+          formatter: (value) => (value >= 6 ? `${value}%` : ""), // hide tiny slices
+          anchor: "center",
+          align: "center",
+          clamp: true
         }
       }
-    }
+    },
+    plugins: [ChartDataLabels]
   });
 }
 
