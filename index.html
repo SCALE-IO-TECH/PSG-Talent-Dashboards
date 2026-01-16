@@ -18,6 +18,7 @@
     }
 
     *{ box-sizing:border-box; }
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -40,6 +41,7 @@
     h1{
       font-size:clamp(22px,3vw,32px);
       margin-bottom:24px;
+      text-align:center;
     }
 
     h2{
@@ -63,7 +65,6 @@
       padding:20px;
     }
 
-    /* KPI cards */
     .kpi-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -87,14 +88,12 @@
       font-weight:900;
     }
 
-    /* Two column sections */
     .two-col{
       display:grid;
       grid-template-columns:2fr 1fr;
       gap:16px;
     }
 
-    /* Live roles */
     .role{
       display:flex;
       justify-content:space-between;
@@ -128,7 +127,6 @@
       color:#16a34a;
     }
 
-    /* Lists */
     .list-item{
       padding:10px 0;
       border-bottom:1px solid var(--stroke);
@@ -136,7 +134,6 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
-    /* Placeholder chart */
     .chart-placeholder{
       height:220px;
       border-radius:14px;
@@ -151,6 +148,28 @@
       text-transform:uppercase;
     }
 
+    .powered-by{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:36px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+      pointer-events:none;
+    }
+
+    .powered-by img{
+      height:22px;
+      width:auto;
+      opacity:.9;
+    }
+
     @media (max-width:900px){
       .kpi-grid{ grid-template-columns:1fr 1fr; }
       .two-col{ grid-template-columns:1fr; }
@@ -160,9 +179,16 @@
 
 <body>
   <div class="dashboard">
+
+    <!-- Pole Star Logo -->
+    <div style="display:flex; justify-content:center; margin-bottom:16px;">
+      <img src="PSG Logo - White With Orange (1).png"
+           alt="Pole Star Global"
+           style="height:64px;">
+    </div>
+
     <h1>Hiring Dashboard</h1>
 
-    <!-- KPIs -->
     <div class="card">
       <div class="kpi-grid">
         <div class="kpi">
@@ -184,25 +210,9 @@
       </div>
     </div>
 
-    <!-- Live roles + sources -->
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
-
-        <div class="role">
-          <div class="title">Senior Engineer</div>
-          <span class="stage">Interview</span>
-        </div>
-
-        <div class="role">
-          <div class="title">Product Manager</div>
-          <span class="stage offer">Offer</span>
-        </div>
-
-        <div class="role">
-          <div class="title">Data Analyst</div>
-          <span class="stage hired">Hired</span>
-        </div>
       </div>
 
       <div class="card">
@@ -211,28 +221,28 @@
       </div>
     </div>
 
-    <!-- Progress / Challenges / Actions -->
     <div class="two-col">
       <div class="card">
         <h2>Progress</h2>
-        <div class="list-item">Reduced time to interview</div>
-        <div class="list-item">Strong offer acceptance rate</div>
       </div>
 
       <div class="card">
         <h2>Challenges</h2>
-        <div class="list-item">Low senior pipeline</div>
-        <div class="list-item">Long notice periods</div>
       </div>
     </div>
 
     <div class="card">
       <h2>Actions Next</h2>
-      <div class="list-item">Launch referral campaign</div>
-      <div class="list-item">Brief agencies on priority roles</div>
     </div>
 
   </div>
-<script src="dashboard.js"></script>
+
+  <!-- Powered by -->
+  <div class="powered-by">
+    <span>Powered by</span>
+    <img src="scaleio.svg" alt="ScaleIO">
+  </div>
+
+  <script src="dashboard.js"></script>
 </body>
 </html>
