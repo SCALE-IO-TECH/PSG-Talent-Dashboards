@@ -104,6 +104,7 @@ async function loadLiveRoles() {
   const idx = (name) => headers.indexOf(name);
 
   const list = document.getElementById("liveRolesList");
+  if (!list) return;
   list.innerHTML = "";
 
   rows.forEach(r => {
@@ -132,7 +133,7 @@ async function loadLiveRoles() {
   });
 }
 
-// ===== NEW STARTERS =====
+// ===== NEW STARTERS (RIGHT COLUMN) =====
 async function loadNewStarters() {
   const text = await fetchCsvByGid(NEW_STARTERS_GID);
   const rows = csvToRows(text.trim());
@@ -140,10 +141,10 @@ async function loadNewStarters() {
 
   const headers = rows.shift().map(h => String(h).trim());
 
-  const iName = pickIndex(headers, ["Name", "Candidate", "New_Starter", "Employee", "Full_Name"]);
-  const iRole = pickIndex(headers, ["Role", "Job_Title", "Job", "Position"]);
-  const iTeam = pickIndex(headers, ["Team", "Department"]);
-  const iStart = pickIndex(headers, ["Start_Date", "Start Date", "Start", "Joining_Date", "Join_Date"]);
+  const iName  = pickIndex(headers, ["Name","Full_Name","Candidate","New_Starter","Employee"]);
+  const iRole  = pickIndex(headers, ["Role","Job_Title","Job","Position"]);
+  const iTeam  = pickIndex(headers, ["Team","Department"]);
+  const iStart = pickIndex(headers, ["Start_Date","Start Date","Start","Joining_Date","Join_Date"]);
 
   const list = document.getElementById("newStartersList");
   if (!list) return;
@@ -168,13 +169,12 @@ async function loadNewStarters() {
           ${start ? `<span class="pill">${esc(start)}</span>` : ``}
         </div>
       </div>
-      <span class="stage">${start ? "Starting" : "—"}</span>
+      <span class="stage">Starting</span>
     `;
     list.appendChild(el);
   });
 }
 
-// ===== INIT =====
 Promise.all([loadStatusKpis(), loadLiveRoles(), loadNewStarters()]).catch(err => {
   console.error(err);
 });
