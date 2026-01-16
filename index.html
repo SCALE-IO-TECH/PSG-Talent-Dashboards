@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hiring Dashboard</title>
+
+  <style>
+    :root{
+      --bg:#0c2f33;
+      --accent:#f78e62;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.65);
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
+        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      padding:28px;
+    }
+
+    h1, h2{
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:800;
+      margin:0;
+    }
+
+    h1{
+      font-size:clamp(22px,3vw,32px);
+      margin-bottom:24px;
+    }
+
+    h2{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .dashboard{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      gap:20px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    /* KPI cards */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
+
+    .kpi{
+      text-align:center;
+    }
+
+    .kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .kpi .value{
+      margin-top:10px;
+      font-size:clamp(28px,4vw,36px);
+      font-weight:900;
+    }
+
+    /* Two column sections */
+    .two-col{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:16px;
+    }
+
+    /* Live roles */
+    .role{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid var(--stroke);
+    }
+    .role:last-child{ border-bottom:none; }
+
+    .role .title{
+      font-weight:700;
+    }
+
+    .stage{
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      background:rgba(255,255,255,.12);
+    }
+
+    .stage.offer{
+      background:rgba(34,197,94,.22);
+      color:#22c55e;
+    }
+
+    .stage.hired{
+      background:rgba(22,163,74,.28);
+      color:#16a34a;
+    }
+
+    /* Lists */
+    .list-item{
+      padding:10px 0;
+      border-bottom:1px solid var(--stroke);
+      font-size:14px;
+    }
+    .list-item:last-child{ border-bottom:none; }
+
+    /* Placeholder chart */
+    .chart-placeholder{
+      height:220px;
+      border-radius:14px;
+      background:
+        linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    @media (max-width:900px){
+      .kpi-grid{ grid-template-columns:1fr 1fr; }
+      .two-col{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard">
+    <h1>Hiring Dashboard</h1>
+
+    <!-- KPIs -->
+    <div class="card">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="label">Live Roles</div>
+          <div class="value">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Applicants</div>
+          <div class="value">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Offers</div>
+          <div class="value">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Hires</div>
+          <div class="value">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live roles + sources -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Live Roles</h2>
+
+        <div class="role">
+          <div class="title">Senior Engineer</div>
+          <span class="stage">Interview</span>
+        </div>
+
+        <div class="role">
+          <div class="title">Product Manager</div>
+          <span class="stage offer">Offer</span>
+        </div>
+
+        <div class="role">
+          <div class="title">Data Analyst</div>
+          <span class="stage hired">Hired</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Candidate Sources</h2>
+        <div class="chart-placeholder">Source Chart</div>
+      </div>
+    </div>
+
+    <!-- Progress / Challenges / Actions -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Progress</h2>
+        <div class="list-item">Reduced time to interview</div>
+        <div class="list-item">Strong offer acceptance rate</div>
+      </div>
+
+      <div class="card">
+        <h2>Challenges</h2>
+        <div class="list-item">Low senior pipeline</div>
+        <div class="list-item">Long notice periods</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Actions Next</h2>
+      <div class="list-item">Launch referral campaign</div>
+      <div class="list-item">Brief agencies on priority roles</div>
+    </div>
+
+  </div>
+</body>
+</html>
