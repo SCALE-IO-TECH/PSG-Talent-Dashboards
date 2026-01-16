@@ -8,7 +8,7 @@
   <style>
     :root{
       --bg:#0c2f33;
-      --accent:#f78e62;
+      --accent:#f78e62; /* Pole Star orange */
       --text:#ffffff;
       --muted:rgba(255,255,255,.65);
       --card:rgba(255,255,255,.06);
@@ -99,7 +99,7 @@
       display:grid;
       grid-template-columns:2fr 1fr;
       gap:16px;
-      align-items:stretch; /* keep equal heights where possible */
+      align-items:stretch;
     }
     .right-col{
       display:grid;
@@ -271,7 +271,7 @@
       justify-content:center;
       align-items:center;
       gap:10px;
-      margin-bottom:22px;
+      margin-top:36px; /* requested spacing under Key Focus */
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
@@ -298,11 +298,6 @@
     <div class="accent-line"></div>
 
     <h1>Hiring Dashboard</h1>
-
-    <div class="powered-by">
-      <span>Powered by</span>
-      <img src="scaleio.svg" alt="ScaleIO">
-    </div>
 
     <div class="card">
       <div class="kpi-grid">
@@ -370,6 +365,12 @@
       <div id="keyFocusList">
         <div class="list-item">—</div>
       </div>
+    </div>
+
+    <!-- MOVED HERE -->
+    <div class="powered-by">
+      <span>Powered by</span>
+      <img src="scaleio.svg" alt="ScaleIO">
     </div>
 
   </div>
