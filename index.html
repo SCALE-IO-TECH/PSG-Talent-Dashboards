@@ -65,6 +65,7 @@
       padding:20px;
     }
 
+    /* KPIs */
     .kpi-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -88,12 +89,14 @@
       font-weight:900;
     }
 
+    /* Two column sections */
     .two-col{
       display:grid;
       grid-template-columns:2fr 1fr;
       gap:16px;
     }
 
+    /* Live roles rows */
     .role{
       display:flex;
       justify-content:space-between;
@@ -127,13 +130,6 @@
       background:rgba(22,163,74,.28);
       color:#16a34a;
     }
-
-    .list-item{
-      padding:10px 0;
-      border-bottom:1px solid var(--stroke);
-      font-size:14px;
-    }
-    .list-item:last-child{ border-bottom:none; }
 
     .chart-placeholder{
       height:220px;
@@ -192,7 +188,7 @@
       <img src="scaleio.svg" alt="ScaleIO">
     </div>
 
-    <!-- KPIs -->
+    <!-- KPIs (FROM STATUS TAB) -->
     <div class="card">
       <div class="kpi-grid">
         <div class="kpi">
@@ -200,8 +196,8 @@
           <div class="value" id="kpiLiveRoles">—</div>
         </div>
         <div class="kpi">
-          <div class="label">Applicants</div>
-          <div class="value" id="kpiApplicants">—</div>
+          <div class="label">On Hold</div>
+          <div class="value" id="kpiOnHold">—</div>
         </div>
         <div class="kpi">
           <div class="label">Offers</div>
@@ -227,7 +223,6 @@
       </div>
     </div>
 
-    <!-- Progress / Challenges -->
     <div class="two-col">
       <div class="card">
         <h2>Progress</h2>
