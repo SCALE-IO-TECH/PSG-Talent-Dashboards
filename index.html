@@ -71,16 +71,13 @@
       grid-template-columns:repeat(4,1fr);
       gap:16px;
     }
-
     .kpi{ text-align:center; }
-
     .kpi .label{
       font-size:12px;
       color:var(--muted);
       letter-spacing:.14em;
       text-transform:uppercase;
     }
-
     .kpi .value{
       margin-top:10px;
       font-size:clamp(28px,4vw,36px);
@@ -91,6 +88,11 @@
     .two-col{
       display:grid;
       grid-template-columns:2fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .right-col{
+      display:grid;
       gap:16px;
     }
 
@@ -104,7 +106,6 @@
       gap:14px;
     }
     .role:last-child{ border-bottom:none; }
-
     .role .title{ font-weight:700; }
 
     .roleMeta{
@@ -160,7 +161,7 @@
     }
 
     .chart-placeholder{
-      height:220px;
+      height:140px; /* smaller: we don't need much room */
       border-radius:14px;
       background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
       display:flex;
@@ -171,6 +172,14 @@
       letter-spacing:.14em;
       text-transform:uppercase;
     }
+
+    .list-item{
+      padding:10px 0;
+      border-bottom:1px solid var(--stroke);
+      font-size:14px;
+      color:rgba(255,255,255,.85);
+    }
+    .list-item:last-child{ border-bottom:none; }
 
     .powered-by{
       display:flex;
@@ -183,11 +192,7 @@
       text-transform:uppercase;
       color:rgba(255,255,255,.55);
     }
-
-    .powered-by img{
-      height:22px;
-      opacity:.9;
-    }
+    .powered-by img{ height:22px; opacity:.9; }
 
     @media (max-width:900px){
       .kpi-grid{ grid-template-columns:1fr 1fr; }
@@ -233,23 +238,51 @@
       </div>
     </div>
 
-    <!-- Live roles + sources -->
+    <!-- Live Roles (left) + Candidate Sources + New Starters (right) -->
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
         <div id="liveRolesList"></div>
       </div>
 
-      <div class="card">
-        <h2>Candidate Sources</h2>
-        <div class="chart-placeholder">Source Chart</div>
+      <div class="right-col">
+        <div class="card">
+          <h2>Candidate Sources</h2>
+          <div class="chart-placeholder">Source Chart</div>
+        </div>
+
+        <div class="card">
+          <h2>New Starters</h2>
+          <div id="newStartersList"></div>
+        </div>
       </div>
     </div>
 
-    <!-- New starters -->
+    <!-- Progress / Challenges -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Progress</h2>
+        <div id="progressList">
+          <!-- optional placeholders -->
+          <div class="list-item">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Challenges</h2>
+        <div id="challengesList">
+          <!-- optional placeholders -->
+          <div class="list-item">—</div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
-      <h2>New Starters</h2>
-      <div id="newStartersList"></div>
+      <h2>Actions Next</h2>
+      <div id="actionsList">
+        <!-- optional placeholders -->
+        <div class="list-item">—</div>
+      </div>
     </div>
 
   </div>
