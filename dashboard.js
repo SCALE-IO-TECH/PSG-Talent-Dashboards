@@ -138,7 +138,7 @@ async function loadLiveRoles() {
   });
 }
 
-// ===== NEW STARTERS =====
+// ===== NEW STARTERS (TEAM UNDER JOB TITLE) =====
 async function loadNewStarters() {
   const text = await fetchCsvByGid(NEW_STARTERS_GID);
   const rows = csvToRows(text.trim());
@@ -168,10 +168,8 @@ async function loadNewStarters() {
     el.innerHTML = `
       <div style="min-width:0;">
         <div class="title">${esc(name)}</div>
-        <div class="meta">
-          ${role ? `<span>${esc(role)}</span>` : ``}
-          ${team ? `<span class="team">${esc(team)}</span>` : ``}
-        </div>
+        ${role ? `<div class="meta">${esc(role)}</div>` : ``}
+        ${team ? `<div class="meta team">${esc(team)}</div>` : ``}
       </div>
       <span class="pill">${esc(start || "—")}</span>
     `;
@@ -277,7 +275,7 @@ async function loadCandidateSourcesChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "46%",     // bigger donut ring
+      cutout: "46%",
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }
