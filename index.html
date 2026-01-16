@@ -55,7 +55,7 @@
       font-size:13px;
       color:var(--muted);
       margin-bottom:12px;
-      font-weight:700;
+      font-weight:800;
     }
 
     .dashboard{
@@ -73,14 +73,17 @@
       padding:20px;
     }
 
+    /* Accent fade line under logo */
     .accent-line{
       height:3px;
       width:min(420px, 78vw);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
       margin:10px auto 14px;
       border-radius:999px;
+      opacity:.95;
     }
 
+    /* KPI BAR */
     .kpi-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -99,22 +102,28 @@
       font-weight:900;
     }
 
+    /* Layout */
     .two-col{
       display:grid;
       grid-template-columns:2fr 1fr;
       gap:16px;
+      align-items:stretch;
     }
     .right-col{
       display:grid;
       gap:16px;
+      align-items:stretch;
     }
 
+    /* Bottom pair: Progress + Challenges equal size */
     .equal-two{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:16px;
+      align-items:stretch;
     }
 
+    /* Rows (used for roles + starters) */
     .row{
       display:flex;
       justify-content:space-between;
@@ -124,7 +133,6 @@
       gap:14px;
     }
     .row:last-child{ border-bottom:none; }
-
     .row .title{ font-weight:700; }
 
     .meta{
@@ -137,13 +145,14 @@
       font-size:12px;
     }
 
-    /* TEAM STYLE — colour only, not bold */
+    /* TEAM STYLE — orange but NOT bold */
     .team{
       color:var(--accent);
-      font-weight:400;
+      font-weight:400; /* <- not bold */
       letter-spacing:.02em;
     }
 
+    /* Neutral pill style (Location + Start Date) */
     .pill{
       display:inline-flex;
       align-items:center;
@@ -158,6 +167,7 @@
       color:rgba(255,255,255,.92);
     }
 
+    /* Stage pill */
     .stage{
       padding:6px 12px;
       border-radius:999px;
@@ -166,6 +176,7 @@
       letter-spacing:.12em;
       text-transform:uppercase;
       background:rgba(255,255,255,.12);
+      white-space:nowrap;
       color:rgba(255,255,255,.92);
     }
 
@@ -181,6 +192,89 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
+    /* Candidate sources */
+    .chart-wrap{
+      height:190px;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
+      border:1px solid rgba(255,255,255,.08);
+      padding:12px 16px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    #candidateSourcesChart{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
+
+    .chart-empty{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      text-align:center;
+      padding:0 12px;
+      pointer-events:none;
+    }
+
+    /* Legend under chart */
+    .legend{
+      margin-top:10px;
+      display:grid;
+      gap:8px;
+    }
+    .legend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.10);
+      font-size:12px;
+      color:rgba(255,255,255,.88);
+    }
+    .legend-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      box-shadow:0 0 0 4px rgba(255,255,255,.05);
+      flex:0 0 auto;
+    }
+    .legend-name{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      letter-spacing:.02em;
+    }
+    .legend-pct{
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
+    .list-item{
+      padding:10px 0;
+      border-bottom:1px solid var(--stroke);
+      font-size:14px;
+      color:rgba(255,255,255,.85);
+    }
+    .list-item:last-child{ border-bottom:none; }
+
+    /* Footer: Powered by at bottom */
     .powered-by{
       display:flex;
       justify-content:center;
@@ -198,6 +292,7 @@
       .kpi-grid{ grid-template-columns:1fr 1fr; }
       .two-col{ grid-template-columns:1fr; }
       .equal-two{ grid-template-columns:1fr; }
+      .chart-wrap{ height:220px; }
     }
   </style>
 </head>
@@ -213,9 +308,78 @@
 
     <h1>Hiring Dashboard</h1>
 
-    <!-- CONTENT UNCHANGED BELOW -->
-    <!-- KPI / Live Roles / Charts / New Starters / Progress / Challenges / Key Focus -->
+    <!-- KPI BAR -->
+    <div class="card">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="label">Live Roles</div>
+          <div class="value" id="kpiLiveRoles">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">On Hold</div>
+          <div class="value" id="kpiOnHold">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Offers</div>
+          <div class="value" id="kpiOffers">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Hires</div>
+          <div class="value" id="kpiHires">—</div>
+        </div>
+      </div>
+    </div>
 
+    <!-- Live Roles + Right Column -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Live Roles</h2>
+        <div id="liveRolesList"></div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <h2>Candidate Sources</h2>
+          <div class="chart-wrap">
+            <canvas id="candidateSourcesChart" aria-label="Candidate sources chart"></canvas>
+            <div id="candidateSourcesEmpty" class="chart-empty">Loading…</div>
+          </div>
+          <div id="candidateSourcesLegend" class="legend"></div>
+        </div>
+
+        <div class="card">
+          <h2>New Starters</h2>
+          <div id="newStartersList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress / Challenges equal -->
+    <div class="equal-two">
+      <div class="card">
+        <h2>Progress</h2>
+        <div id="progressList">
+          <div class="list-item">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Challenges</h2>
+        <div id="challengesList">
+          <div class="list-item">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Focus -->
+    <div class="card">
+      <h2>Key Focus</h2>
+      <div id="keyFocusList">
+        <div class="list-item">—</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
     <div class="powered-by">
       <span>Powered by</span>
       <img src="scaleio.svg" alt="ScaleIO">
