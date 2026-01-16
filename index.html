@@ -65,6 +65,16 @@
       padding:20px;
     }
 
+    /* Accent fade line under logo */
+    .accent-line{
+      height:3px;
+      width:min(420px, 78vw);
+      background:linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin:10px auto 14px;
+      border-radius:999px;
+      opacity:.95;
+    }
+
     /* KPI BAR */
     .kpi-grid{
       display:grid;
@@ -89,11 +99,20 @@
       display:grid;
       grid-template-columns:2fr 1fr;
       gap:16px;
-      align-items:start;
+      align-items:stretch; /* keep equal heights where possible */
     }
     .right-col{
       display:grid;
       gap:16px;
+      align-items:stretch;
+    }
+
+    /* Bottom pair: Progress + Challenges equal size */
+    .equal-two{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:stretch;
     }
 
     /* Rows (used for roles + starters) */
@@ -116,6 +135,13 @@
       align-items:center;
       color:rgba(255,255,255,.65);
       font-size:12px;
+    }
+
+    /* Team name highlight */
+    .team{
+      color:var(--accent);
+      font-weight:900;
+      letter-spacing:.02em;
     }
 
     /* Neutral pill style (Location + Start Date) */
@@ -160,11 +186,11 @@
 
     /* Candidate sources: larger donut + padding */
     .chart-wrap{
-      height:190px;                /* bigger */
+      height:190px;
       border-radius:14px;
       background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
       border:1px solid rgba(255,255,255,.08);
-      padding:12px 16px;           /* more padding left/right */
+      padding:12px 16px;
       overflow:hidden;
       position:relative;
     }
@@ -256,6 +282,7 @@
     @media (max-width:900px){
       .kpi-grid{ grid-template-columns:1fr 1fr; }
       .two-col{ grid-template-columns:1fr; }
+      .equal-two{ grid-template-columns:1fr; }
       .chart-wrap{ height:220px; }
     }
   </style>
@@ -264,9 +291,11 @@
 <body>
   <div class="dashboard">
 
-    <div style="display:flex; justify-content:center; margin-bottom:16px;">
+    <div style="display:flex; justify-content:center; margin-bottom:8px;">
       <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" style="height:64px;">
     </div>
+
+    <div class="accent-line"></div>
 
     <h1>Hiring Dashboard</h1>
 
@@ -319,7 +348,8 @@
       </div>
     </div>
 
-    <div class="two-col">
+    <!-- Progress / Challenges equal -->
+    <div class="equal-two">
       <div class="card">
         <h2>Progress</h2>
         <div id="progressList">
