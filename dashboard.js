@@ -2,6 +2,7 @@
 const STATUS_GID = "1256252635";
 const LIVE_ROLES_GID = "0";
 const NEW_STARTERS_GID = "2080311953";
+const CANDIDATE_SOURCES_GID = "1950940614";
 
 // Published CSV endpoint (gid-based)
 const PUB_BASE =
@@ -174,7 +175,85 @@ async function loadNewStarters() {
   });
 }
 
+// ===== CANDIDATE SOURCES (% CHART) =====
+let candidateSourcesChart = null;
+
+async function loadCandidateSourcesChart() {
+  const empty = document.getElementById("candidateSourcesEmpty");
+  const canvas = document.getElementById("candidateSourcesChart");
+  if (!canvas) return;
+
+  const text = await fetchCsvByGid(CANDIDATE_SOURCES_GID);
+  const rows = csvToRows(text.trim());
+  if (rows.length < 2) {
+    if (empty) empty.textContent = "No data";
+    return;
+  }
+
+  const headers = rows.shift().map(h => String(h).trim());
+
+  // Your tab is EXACTLY: source + amount
+  const iSource = pickIndex(headers, ["source"]);
+  const iAmount = pickIndex(headers, ["amount"]);
+
+  if (iSource < 0 || iAmount < 0) {
+    if (empty) empty.textContent = "Check headers";
+    return;
+  }
+
+  const data = [];
+  for (const r of rows) {
+    const source = String(r[iSource] ?? "").trim();
+    const amount = toNumber(r[iAmount]);
+    if (!source || amount <= 0) continue;
+    data.push({ source, amount });
+  }
+
+  const total = data.reduce((s, x) => s + x.amount, 0);
+  if (!total) {
+    if (empty) empty.textContent = "No data";
+    return;
+  }
+
+  const labels = data.map(d => d.source);
+  const perc = data.map(d => +(d.amount / total * 100).toFixed(1));
+
+  if (empty) empty.style.display = "none";
+
+  if (candidateSourcesChart) candidateSourcesChart.destroy();
+
+  candidateSourcesChart = new Chart(canvas.getContext("2d"), {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data: perc,
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.label}: ${ctx.raw}%`
+          }
+        }
+      }
+    }
+  });
+}
+
 // ===== INIT =====
-Promise.all([loadStatusKpis(), loadLiveRoles(), loadNewStarters()]).catch(err => {
+Promise.all([
+  loadStatusKpis(),
+  loadLiveRoles(),
+  loadNewStarters(),
+  loadCandidateSourcesChart()
+]).catch(err => {
   console.error(err);
 });
