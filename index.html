@@ -8,7 +8,6 @@
   <!-- Prevent scroll-restore BEFORE paint -->
   <script>
     try { history.scrollRestoration = "manual"; } catch(e) {}
-    // pageshow catches BFCache reloads that often restore scroll
     window.addEventListener("pageshow", () => { window.scrollTo(0,0); }, { once:true });
     window.scrollTo(0,0);
   </script>
@@ -32,7 +31,7 @@
 
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
-    html { scroll-behavior:auto; }
+    html { scroll-behavior:auto; background: var(--bg); }
 
     body{
       margin:0;
@@ -41,12 +40,36 @@
       padding:28px;
       overflow-x:hidden;
 
-      /* ✅ EXACT ORIGINAL GLOWS — DO NOT CHANGE */
+      /* ✅ Solid base only (glows moved to fixed layer below) */
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* ✅ FIXED glow layer: viewport-based (no “half cut”, no seams) */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
       background:
         radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
-        var(--bg);
+        /* same idea as before, but spread to avoid a hard stop line */
+        linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%);
+    }
+
+    /* Keep all page content above the glow layer */
+    .dashboard{
+      position: relative;
+      z-index: 1;
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      gap:20px;
+
+      /* ✅ 36px breathing room at the bottom */
+      padding-bottom:36px;
     }
 
     h1, h2{
@@ -70,17 +93,6 @@
       font-weight:800;
     }
 
-    .dashboard{
-      max-width:1200px;
-      margin:0 auto;
-      display:grid;
-      gap:20px;
-      position:relative;
-
-      /* ✅ 36px breathing room at the bottom (ScaleIO not flush) */
-      padding-bottom:36px;
-    }
-
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
@@ -88,7 +100,6 @@
       box-shadow:var(--shadow);
       padding:20px;
 
-      /* ✅ hover lift */
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -146,7 +157,6 @@
       align-items:stretch;
     }
 
-    /* Rows */
     .row{
       display:flex;
       justify-content:space-between;
@@ -210,7 +220,6 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
-    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
@@ -291,7 +300,6 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
-    /* Quick Links */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -369,21 +377,14 @@
       .chart-wrap{ height:220px; }
     }
 
-    /* =========================
-       Splash overlay (WITH overlay + fades while moving)
-       ========================= */
+    /* Splash overlay (kept) */
     .splash{
       position:fixed;
       inset:0;
       z-index:9999;
-
-      /* ✅ Real overlay tint (like calculator) */
       background: rgba(12,47,51,.92);
-
       opacity:1;
       pointer-events:auto;
-
-      /* overlay fades while logo moves */
       transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
     .splash.fade{
@@ -400,7 +401,6 @@
       filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
       will-change: transform;
       transform-origin:center center;
-
       transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
       transition: transform 950ms cubic-bezier(.4,0,.2,1);
     }
@@ -540,7 +540,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="dashboard.js"></script>
 
-  <!-- Splash animation: logo flies to header while overlay fades -->
   <script>
     window.addEventListener("load", () => {
       window.scrollTo(0, 0);
