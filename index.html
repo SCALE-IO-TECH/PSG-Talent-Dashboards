@@ -127,7 +127,7 @@
     .row{
       display:flex;
       justify-content:space-between;
-      align-items:center;
+      align-items:center;              /* <— center vertically */
       padding:12px 0;
       border-bottom:1px solid var(--stroke);
       gap:14px;
@@ -160,7 +160,7 @@
       background:rgba(255,255,255,.12);
       white-space:nowrap;
       color:rgba(255,255,255,.92);
-      line-height:1;
+      line-height:1;                  /* <— prevents “taller pill” */
     }
 
     .stage.offer{ background:rgba(247,142,98,.18); color:var(--accent); border:1px solid rgba(247,142,98,.35); }
@@ -535,7 +535,7 @@
     });
   </script>
 
-  <!-- ✅ BOAT: hidden on load, starts entering after 1s, then continues slow loop -->
+  <!-- ✅ ONE BOAT ONLY: hidden off-screen, then starts moving (same speed) after 1s -->
   <script>
     (function(){
       const layer = document.getElementById("boatLayer");
@@ -561,16 +561,15 @@
 
       const lineA = { x1: -380, y1: 148, x2: 1580, y2: 56 };
 
-      const DURATION = 160000;     // keep your slow speed
+      const DURATION = 160000;     // keep your slow constant speed
       const back = 110;
       const dashStep = 22;
 
-      const START_DELAY = 1000;    // ✅ 1s after page load
+      const START_DELAY = 1000;    // ✅ 1 second after page load
 
-      // Entry segment: ensures it ACTUALLY enters right after the delay (no jump)
-      const ENTER_FROM_P = 0.12;   // off-screen (boat center left of viewport)
-      const ENTER_TO_P   = 0.22;   // your previous "appears quickly" region
-      const ENTER_MS     = 1800;   // smooth enter duration
+      // ✅ Start just off the left edge so it begins entering shortly after start,
+      // while still being NOT visible at t=0.
+      const OFFSCREEN_P = 0.155;
 
       function lerp(a,b,t){ return a + (b-a)*t; }
       function posOnLine(line, p){ return { x: lerp(line.x1, line.x2, p), y: lerp(line.y1, line.y2, p) }; }
@@ -586,7 +585,7 @@
         return pt;
       }
 
-      function setDashes(dashes, line, p, visibilityScale){
+      function setDashes(dashes, line, p, forceHidden=false){
         const dx = line.x2-line.x1, dy = line.y2-line.y1;
         const len = Math.hypot(dx,dy) || 1;
         const ux = dx/len, uy = dy/len;
@@ -601,63 +600,43 @@
           const x = sternX - ux*dist;
           const y = sternY - uy*dist;
 
-          const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
-          const base = Math.max(0.10, fade);
-          dash.style.opacity = String(base * (visibilityScale || 0));
+          if (forceHidden){
+            dash.style.opacity = "0";
+          } else {
+            const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
+            dash.style.opacity = String(Math.max(0.10, fade));
+          }
 
           dash.style.transform = `translate(${x}px, ${y}px) translate(-50%,-50%)`;
         }
       }
 
-      // ✅ On load: boat NOT visible
+      // ✅ On initial load: keep boat truly invisible and off-screen (no jump)
       aBoat.style.opacity = "0";
-      setBoat(aBoat, lineA, ENTER_FROM_P);
-      setDashes(aDashes, lineA, ENTER_FROM_P, 0);
+      setBoat(aBoat, lineA, OFFSCREEN_P);
+      setDashes(aDashes, lineA, OFFSCREEN_P, true);
 
-      function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+      function loopFactory(baseOffset){
+        const t0 = performance.now();
+        function loop(now){
+          const t = (now || performance.now()) - t0;
+          const pA = (((t % DURATION) / DURATION) + baseOffset) % 1;
 
-      function start(){
-        // Wait 1s after load
-        setTimeout(() => {
-          aBoat.style.opacity = ""; // back to CSS (.95)
+          setBoat(aBoat, lineA, pA);
+          setDashes(aDashes, lineA, pA);
 
-          // 1) Smooth enter from off-screen to your start offset
-          const enterStart = performance.now();
-          function enterLoop(now){
-            const t = Math.min(1, (now - enterStart) / ENTER_MS);
-            const e = easeOutCubic(t);
-            const p = lerp(ENTER_FROM_P, ENTER_TO_P, e);
-
-            setBoat(aBoat, lineA, p);
-            setDashes(aDashes, lineA, p, e);
-
-            if (t < 1) {
-              requestAnimationFrame(enterLoop);
-              return;
-            }
-
-            // 2) Continue with the original slow loop, seamlessly from ENTER_TO_P (no jump)
-            const baseOffset = ENTER_TO_P;
-            const t0 = performance.now();
-
-            function loop(n){
-              const dt = (n - t0);
-              const pA = (((dt % DURATION) / DURATION) + baseOffset) % 1;
-
-              setBoat(aBoat, lineA, pA);
-              setDashes(aDashes, lineA, pA, 1);
-
-              requestAnimationFrame(loop);
-            }
-            requestAnimationFrame(loop);
-          }
-          requestAnimationFrame(enterLoop);
-        }, START_DELAY);
+          requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
       }
 
-      // Start after full load (as requested)
-      if (document.readyState === "complete") start();
-      else window.addEventListener("load", start, { once:true });
+      // ✅ Start the *normal* constant-speed motion after 1s
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          aBoat.style.opacity = ""; // returns to CSS opacity (.95)
+          loopFactory(OFFSCREEN_P);
+        }, START_DELAY);
+      }, { once:true });
     })();
   </script>
 
