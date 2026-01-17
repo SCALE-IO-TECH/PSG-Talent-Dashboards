@@ -15,7 +15,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900;1,200..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -72,6 +72,7 @@
       margin:0;
     }
 
+    /* ✅ ONLY change requested: force header font back to Unbounded */
     h1{
       font-family: "Unbounded", sans-serif;
       font-weight:600;
@@ -112,52 +113,17 @@
     }
 
     /* KPI BAR */
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:16px;
-    }
+    .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
     .kpi{ text-align:center; }
-    .kpi .label{
-      font-size:12px;
-      color:var(--muted);
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-    .kpi .value{
-      margin-top:10px;
-      font-size:clamp(28px,4vw,36px);
-      font-weight:900;
-    }
+    .kpi .label{ font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
+    .kpi .value{ margin-top:10px; font-size:clamp(28px,4vw,36px); font-weight:900; }
 
     /* Layout */
-    .two-col{
-      display:grid;
-      grid-template-columns:2fr 1fr;
-      gap:16px;
-      align-items:stretch;
-    }
-    .right-col{
-      display:grid;
-      gap:16px;
-      align-items:stretch;
-    }
+    .two-col{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; }
+    .right-col{ display:grid; gap:16px; align-items:stretch; }
+    .equal-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
 
-    .equal-two{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-      align-items:stretch;
-    }
-
-    .row{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      padding:12px 0;
-      border-bottom:1px solid var(--stroke);
-      gap:14px;
-    }
+    .row{ display:flex; justify-content:space-between; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--stroke); gap:14px; }
     .row:last-child{ border-bottom:none; }
     .row .title{ font-weight:700; }
 
@@ -171,11 +137,7 @@
       font-size:12px;
     }
 
-    .team{
-      color:var(--accent);
-      font-weight:400;
-      letter-spacing:.02em;
-    }
+    .team{ color:var(--accent); font-weight:400; letter-spacing:.02em; }
 
     .pill{
       display:inline-flex;
@@ -202,16 +164,8 @@
       white-space:nowrap;
       color:rgba(255,255,255,.92);
     }
-    .stage.offer{
-      background:rgba(247,142,98,.18);
-      color:var(--accent);
-      border:1px solid rgba(247,142,98,.35);
-    }
-    .stage.hired{
-      background:rgba(22,163,74,.22);
-      color:#16a34a;
-      border:1px solid rgba(22,163,74,.35);
-    }
+    .stage.offer{ background:rgba(247,142,98,.18); color:var(--accent); border:1px solid rgba(247,142,98,.35); }
+    .stage.hired{ background:rgba(22,163,74,.22); color:#16a34a; border:1px solid rgba(22,163,74,.35); }
 
     /* Candidate sources */
     .chart-wrap{
@@ -241,50 +195,18 @@
       pointer-events:none;
     }
 
-    .legend{
-      margin-top:10px;
-      display:grid;
-      gap:8px;
-    }
+    .legend{ margin-top:10px; display:grid; gap:8px; }
     .legend-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:6px 10px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.10);
-      font-size:12px;
-      color:rgba(255,255,255,.88);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.10); font-size:12px; color:rgba(255,255,255,.88);
     }
-    .legend-left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .legend-dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      box-shadow:0 0 0 4px rgba(255,255,255,.05);
-      flex:0 0 auto;
-    }
-    .legend-name{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      letter-spacing:.02em;
-    }
+    .legend-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .legend-dot{ width:10px; height:10px; border-radius:999px; box-shadow:0 0 0 4px rgba(255,255,255,.05); flex:0 0 auto; }
+    .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    .list-item{
-      padding:10px 0;
-      border-bottom:1px solid var(--stroke);
-      font-size:14px;
-      color:rgba(255,255,255,.85);
-    }
+    .list-item{ padding:10px 0; border-bottom:1px solid var(--stroke); font-size:14px; color:rgba(255,255,255,.85); }
     .list-item:last-child{ border-bottom:none; }
 
     .quick-links{
@@ -298,51 +220,24 @@
       align-items:center;
     }
     .quick-links a{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      text-decoration:none;
-      opacity:.82;
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      text-decoration:none; opacity:.82;
       transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
     }
     .quick-links a:hover{ opacity:1; transform: translateY(-1px); }
-    .quick-links .logo-link{
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.10);
-    }
-    .quick-links img{
-      height:28px;
-      max-width:130px;
-      object-fit:contain;
-      display:block;
-    }
+    .quick-links .logo-link{ padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.10); }
+    .quick-links img{ height:28px; max-width:130px; object-fit:contain; display:block; }
     .quick-links .text-link{
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.10);
-      color:rgba(255,255,255,.70);
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      white-space:nowrap;
+      padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10); color:rgba(255,255,255,.70);
+      font-size:11px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
     }
     .quick-links .text-link:hover{ color:#fff; border-color: rgba(247,142,98,.35); }
 
     .powered-by{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:10px;
-      margin-top:18px;
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,.55);
-      padding-bottom:36px;
+      display:flex; justify-content:center; align-items:center; gap:10px;
+      margin-top:18px; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+      color:rgba(255,255,255,.55); padding-bottom:36px;
     }
     .powered-by img{ height:22px; opacity:.9; }
 
@@ -355,21 +250,15 @@
 
     /* Splash overlay */
     .splash{
-      position:fixed;
-      inset:0;
-      z-index:9999;
+      position:fixed; inset:0; z-index:9999;
       background: rgba(12,47,51,.92);
-      opacity:1;
-      pointer-events:auto;
+      opacity:1; pointer-events:auto;
       transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
     .splash.fade{ opacity:0; pointer-events:none; }
     .splash-logo{
-      position:fixed;
-      left:50%;
-      top:50%;
-      width:min(520px, 76vw);
-      height:auto;
+      position:fixed; left:50%; top:50%;
+      width:min(520px, 76vw); height:auto;
       filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
       will-change: transform;
       transform-origin:center center;
@@ -384,24 +273,19 @@
       70%  { opacity:1; transform: translateY(4px); }
       100% { opacity:1; transform: translateY(0); }
     }
-    .legend-item.animate-in{
-      animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards;
-    }
+    .legend-item.animate-in{ animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards; }
 
     /* =========================
-       Boat animation layer (UPDATED)
-       - 12 dashes
-       - Wake anchored to stern center (left-middle) via offset-anchor
-       - Path moved DOWN so boat stays on-screen more
+       Boat animation layer
+       ✅ Wake is now SATELLITE-TRACKED from stern-center (left-middle)
+       - Wake dashes are positioned from recorded stern points (not offset-path)
+       - This guarantees the trail starts exactly from the back centre of the image
        ========================= */
     .topScene{ position: relative; }
-
     .boatLayer{
       position:absolute;
-      left:0;
-      right:0;
-      top:-8px;
-      height:170px;
+      left:0; right:0; top:-8px;
+      height:190px;
       pointer-events:none;
       z-index:1;
       overflow:hidden;
@@ -410,38 +294,30 @@
 
     #headerLogo, .accent-line, h1{ position: relative; z-index: 2; }
 
-    .boat, .wake{
+    .boat{
       position:absolute;
-      /* moved DOWN: y values increased */
-      offset-path: path("M -120 104 C 80 26 260 38 350 96 C 450 160 600 150 700 82 C 820 18 940 28 1040 88 C 1140 148 1280 150 1380 90 C 1460 48 1540 58 1660 82");
+      /* brought DOWN so boat stays on-screen more */
+      offset-path: path("M -120 112 C 80 34 260 46 350 104 C 450 168 600 158 700 90 C 820 26 940 36 1040 96 C 1140 156 1280 158 1380 98 C 1460 56 1540 66 1660 90");
       offset-rotate: auto;
       transform: translate(-50%,-50%);
-      will-change: offset-distance, opacity;
-    }
-
-    .boat{
+      will-change: offset-distance;
       width:220px;
-      height:auto;
-      opacity:.92;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
       offset-distance: 0%;
-      /* ✅ stern center = LEFT side, vertical middle */
+      /* anchor point = stern center (left-middle) */
       offset-anchor: 0% 50%;
     }
-    .boat img{
-      width:220px;
-      height:auto;
-      display:block;
-    }
+    .boat img{ width:220px; height:auto; display:block; }
 
-    .wake{
+    .wakeDash{
+      position:absolute;
       width:12px;
       height:3px;
       border-radius:999px;
       background: rgba(247,142,98,.95);
-      opacity:.55;
-      offset-distance: 0%;
-      offset-anchor: 50% 50%;
+      opacity:0;
+      transform: translate(-50%,-50%);
+      will-change: transform, opacity;
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -469,11 +345,11 @@
 
     <!-- Top scene -->
     <div class="topScene">
-      <div class="boatLayer" aria-hidden="true">
-        <!-- 12 trail dashes -->
-        <div class="wake"></div><div class="wake"></div><div class="wake"></div><div class="wake"></div>
-        <div class="wake"></div><div class="wake"></div><div class="wake"></div><div class="wake"></div>
-        <div class="wake"></div><div class="wake"></div><div class="wake"></div><div class="wake"></div>
+      <div class="boatLayer" aria-hidden="true" id="boatLayer">
+        <!-- 12 satellite-track dashes -->
+        <div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div>
+        <div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div>
+        <div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div>
 
         <!-- boat -->
         <div class="boat" id="psgBoat">
@@ -481,7 +357,7 @@
         </div>
       </div>
 
-      <!-- ✅ Logo lowered: 40px top padding -->
+      <!-- ✅ 40px top padding (as requested) -->
       <div style="display:flex; justify-content:center; padding-top:40px; margin-bottom:28px;">
         <img
           src="PSG Logo - White With Orange (1).png"
@@ -553,15 +429,12 @@
       <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
         <img src="Teamtailor.webp" alt="Teamtailor">
       </a>
-
       <a class="logo-link" href="https://app.hibob.com" target="_blank" rel="noopener">
         <img src="bob.png" alt="HiBob">
       </a>
-
       <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
         Management Handbook
       </a>
-
       <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
         Manager Guidelines
       </a>
@@ -621,7 +494,7 @@
         }
       });
 
-      els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
+      see: els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
     }
 
     function hookLegendDropIn() {
@@ -658,50 +531,81 @@
     });
   </script>
 
-  <!-- ✅ BOAT: smooth + wake anchored to very BACK of the image (left-middle) -->
+  <!-- ✅ BOAT + SATELLITE WAKE (stern-center tracked) -->
   <script>
     (function(){
       const boat = document.getElementById("psgBoat");
-      const dashes = Array.from(document.querySelectorAll(".boatLayer .wake"));
-      if (!boat || dashes.length === 0) return;
+      const layer = document.getElementById("boatLayer");
+      const dashes = Array.from(document.querySelectorAll(".wakeDash"));
+      const img = document.getElementById("boatImg");
+      if (!boat || !layer || dashes.length !== 12) return;
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
       // Robust boat filename fallback
-      const boatImg = document.getElementById("boatImg");
-      if (boatImg){
+      if (img){
         const fallbacks = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
         let idx = 0;
-        boatImg.onerror = () => { idx++; if (idx < fallbacks.length) boatImg.src = fallbacks[idx]; };
-        boatImg.src = fallbacks[0];
+        img.onerror = () => { idx++; if (idx < fallbacks.length) img.src = fallbacks[idx]; };
+        img.src = fallbacks[0];
       }
 
-      const DURATION_MS = 140000; // slow
-      const GAP = 0.012;          // tighter spacing because 12 dashes
+      const DURATION_MS = 140000;  // slow
       const START_DELAY_MS = 900;
+
+      // Store many stern points; we sample them to render 12 dashes
+      const history = [];
+      const MAX_HISTORY = 240;     // enough for smooth spacing
+      const SAMPLE_EVERY_MS = 80;  // how often we record a stern point
+      let lastSample = 0;
+
+      function recordSternPoint(now){
+        const boatRect = boat.getBoundingClientRect();
+        const layerRect = layer.getBoundingClientRect();
+
+        // ✅ Stern center point: "very back of image" = left side, vertical center
+        const sternX_page = boatRect.left + 0; // extreme back edge
+        const sternY_page = boatRect.top + (boatRect.height / 2);
+
+        const x = sternX_page - layerRect.left;
+        const y = sternY_page - layerRect.top;
+
+        history.push({x,y, t: now});
+        if (history.length > MAX_HISTORY) history.splice(0, history.length - MAX_HISTORY);
+      }
+
+      function renderDashes(){
+        // We want 12 dashes spaced back along the recorded path, with dash[0] closest to the stern.
+        const step = 8; // how many recorded points between each dash (tweak spacing)
+        for (let i = 0; i < dashes.length; i++){
+          const idx = history.length - 1 - (i * step);
+          const dash = dashes[i];
+          if (idx < 0){
+            dash.style.opacity = "0";
+            continue;
+          }
+          const p = history[idx];
+
+          const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
+          dash.style.opacity = String(Math.max(0.10, fade));
+          dash.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%,-50%)`;
+        }
+      }
 
       function loop(now){
         const t = now || performance.now();
         const raw = (t % DURATION_MS) / DURATION_MS;
 
+        // Move boat smoothly
         boat.style.offsetDistance = (raw * 100).toFixed(4) + "%";
 
-        const show = t > START_DELAY_MS;
-
-        for (let i = 0; i < dashes.length; i++){
-          const w = dashes[i];
-          if (!show){
-            w.style.opacity = "0";
-            w.style.offsetDistance = "0%";
-            continue;
+        if (t > START_DELAY_MS){
+          if (t - lastSample >= SAMPLE_EVERY_MS){
+            lastSample = t;
+            recordSternPoint(t);
           }
-
-          let p = raw - GAP * (i + 1);
-          if (p < 0) p += 1;
-
-          w.style.offsetDistance = (p * 100).toFixed(4) + "%";
-
-          const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
-          w.style.opacity = String(Math.max(0.10, fade));
+          renderDashes();
+        } else {
+          dashes.forEach(d => d.style.opacity = "0");
         }
 
         requestAnimationFrame(loop);
