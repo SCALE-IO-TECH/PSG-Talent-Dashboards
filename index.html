@@ -34,6 +34,7 @@
         var(--bg);
       color:var(--text);
       padding:28px;
+      overflow-x:hidden;
     }
 
     h1, h2{
@@ -42,7 +43,6 @@
       margin:0;
     }
 
-    /* HIRING DASHBOARD FONT */
     h1{
       font-family: "Unbounded", sans-serif;
       font-weight:600;
@@ -63,6 +63,7 @@
       margin:0 auto;
       display:grid;
       gap:20px;
+      position:relative;
     }
 
     .card{
@@ -71,9 +72,15 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
+      transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 22px 60px rgba(0,0,0,.42);
+      border-color: rgba(255,255,255,.18);
     }
 
-    /* Accent fade line under logo */
     .accent-line{
       height:3px;
       width:min(420px, 78vw);
@@ -115,7 +122,6 @@
       align-items:stretch;
     }
 
-    /* Bottom pair: Progress + Challenges equal size */
     .equal-two{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -123,7 +129,6 @@
       align-items:stretch;
     }
 
-    /* Rows (used for roles + starters) */
     .row{
       display:flex;
       justify-content:space-between;
@@ -145,14 +150,12 @@
       font-size:12px;
     }
 
-    /* TEAM STYLE — orange but NOT bold */
     .team{
       color:var(--accent);
       font-weight:400;
       letter-spacing:.02em;
     }
 
-    /* Neutral pill style (Location + Start Date) */
     .pill{
       display:inline-flex;
       align-items:center;
@@ -167,7 +170,6 @@
       color:rgba(255,255,255,.92);
     }
 
-    /* Stage pill */
     .stage{
       padding:6px 12px;
       border-radius:999px;
@@ -192,7 +194,6 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
-    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
@@ -224,7 +225,6 @@
       pointer-events:none;
     }
 
-    /* Legend under chart */
     .legend{
       margin-top:10px;
       display:grid;
@@ -274,7 +274,7 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
-    /* Quick Links (moved ABOVE powered-by) */
+    /* Quick Links */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -308,7 +308,6 @@
       background: rgba(0,0,0,.10);
     }
 
-    /* SLIGHTLY BIGGER LOGOS */
     .quick-links img{
       height:28px;
       max-width:130px;
@@ -333,13 +332,13 @@
       border-color: rgba(247,142,98,.35);
     }
 
-    /* Footer: Powered by at bottom */
+    /* Powered by footer */
     .powered-by{
       display:flex;
       justify-content:center;
       align-items:center;
       gap:10px;
-      margin-top:18px; /* sits under quick links */
+      margin-top:18px;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
@@ -353,13 +352,58 @@
       .equal-two{ grid-template-columns:1fr; }
       .chart-wrap{ height:220px; }
     }
+
+    /* =========================
+       Splash overlay animation
+       ========================= */
+    .splash{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(12,47,51,.92), rgba(12,47,51,.98));
+      z-index:9999;
+      animation: splashFadeOut 900ms ease 1100ms forwards;
+    }
+
+    .splash .logo{
+      width:min(520px, 76vw);
+      height:auto;
+      filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
+      opacity:0;
+      transform: translateY(12px) scale(1.02);
+      animation: splashIn 650ms ease forwards, logoPullBack 900ms ease 1100ms forwards;
+      transform-origin: center;
+    }
+
+    @keyframes splashIn{
+      to{ opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    @keyframes splashFadeOut{
+      to{ opacity:0; visibility:hidden; pointer-events:none; }
+    }
+
+    /* "Pull back into position" feel */
+    @keyframes logoPullBack{
+      to{
+        transform: translateY(-120px) scale(.28);
+        opacity:0;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <!-- Splash overlay -->
+  <div class="splash" aria-hidden="true">
+    <img class="logo" src="PSG Logo - White With Orange (1).png" alt="Pole Star Global">
+  </div>
+
   <div class="dashboard">
 
     <div style="display:flex; justify-content:center; margin-bottom:8px;">
+      <!-- Header logo stays in place (splash "pulls back" toward here visually) -->
       <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" style="height:64px;">
     </div>
 
@@ -438,7 +482,7 @@
       </div>
     </div>
 
-    <!-- Quick Links (ABOVE powered-by) -->
+    <!-- Quick Links -->
     <div class="quick-links" aria-label="Quick Links">
       <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
         <img src="Teamtailor.webp" alt="Teamtailor">
