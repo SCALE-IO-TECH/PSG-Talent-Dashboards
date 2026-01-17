@@ -535,7 +535,7 @@
     });
   </script>
 
-  <!-- ✅ ONE BOAT ONLY: starts off-page, enters 1s after page load -->
+  <!-- ✅ ONE BOAT ONLY: off-screen initially, starts entering 1s after page load -->
   <script>
     (function(){
       const layer = document.getElementById("boatLayer");
@@ -561,12 +561,13 @@
 
       const lineA = { x1: -380, y1: 148, x2: 1580, y2: 56 };
 
-      const DURATION = 160000;   // same slow speed as before
+      const DURATION = 160000;     // same slow speed as before
       const back = 110;
       const dashStep = 22;
 
-      const START_OFFSET = 0.0;   // ✅ start fully off-page
-      const START_DELAY = 1000;   // ✅ enter 1s after page load
+      const START_DELAY = 1000;    // ✅ 1 second after page load
+      const START_OFFSET = 0.22;   // ✅ keeps the “appears quickly” behaviour
+      const P_OFFSCREEN = 0.17;    // ✅ place it just off-screen initially
 
       let t0 = 0;
 
@@ -620,22 +621,17 @@
         requestAnimationFrame(loop);
       }
 
-      // ✅ Place boat off-page immediately, keep wake hidden until start
-      setBoat(aBoat, lineA, 0);
-      setDashes(aDashes, lineA, 0, true);
+      // ✅ Immediately place boat off-screen, keep wake hidden
+      setBoat(aBoat, lineA, P_OFFSCREEN);
+      setDashes(aDashes, lineA, P_OFFSCREEN, true);
 
-      function startAfterLoad(){
+      // ✅ Start motion 1s after the page has loaded
+      window.addEventListener("load", () => {
         setTimeout(() => {
           t0 = performance.now();
           requestAnimationFrame(loop);
         }, START_DELAY);
-      }
-
-      if (document.readyState === "complete") {
-        startAfterLoad();
-      } else {
-        window.addEventListener("load", startAfterLoad, { once:true });
-      }
+      }, { once:true });
     })();
   </script>
 
