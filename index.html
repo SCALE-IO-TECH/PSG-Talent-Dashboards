@@ -2,638 +2,1166 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hiring Dashboard</title>
-
-  <!-- Prevent scroll-restore BEFORE paint -->
-  <script>
-    try { history.scrollRestoration = "manual"; } catch(e) {}
-    window.addEventListener("pageshow", () => { window.scrollTo(0,0); }, { once:true });
-    window.scrollTo(0,0);
-  </script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
-
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pole Star — Hiring Dashboard</title>
   <style>
     :root{
-      --bg:#0c2f33;
-      --accent:#f78e62;
-      --text:#ffffff;
-      --muted:rgba(255,255,255,.65);
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.12);
-      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --bg:#0b1220;
+      --panel:#0f1b33;
+      --panel2:#0c1730;
+      --card:#101f3b;
+      --card2:#0f1c36;
+      --muted:#8ea0c6;
+      --text:#e9f1ff;
+      --line:rgba(255,255,255,.08);
+      --accent:#61d2ff;
+      --accent2:#8b5cf6;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --shadow:0 18px 40px rgba(0,0,0,.35);
       --radius:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
-
-    *{ box-sizing:border-box; }
-    html, body{ height:100%; }
-    html { scroll-behavior:auto; background: var(--bg); }
-
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: "Inter Tight", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family:var(--sans);
       color:var(--text);
-      padding:28px;
-      overflow-x:hidden;
-      background: var(--bg);
-      position: relative;
-    }
-
-    /* FIXED glow layer: viewport-based (no seams/cut lines) */
-    body::before{
-      content:"";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
       background:
-        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
-        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%);
+        radial-gradient(1200px 800px at 20% 10%, rgba(97,210,255,.18), transparent 55%),
+        radial-gradient(900px 700px at 85% 25%, rgba(139,92,246,.16), transparent 55%),
+        radial-gradient(800px 600px at 40% 100%, rgba(34,197,94,.10), transparent 55%),
+        linear-gradient(180deg, #060b18, #0a1223 45%, #081023);
+      overflow-x:hidden;
     }
-
-    .dashboard{
-      position: relative;
-      z-index: 1;
-      max-width:1200px;
-      margin:0 auto;
-      display:grid;
-      gap:20px;
-      padding-bottom:36px;
-    }
-
-    h1, h2{
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      margin:0;
-    }
-    h1{
-      font-family: "Unbounded", sans-serif;
-      font-weight:600;
-      font-size:clamp(22px,3vw,32px);
-      text-align:center;
-      margin-bottom:10px;
-    }
-    h2{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:12px;
-      font-weight:800;
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:20px;
-      transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
-      will-change: transform;
-    }
-    .card:hover{
-      transform: translateY(-4px);
-      box-shadow: 0 22px 60px rgba(0,0,0,.42);
-      border-color: rgba(255,255,255,.18);
-    }
-
-    .accent-line{
-      height:3px;
-      width:min(420px, 78vw);
-      background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:26px auto 20px;
-      border-radius:999px;
-      opacity:.95;
-    }
-
-    /* KPI BAR */
-    .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-    .kpi{ text-align:center; }
-    .kpi .label{ font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
-    .kpi .value{ margin-top:10px; font-size:clamp(28px,4vw,36px); font-weight:900; }
 
     /* Layout */
-    .two-col{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; }
-    .right-col{ display:grid; gap:16px; align-items:stretch; }
-    .equal-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
-
-    /* ✅ FIX: keep stage pill vertically centered (was flex-start) */
-    .row{
+    .app{
+      min-height:100%;
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:16px;
+      padding:18px;
+    }
+    .sidebar{
+      position:sticky;
+      top:18px;
+      height:calc(100vh - 36px);
+      background:linear-gradient(180deg, rgba(15,27,51,.9), rgba(12,23,48,.9));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      overflow:hidden;
+    }
+    .brand{
       display:flex;
-      justify-content:space-between;
       align-items:center;
-      padding:12px 0;
-      border-bottom:1px solid var(--stroke);
-      gap:14px;
+      gap:12px;
+      padding:10px 10px 14px;
+      border-bottom:1px solid var(--line);
+      margin:-2px -2px 14px;
     }
-    .row:last-child{ border-bottom:none; }
-    .row .title{ font-weight:700; }
-
-    .meta{
-      margin-top:6px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-      color:rgba(255,255,255,.65);
-      font-size:12px;
+    .logo{
+      width:42px;height:42px;border-radius:14px;
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.55), transparent 60%),
+        conic-gradient(from 220deg, rgba(97,210,255,.95), rgba(139,92,246,.9), rgba(34,197,94,.85), rgba(97,210,255,.95));
+      box-shadow: 0 10px 30px rgba(97,210,255,.12), 0 14px 40px rgba(139,92,246,.10);
+      border:1px solid rgba(255,255,255,.10);
     }
-    .team{ color:var(--accent); font-weight:400; letter-spacing:.02em; }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      padding:6px 12px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      background:rgba(255,255,255,.12);
-      white-space:nowrap;
-      color:rgba(255,255,255,.92);
-      line-height:1;
+    .brand h1{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+      line-height:1.2;
+    }
+    .brand .sub{
+      font-size:12px;color:var(--muted);
+      margin-top:2px;
     }
 
-    .stage{
-      display:inline-flex;
-      align-items:center;
-      padding:6px 12px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      background:rgba(255,255,255,.12);
-      white-space:nowrap;
-      color:rgba(255,255,255,.92);
-      line-height:1;
+    .nav{
+      display:flex;flex-direction:column;gap:8px;
+      margin-top:12px;
     }
-    .stage.offer{ background:rgba(247,142,98,.18); color:var(--accent); border:1px solid rgba(247,142,98,.35); }
-    .stage.hired{ background:rgba(22,163,74,.22); color:#16a34a; border:1px solid rgba(22,163,74,.35); }
-
-    /* Candidate sources */
-    .chart-wrap{
-      height:190px;
+    .nav button{
+      all:unset;
+      cursor:pointer;
+      padding:10px 12px;
       border-radius:14px;
-      background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
-      border:1px solid rgba(255,255,255,.08);
-      padding:12px 16px;
+      border:1px solid transparent;
+      color:rgba(233,241,255,.88);
+      display:flex;align-items:center;gap:10px;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .nav button:hover{
+      background:rgba(255,255,255,.05);
+      border-color:rgba(255,255,255,.08);
+      transform:translateY(-1px);
+    }
+    .nav button.active{
+      background:linear-gradient(90deg, rgba(97,210,255,.16), rgba(139,92,246,.14));
+      border-color:rgba(97,210,255,.18);
+    }
+    .nav .dot{
+      width:10px;height:10px;border-radius:99px;
+      background:rgba(255,255,255,.18);
+      box-shadow:0 0 0 4px rgba(255,255,255,.03);
+    }
+    .nav button.active .dot{
+      background:rgba(97,210,255,.9);
+      box-shadow:0 0 0 4px rgba(97,210,255,.10);
+    }
+
+    .sidebar .meta{
+      margin-top:auto;
+      border-top:1px solid var(--line);
+      padding-top:14px;
+      display:grid;
+      gap:10px;
+    }
+    .chiprow{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{
+      font: 600 11px/1 var(--sans);
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:rgba(233,241,255,.86);
+      display:inline-flex;gap:8px;align-items:center;
+    }
+    .chip i{
+      width:7px;height:7px;border-radius:99px;display:inline-block;
+      background:rgba(255,255,255,.28);
+    }
+    .chip.good i{background:rgba(34,197,94,.85)}
+    .chip.warn i{background:rgba(245,158,11,.9)}
+    .chip.bad i{background:rgba(239,68,68,.9)}
+    .tiny{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    /* Main */
+    .main{
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+      gap:14px;
+      min-width:0;
+    }
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;
+      background:linear-gradient(180deg, rgba(16,31,59,.76), rgba(12,23,48,.70));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      min-width:0;
+    }
+    .headline{
+      display:flex;flex-direction:column;gap:3px;min-width:0;
+    }
+    .headline .title{
+      font-size:18px;
+      letter-spacing:.2px;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .headline .subtitle{
+      font-size:12px;
+      color:var(--muted);
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .controls{
+      display:flex;align-items:center;gap:10px;min-width:0;
+    }
+    .search{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      min-width:240px;
+      max-width:360px;
+      flex:1;
+    }
+    .search svg{opacity:.7}
+    .search input{
+      all:unset;
+      width:100%;
+      font-size:13px;
+      color:rgba(233,241,255,.92);
+    }
+    .btn{
+      cursor:pointer;
+      border:none;
+      color:rgba(233,241,255,.92);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px 12px;
+      border-radius:14px;
+      font:600 12px/1 var(--sans);
+      display:inline-flex;align-items:center;gap:8px;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}
+    .btn.primary{
+      background:linear-gradient(90deg, rgba(97,210,255,.18), rgba(139,92,246,.18));
+      border-color:rgba(97,210,255,.22);
+    }
+    .btn.primary:hover{background:linear-gradient(90deg, rgba(97,210,255,.22), rgba(139,92,246,.22))}
+    .btn .kbd{
+      font:700 11px/1 var(--mono);
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      color:rgba(233,241,255,.84);
+    }
+
+    /* Animation Panel */
+    .hero{
+      background:linear-gradient(180deg, rgba(16,31,59,.78), rgba(12,23,48,.70));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
       overflow:hidden;
       position:relative;
     }
-    #candidateSourcesChart{ width:100% !important; height:100% !important; display:block; }
-    .chart-empty{
-      position:absolute; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      color:var(--muted); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
-      text-align:center; padding:0 12px; pointer-events:none;
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+      align-items:stretch;
+      min-width:0;
     }
-
-    .legend{ margin-top:10px; display:grid; gap:8px; }
-    .legend-item{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.10); font-size:12px; color:rgba(255,255,255,.88);
-    }
-    .legend-left{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .legend-dot{ width:10px; height:10px; border-radius:999px; box-shadow:0 0 0 4px rgba(255,255,255,.05); flex:0 0 auto; }
-    .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
-    .legend-pct{ font-weight:900; letter-spacing:.04em; }
-
-    .list-item{ padding:10px 0; border-bottom:1px solid var(--stroke); font-size:14px; color:rgba(255,255,255,.85); }
-    .list-item:last-child{ border-bottom:none; }
-
-    .quick-links{
-      margin-top:36px; padding-top:18px;
-      border-top:1px solid rgba(255,255,255,.10);
-      display:flex; justify-content:center; gap:22px; flex-wrap:wrap; align-items:center;
-    }
-    .quick-links a{
-      display:inline-flex; align-items:center; justify-content:center; gap:10px;
-      text-decoration:none; opacity:.82;
-      transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
-    }
-    .quick-links a:hover{ opacity:1; transform: translateY(-1px); }
-    .quick-links .logo-link{ padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.10); }
-    .quick-links img{ height:28px; max-width:130px; object-fit:contain; display:block; }
-    .quick-links .text-link{
-      padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.10); color:rgba(255,255,255,.70);
-      font-size:11px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
-    }
-    .quick-links .text-link:hover{ color:#fff; border-color: rgba(247,142,98,.35); }
-
-    .powered-by{
-      display:flex; justify-content:center; align-items:center; gap:10px;
-      margin-top:18px; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-      color:rgba(255,255,255,.55); padding-bottom:36px;
-    }
-    .powered-by img{ height:22px; opacity:.9; }
-
-    @media (max-width:900px){
-      .kpi-grid{ grid-template-columns:1fr 1fr; }
-      .two-col{ grid-template-columns:1fr; }
-      .equal-two{ grid-template-columns:1fr; }
-      .chart-wrap{ height:220px; }
-    }
-
-    /* Splash overlay */
-    .splash{
-      position:fixed; inset:0; z-index:9999;
-      background: rgba(12,47,51,.92);
-      opacity:1; pointer-events:auto;
-      transition: opacity 950ms cubic-bezier(.4,0,.2,1);
-    }
-    .splash.fade{ opacity:0; pointer-events:none; }
-    .splash-logo{
-      position:fixed; left:50%; top:50%;
-      width:min(520px, 76vw); height:auto;
-      filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
-      will-change: transform;
-      transform-origin:center center;
-      transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
-      transition: transform 950ms cubic-bezier(.4,0,.2,1);
-    }
-
-    /* Legend animation */
-    .legend-item.animate-pre{ opacity:0; transform: translateY(-14px); }
-    @keyframes legendDropBounce {
-      0%   { opacity:0; transform: translateY(-14px); }
-      70%  { opacity:1; transform: translateY(4px); }
-      100% { opacity:1; transform: translateY(0); }
-    }
-    .legend-item.animate-in{ animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards; }
-
-    /* =========================
-       TWO BOATS + 12 dashes each
-       - Boats cross the SAME crossing point, but at DIFFERENT TIMES (phase offset)
-       - Wakes can cross; boats never collide
-       ========================= */
-    .topScene{ position: relative; }
-    .boatLayer{
-      position:absolute;
-      left:0; right:0; top:0;
-      height:190px;
-      pointer-events:none;
-      z-index:1;
+    .oceanWrap{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(700px 300px at 40% 0%, rgba(97,210,255,.14), transparent 55%),
+        radial-gradient(700px 300px at 80% 15%, rgba(139,92,246,.12), transparent 60%),
+        linear-gradient(180deg, rgba(9,18,38,.75), rgba(7,13,30,.78));
+      position:relative;
       overflow:hidden;
-      opacity:.22;
+      min-height:210px;
     }
-    #headerLogo, .accent-line, h1{ position: relative; z-index: 2; }
-
-    .boatA, .boatB{
-      position:absolute;
-      width:220px;
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
-      will-change: transform;
-      opacity:.95;
+    .oceanWrap::before{
+      content:"";
+      position:absolute;inset:-50px;
+      background:
+        radial-gradient(closest-side at 15% 25%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(closest-side at 65% 35%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(closest-side at 85% 70%, rgba(255,255,255,.04), transparent 60%);
+      filter:blur(1px);
+      opacity:.9;
+      animation: drift 14s linear infinite;
     }
-    .boatA img, .boatB img{ width:220px; height:auto; display:block; }
+    @keyframes drift{
+      0%{transform:translate3d(-24px,-12px,0) rotate(0.2deg)}
+      50%{transform:translate3d(22px,10px,0) rotate(-0.2deg)}
+      100%{transform:translate3d(-24px,-12px,0) rotate(0.2deg)}
+    }
 
-    .wakeDash{
+    /* Boats */
+    .boat{
       position:absolute;
-      width:12px;
-      height:3px;
+      top:50%;
+      transform:translate3d(0,-50%,0);
+      width:86px;height:40px;
+      filter:drop-shadow(0 10px 16px rgba(0,0,0,.35));
+      will-change:transform;
+    }
+    .boat .hull{
+      position:absolute;left:6px;right:6px;bottom:6px;height:16px;
+      border-radius:0 0 14px 14px;
+      background:linear-gradient(180deg, rgba(233,241,255,.16), rgba(233,241,255,.06));
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .boat .deck{
+      position:absolute;left:22px;bottom:20px;width:26px;height:12px;
+      border-radius:8px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .boat .mast{
+      position:absolute;left:46px;bottom:18px;width:2px;height:20px;
+      background:rgba(255,255,255,.40);
+      border-radius:2px;
+    }
+    .boat .sail{
+      position:absolute;left:48px;bottom:20px;width:0;height:0;
+      border-left:0 solid transparent;
+      border-right:18px solid transparent;
+      border-bottom:20px solid rgba(97,210,255,.55);
+      filter:drop-shadow(0 4px 8px rgba(97,210,255,.12));
+    }
+    .boat .wake{
+      position:absolute;left:-18px;bottom:3px;width:24px;height:12px;
       border-radius:999px;
-      background: rgba(247,142,98,.95);
-      opacity:0;
-      transform: translate(-50%,-50%);
-      will-change: transform, opacity;
+      background:radial-gradient(closest-side, rgba(255,255,255,.18), transparent 70%);
+      opacity:.7;
+      filter:blur(.2px);
+      animation:wake 1.2s ease-in-out infinite;
+    }
+    @keyframes wake{
+      0%,100%{transform:translateX(0) scale(1); opacity:.65}
+      50%{transform:translateX(-3px) scale(1.07); opacity:.85}
     }
 
+    /* Boat A path */
+    .boatA{
+      left:6%;
+      animation:
+        boatAPath 10s linear infinite,
+        bob 1.7s ease-in-out infinite;
+    }
+
+    /* Boat B starts off-screen to the right */
+    .boatB{
+      left:110%;
+      animation:
+        boatBPath 10s linear infinite,
+        bob 1.9s ease-in-out infinite;
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.38));
+    }
+
+    /* Non-colliding choreography: A dips down while B rises near mid */
+    @keyframes boatAPath{
+      0%   { transform:translate3d(0,-50%,0) translateX(0)   translateY(-14px) rotate(-2deg); }
+      20%  { transform:translate3d(0,-50%,0) translateX(110px) translateY(-12px) rotate(-1deg); }
+      40%  { transform:translate3d(0,-50%,0) translateX(230px) translateY(  8px) rotate( 1deg); }
+      50%  { transform:translate3d(0,-50%,0) translateX(295px) translateY( 18px) rotate( 2deg); }
+      60%  { transform:translate3d(0,-50%,0) translateX(360px) translateY( 10px) rotate( 1deg); }
+      80%  { transform:translate3d(0,-50%,0) translateX(500px) translateY(-10px) rotate(-1deg); }
+      100% { transform:translate3d(0,-50%,0) translateX(680px) translateY(-14px) rotate(-2deg); }
+    }
+
+    @keyframes boatBPath{
+      0%   { transform:translate3d(0,-50%,0) translateX(0)   translateY( 18px) rotate( 2deg); }
+      10%  { transform:translate3d(0,-50%,0) translateX(-90px) translateY( 16px) rotate( 2deg); }
+      30%  { transform:translate3d(0,-50%,0) translateX(-240px) translateY( 10px) rotate( 1deg); }
+      45%  { transform:translate3d(0,-50%,0) translateX(-330px) translateY(-10px) rotate( 0deg); }
+      50%  { transform:translate3d(0,-50%,0) translateX(-370px) translateY(-18px) rotate(-1deg); }
+      65%  { transform:translate3d(0,-50%,0) translateX(-460px) translateY(-12px) rotate(-2deg); }
+      85%  { transform:translate3d(0,-50%,0) translateX(-610px) translateY(  6px) rotate( 1deg); }
+      100% { transform:translate3d(0,-50%,0) translateX(-780px) translateY( 18px) rotate( 2deg); }
+    }
+
+    @keyframes bob{
+      0%,100%{ filter:drop-shadow(0 10px 16px rgba(0,0,0,.34)); }
+      50%{ filter:drop-shadow(0 12px 20px rgba(0,0,0,.40)); }
+    }
+
+    .boatB .sail{
+      border-bottom-color: rgba(139,92,246,.50);
+      filter:drop-shadow(0 4px 8px rgba(139,92,246,.12));
+    }
+    .boatB .hull{
+      background:linear-gradient(180deg, rgba(233,241,255,.14), rgba(233,241,255,.05));
+    }
+
+    /* Buoys / stars */
+    .spark{
+      position:absolute;
+      width:6px;height:6px;border-radius:99px;
+      background:rgba(255,255,255,.75);
+      opacity:.75;
+      filter:blur(.2px);
+      animation: twinkle 2.8s ease-in-out infinite;
+      box-shadow:0 0 18px rgba(97,210,255,.22);
+    }
+    @keyframes twinkle{
+      0%,100%{transform:scale(.85); opacity:.55}
+      50%{transform:scale(1.15); opacity:.9}
+    }
+    .spark.p{box-shadow:0 0 18px rgba(139,92,246,.20)}
+    .spark.g{box-shadow:0 0 18px rgba(34,197,94,.18)}
+    .buoy{
+      position:absolute;bottom:12px;width:10px;height:10px;border-radius:99px;
+      background:rgba(245,158,11,.9);
+      box-shadow:0 0 0 6px rgba(245,158,11,.12), 0 10px 18px rgba(0,0,0,.26);
+      animation: bobBuoy 2.2s ease-in-out infinite;
+    }
+    @keyframes bobBuoy{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-6px)}
+    }
+
+    .legend{
+      display:flex;flex-direction:column;gap:10px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      padding:12px;
+      min-width:0;
+    }
+    .legend .row{
+      display:flex;justify-content:space-between;gap:12px;
+      padding:10px 10px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      min-width:0;
+    }
+    .legend .row strong{font-size:12px}
+    .legend .row span{font-size:12px;color:var(--muted);white-space:nowrap}
+    .legend .kpi{
+      display:flex;align-items:center;gap:10px;min-width:0;
+    }
+    .pill{
+      width:10px;height:10px;border-radius:99px;background:rgba(255,255,255,.22);
+      box-shadow:0 0 0 5px rgba(255,255,255,.03);
+      flex:0 0 auto;
+    }
+    .pill.a{background:rgba(97,210,255,.9);box-shadow:0 0 0 5px rgba(97,210,255,.10)}
+    .pill.b{background:rgba(139,92,246,.9);box-shadow:0 0 0 5px rgba(139,92,246,.10)}
+    .pill.c{background:rgba(34,197,94,.9);box-shadow:0 0 0 5px rgba(34,197,94,.10)}
+
+    /* Content grid */
+    .content{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:14px;
+      min-width:0;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(16,31,59,.76), rgba(12,23,48,.70));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      min-width:0;
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:13px;
+      letter-spacing:.2px;
+      color:rgba(233,241,255,.9);
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;
+    }
+    .badge{
+      font:700 11px/1 var(--mono);
+      padding:7px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:rgba(233,241,255,.86);
+    }
+
+    /* Pipeline board */
+    .board{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(180px,1fr));
+      gap:10px;
+      min-width:0;
+    }
+    .col{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      padding:10px;
+      min-width:0;
+    }
+    .colHead{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:8px;
+      padding:6px 6px 10px;
+      color:rgba(233,241,255,.88);
+      font-size:12px;
+    }
+    .count{
+      font:700 11px/1 var(--mono);
+      padding:6px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      color:rgba(233,241,255,.80);
+    }
+    .items{display:flex;flex-direction:column;gap:8px;min-width:0}
+    .item{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(16,31,59,.55);
+      padding:10px 10px;
+      display:flex;flex-direction:column;gap:6px;
+      min-width:0;
+    }
+    .item .name{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .item .role{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{
+      font:700 10px/1 var(--mono);
+      padding:6px 7px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:rgba(233,241,255,.78);
+    }
+    .tag.good{border-color:rgba(34,197,94,.25); background:rgba(34,197,94,.08); color:rgba(191,255,214,.92)}
+    .tag.warn{border-color:rgba(245,158,11,.28); background:rgba(245,158,11,.09); color:rgba(255,232,196,.92)}
+    .tag.bad{border-color:rgba(239,68,68,.24); background:rgba(239,68,68,.08); color:rgba(255,205,205,.92)}
+
+    /* Right column */
+    .grid2{
+      display:grid;
+      grid-template-rows: auto auto 1fr;
+      gap:14px;
+      min-width:0;
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      min-width:0;
+    }
+    .kpiCard{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      padding:12px;
+      min-width:0;
+    }
+    .kpiCard .label{font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .kpiCard .value{margin-top:8px;font-size:20px;letter-spacing:.2px}
+    .kpiCard .delta{margin-top:6px;font-size:12px;color:rgba(233,241,255,.78)}
+    .miniDot{
+      width:10px;height:10px;border-radius:99px;background:rgba(255,255,255,.22);
+      box-shadow:0 0 0 5px rgba(255,255,255,.03);
+      flex:0 0 auto;
+    }
+    .miniDot.good{background:rgba(34,197,94,.9);box-shadow:0 0 0 5px rgba(34,197,94,.10)}
+    .miniDot.warn{background:rgba(245,158,11,.95);box-shadow:0 0 0 5px rgba(245,158,11,.10)}
+    .miniDot.bad{background:rgba(239,68,68,.95);box-shadow:0 0 0 5px rgba(239,68,68,.10)}
+
+    /* Activity */
+    .activity{display:flex;flex-direction:column;gap:10px;min-width:0}
+    .actItem{
+      display:flex;gap:10px;align-items:flex-start;
+      padding:10px 10px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      min-width:0;
+    }
+    .avatar{
+      width:34px;height:34px;border-radius:14px;
+      background:
+        radial-gradient(16px 16px at 28% 28%, rgba(255,255,255,.55), transparent 60%),
+        linear-gradient(135deg, rgba(97,210,255,.8), rgba(139,92,246,.78));
+      border:1px solid rgba(255,255,255,.12);
+      flex:0 0 auto;
+    }
+    .actItem .txt{min-width:0}
+    .actItem .txt .t{
+      font-size:12px;line-height:1.35;margin:0;
+      color:rgba(233,241,255,.9);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .actItem .txt .s{
+      margin:4px 0 0;
+      font-size:12px;color:var(--muted);
+      line-height:1.3;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .actItem time{
+      margin-left:auto;
+      font:700 10px/1 var(--mono);
+      color:rgba(233,241,255,.68);
+      padding:6px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.16);
+      border:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
+    }
+
+    /* Table */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0 8px;
+      font-size:12px;
+      min-width:0;
+    }
+    thead th{
+      text-align:left;
+      color:var(--muted);
+      font-weight:600;
+      padding:0 10px 6px;
+      font-size:11px;
+      letter-spacing:.2px;
+    }
+    tbody tr{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    tbody td{
+      padding:10px 10px;
+      border-top:1px solid rgba(255,255,255,.06);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    tbody tr td:first-child{
+      border-left:1px solid rgba(255,255,255,.10);
+      border-radius:14px 0 0 14px;
+    }
+    tbody tr td:last-child{
+      border-right:1px solid rgba(255,255,255,.10);
+      border-radius:0 14px 14px 0;
+    }
+    .status{
+      display:inline-flex;align-items:center;gap:8px;
+      font:700 11px/1 var(--mono);
+      padding:7px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.12);
+      color:rgba(233,241,255,.82);
+      white-space:nowrap;
+    }
+    .status i{width:7px;height:7px;border-radius:99px;display:inline-block;background:rgba(255,255,255,.25)}
+    .status.good{border-color:rgba(34,197,94,.22);background:rgba(34,197,94,.08)}
+    .status.good i{background:rgba(34,197,94,.9)}
+    .status.warn{border-color:rgba(245,158,11,.24);background:rgba(245,158,11,.08)}
+    .status.warn i{background:rgba(245,158,11,.95)}
+    .status.bad{border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.08)}
+    .status.bad i{background:rgba(239,68,68,.95)}
+
+    /* Responsive */
+    @media (max-width: 1100px){
+      .app{grid-template-columns: 1fr}
+      .sidebar{position:relative;height:auto;top:0}
+      .content{grid-template-columns:1fr}
+      .heroGrid{grid-template-columns:1fr}
+      .board{grid-template-columns:repeat(2, minmax(180px, 1fr))}
+    }
+    @media (max-width: 640px){
+      .controls{width:100%}
+      .search{min-width:0}
+      .topbar{flex-direction:column;align-items:stretch}
+      .kpis{grid-template-columns:1fr}
+      .board{grid-template-columns:1fr}
+    }
+
+    /* Reduced motion */
     @media (prefers-reduced-motion: reduce){
-      .boatLayer{ display:none !important; }
-      .legend-item{ animation:none !important; }
-      .splash, .splash-logo { transition:none !important; }
-      .card{ transition:none !important; }
-      .card:hover{ transform:none !important; }
+      .oceanWrap::before,.boat,.spark,.buoy{animation:none !important}
     }
   </style>
 </head>
-
 <body>
-  <!-- Splash overlay -->
-  <div class="splash" id="splash" aria-hidden="true">
-    <img
-      src="PSG Logo - White With Orange (1).png"
-      alt="Pole Star Global"
-      class="splash-logo"
-      id="splashLogo"
-    />
-  </div>
-
-  <div class="dashboard">
-
-    <!-- Top scene -->
-    <div class="topScene">
-      <div class="boatLayer" aria-hidden="true" id="boatLayer">
-        <!-- Boat A -->
-        <div class="boatA" id="boatA">
-          <img id="boatImgA" src="Untitled design (16).png" alt="" aria-hidden="true">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Pole Star</h1>
+          <div class="sub">Hiring Dashboard</div>
         </div>
-        <!-- 12 dashes for A -->
-        <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
-        <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
-        <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
+      </div>
 
-        <!-- Boat B -->
-        <div class="boatB" id="boatB">
-          <img id="boatImgB" src="Untitled design (16).png" alt="" aria-hidden="true">
+      <nav class="nav" aria-label="Sections">
+        <button class="active" type="button"><span class="dot" aria-hidden="true"></span>Overview</button>
+        <button type="button"><span class="dot" aria-hidden="true"></span>Pipeline</button>
+        <button type="button"><span class="dot" aria-hidden="true"></span>Interviews</button>
+        <button type="button"><span class="dot" aria-hidden="true"></span>Offers</button>
+        <button type="button"><span class="dot" aria-hidden="true"></span>Team Load</button>
+        <button type="button"><span class="dot" aria-hidden="true"></span>Settings</button>
+      </nav>
+
+      <div class="meta">
+        <div class="chiprow">
+          <span class="chip good"><i></i>On track</span>
+          <span class="chip warn"><i></i>2 bottlenecks</span>
+          <span class="chip"><i></i>Q1 hiring</span>
         </div>
-        <!-- 12 dashes for B -->
-        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
-        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
-        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
+        <div class="tiny">
+          Tips: Use <span style="font-family:var(--mono);font-weight:700;color:rgba(233,241,255,.88)">Ctrl</span>+
+          <span style="font-family:var(--mono);font-weight:700;color:rgba(233,241,255,.88)">K</span> to search.
+          Pipeline cards filter instantly.
+        </div>
       </div>
+    </aside>
 
-      <!-- 40px top padding -->
-      <div style="display:flex; justify-content:center; padding-top:40px; margin-bottom:28px;">
-        <img
-          src="PSG Logo - White With Orange (1).png"
-          alt="Pole Star Global"
-          id="headerLogo"
-          style="height:64px;"
-        >
-      </div>
+    <main class="main">
+      <header class="topbar">
+        <div class="headline">
+          <h2 class="title">Pole Star Hiring Dashboard</h2>
+          <p class="subtitle">North-star metrics, pipeline health, and weekly momentum</p>
+        </div>
 
-      <div class="accent-line"></div>
-      <h1>Hiring Dashboard</h1>
-    </div>
-
-    <!-- KPI BAR -->
-    <div class="card">
-      <div class="kpi-grid">
-        <div class="kpi"><div class="label">Live Roles</div><div class="value" id="kpiLiveRoles">—</div></div>
-        <div class="kpi"><div class="label">On Hold</div><div class="value" id="kpiOnHold">—</div></div>
-        <div class="kpi"><div class="label">Offers</div><div class="value" id="kpiOffers">—</div></div>
-        <div class="kpi"><div class="label">Hires</div><div class="value" id="kpiHires">—</div></div>
-      </div>
-    </div>
-
-    <!-- Live Roles + Right Column -->
-    <div class="two-col">
-      <div class="card">
-        <h2>Live Roles</h2>
-        <div id="liveRolesList"></div>
-      </div>
-
-      <div class="right-col">
-        <div class="card">
-          <h2>Candidate Sources</h2>
-          <div class="chart-wrap">
-            <canvas id="candidateSourcesChart" aria-label="Candidate sources chart"></canvas>
-            <div id="candidateSourcesEmpty" class="chart-empty">Loading…</div>
+        <div class="controls">
+          <div class="search" role="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" opacity=".9"/>
+              <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            </svg>
+            <input id="q" type="text" placeholder="Search candidates, roles, notes…" autocomplete="off" />
           </div>
-          <div id="candidateSourcesLegend" class="legend"></div>
+          <button class="btn primary" type="button" id="addRole">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Add role <span class="kbd">N</span>
+          </button>
+          <button class="btn" type="button" id="export">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            </svg>
+            Export
+          </button>
         </div>
+      </header>
 
-        <div class="card">
-          <h2>New Starters</h2>
-          <div id="newStartersList"></div>
+      <section class="hero" aria-label="North Star">
+        <div class="heroGrid">
+          <div class="oceanWrap" aria-label="Two boats animation">
+            <div class="spark" style="left:14%; top:22%; animation-delay:-.8s;"></div>
+            <div class="spark p" style="left:34%; top:12%; animation-delay:-1.6s;"></div>
+            <div class="spark g" style="left:58%; top:24%; animation-delay:-.3s;"></div>
+            <div class="spark" style="left:78%; top:10%; animation-delay:-2.0s;"></div>
+            <div class="spark p" style="left:86%; top:30%; animation-delay:-.9s;"></div>
+            <div class="buoy" style="left:22%; animation-delay:-.6s;"></div>
+            <div class="buoy" style="left:72%; animation-delay:-1.2s;"></div>
+
+            <div class="boat boatA" aria-hidden="true">
+              <div class="wake"></div>
+              <div class="sail"></div>
+              <div class="mast"></div>
+              <div class="deck"></div>
+              <div class="hull"></div>
+            </div>
+
+            <div class="boat boatB" aria-hidden="true">
+              <div class="wake"></div>
+              <div class="sail"></div>
+              <div class="mast"></div>
+              <div class="deck"></div>
+              <div class="hull"></div>
+            </div>
+          </div>
+
+          <div class="legend" aria-label="North-star summary">
+            <div class="row">
+              <div class="kpi"><span class="pill a" aria-hidden="true"></span><strong>Time-to-hire</strong></div>
+              <span id="tth">32.4 days</span>
+            </div>
+            <div class="row">
+              <div class="kpi"><span class="pill b" aria-hidden="true"></span><strong>Offer accept</strong></div>
+              <span id="offerRate">78%</span>
+            </div>
+            <div class="row">
+              <div class="kpi"><span class="pill c" aria-hidden="true"></span><strong>Pipeline SLA</strong></div>
+              <span id="sla">92%</span>
+            </div>
+            <div class="row">
+              <div class="kpi"><span class="pill" aria-hidden="true"></span><strong>Open roles</strong></div>
+              <span id="openRoles">7</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Progress / Challenges -->
-    <div class="equal-two">
-      <div class="card">
-        <h2>Progress</h2>
-        <div id="progressList"><div class="list-item">—</div></div>
-      </div>
+      <section class="content" aria-label="Dashboard content">
+        <section class="card" aria-label="Pipeline board">
+          <h2>
+            Pipeline board
+            <span class="badge" id="boardBadge">FILTER: none</span>
+          </h2>
 
-      <div class="card">
-        <h2>Challenges</h2>
-        <div id="challengesList"><div class="list-item">—</div></div>
-      </div>
-    </div>
+          <div class="board" id="board">
+            <div class="col" data-stage="Sourced">
+              <div class="colHead">
+                <span>Sourced</span>
+                <span class="count" id="c_sourced">0</span>
+              </div>
+              <div class="items" id="sourced"></div>
+            </div>
 
-    <!-- Key Focus -->
-    <div class="card">
-      <h2>Key Focus</h2>
-      <div id="keyFocusList"><div class="list-item">—</div></div>
-    </div>
+            <div class="col" data-stage="Screen">
+              <div class="colHead">
+                <span>Screen</span>
+                <span class="count" id="c_screen">0</span>
+              </div>
+              <div class="items" id="screen"></div>
+            </div>
 
-    <!-- Quick Links -->
-    <div class="quick-links" aria-label="Quick Links">
-      <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
-        <img src="Teamtailor.webp" alt="Teamtailor">
-      </a>
-      <a class="logo-link" href="https://app.hibob.com" target="_blank" rel="noopener">
-        <img src="bob.png" alt="HiBob">
-      </a>
-      <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
-        Management Handbook
-      </a>
-      <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
-        Manager Guidelines
-      </a>
-    </div>
+            <div class="col" data-stage="Onsite">
+              <div class="colHead">
+                <span>Onsite</span>
+                <span class="count" id="c_onsite">0</span>
+              </div>
+              <div class="items" id="onsite"></div>
+            </div>
 
-    <!-- Powered by -->
-    <div class="powered-by">
-      <span>Powered by</span>
-      <img src="scaleio.svg" alt="ScaleIO">
-    </div>
+            <div class="col" data-stage="Offer">
+              <div class="colHead">
+                <span>Offer</span>
+                <span class="count" id="c_offer">0</span>
+              </div>
+              <div class="items" id="offer"></div>
+            </div>
+          </div>
+        </section>
 
+        <section class="grid2" aria-label="Right column">
+          <section class="card" aria-label="KPIs">
+            <h2>
+              Week snapshot
+              <span class="badge" id="weekStamp"></span>
+            </h2>
+            <div class="kpis">
+              <div class="kpiCard">
+                <div class="label">
+                  <span>Interviews</span>
+                  <span class="miniDot warn" aria-hidden="true"></span>
+                </div>
+                <div class="value" id="kpiInterviews">14</div>
+                <div class="delta" id="kpiInterviewsDelta">+2 vs last week</div>
+              </div>
+              <div class="kpiCard">
+                <div class="label">
+                  <span>Pass-through</span>
+                  <span class="miniDot good" aria-hidden="true"></span>
+                </div>
+                <div class="value" id="kpiPass">46%</div>
+                <div class="delta" id="kpiPassDelta">+4 pts</div>
+              </div>
+              <div class="kpiCard">
+                <div class="label">
+                  <span>Stale (7d+)</span>
+                  <span class="miniDot bad" aria-hidden="true"></span>
+                </div>
+                <div class="value" id="kpiStale">5</div>
+                <div class="delta" id="kpiStaleDelta">-1</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" aria-label="Recent activity">
+            <h2>
+              Recent activity
+              <span class="badge">LIVE</span>
+            </h2>
+            <div class="activity" id="activity"></div>
+          </section>
+
+          <section class="card" aria-label="Roles table">
+            <h2>
+              Open roles
+              <span class="badge" id="roleCountBadge">7 roles</span>
+            </h2>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="min-width:160px;">Role</th>
+                    <th>Team</th>
+                    <th>Priority</th>
+                    <th>Stage</th>
+                  </tr>
+                </thead>
+                <tbody id="rolesTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <script>
-    // Slow donut animation (no style changes)
-    if (window.Chart && Chart.defaults) {
-      Chart.defaults.animation.duration = 2800;
-      Chart.defaults.animation.easing = "easeOutQuart";
+    const data = {
+      roles: [
+        { role: "Senior Full-Stack Engineer", team: "Core Product", priority: "High", stage: "Interviews", status: "good" },
+        { role: "Data Analyst (Growth)", team: "Growth", priority: "Medium", stage: "Sourcing", status: "warn" },
+        { role: "Product Designer", team: "Design", priority: "High", stage: "Onsite loop", status: "warn" },
+        { role: "Recruiting Ops", team: "People", priority: "Low", stage: "Screening", status: "good" },
+        { role: "Platform Engineer", team: "Infrastructure", priority: "High", stage: "Offer prep", status: "bad" },
+        { role: "ML Engineer", team: "Applied AI", priority: "Medium", stage: "Interviews", status: "good" },
+        { role: "Customer Success Lead", team: "GTM", priority: "Medium", stage: "Sourcing", status: "warn" },
+      ],
+      pipeline: [
+        { name: "Amina K.", role: "Senior Full-Stack Engineer", stage: "Sourced", tags: ["Referral", "TypeScript"], tone: "good" },
+        { name: "Marco R.", role: "Platform Engineer", stage: "Sourced", tags: ["K8s", "SRE"], tone: "warn" },
+        { name: "Jules P.", role: "Product Designer", stage: "Sourced", tags: ["Portfolio", "Figma"], tone: "good" },
+
+        { name: "Priya S.", role: "ML Engineer", stage: "Screen", tags: ["LLMs", "Python"], tone: "good" },
+        { name: "Hassan L.", role: "Data Analyst (Growth)", stage: "Screen", tags: ["SQL", "Looker"], tone: "warn" },
+        { name: "Noah T.", role: "Customer Success Lead", stage: "Screen", tags: ["Enterprise", "CS"], tone: "good" },
+
+        { name: "Elena V.", role: "Senior Full-Stack Engineer", stage: "Onsite", tags: ["System design", "React"], tone: "warn" },
+        { name: "Jun W.", role: "Product Designer", stage: "Onsite", tags: ["Loop", "Stakeholders"], tone: "good" },
+        { name: "Sofia D.", role: "ML Engineer", stage: "Onsite", tags: ["Applied", "Eval"], tone: "good" },
+
+        { name: "Kai M.", role: "Platform Engineer", stage: "Offer", tags: ["Comp", "Leveling"], tone: "bad" },
+        { name: "Chloe N.", role: "Recruiting Ops", stage: "Offer", tags: ["Ops", "SLA"], tone: "good" },
+      ],
+      activity: [
+        { who: "Hiring Ops", t: "Offer approved for Chloe N.", s: "Recruiting Ops • start date aligned with People team.", when: "2h" },
+        { who: "Panel", t: "Onsite feedback submitted for Jun W.", s: "Product Designer • strong craft, clear narrative.", when: "6h" },
+        { who: "Recruiter", t: "Screen scheduled with Hassan L.", s: "Data Analyst (Growth) • Tue 10:00.", when: "1d" },
+        { who: "Recruiter", t: "Inbound referral: Amina K.", s: "Senior Full-Stack Engineer • prior startup lead.", when: "2d" },
+      ]
+    };
+
+    const els = {
+      q: document.getElementById("q"),
+      boardBadge: document.getElementById("boardBadge"),
+      cols: {
+        Sourced: document.getElementById("sourced"),
+        Screen: document.getElementById("screen"),
+        Onsite: document.getElementById("onsite"),
+        Offer: document.getElementById("offer"),
+      },
+      counts: {
+        Sourced: document.getElementById("c_sourced"),
+        Screen: document.getElementById("c_screen"),
+        Onsite: document.getElementById("c_onsite"),
+        Offer: document.getElementById("c_offer"),
+      },
+      activity: document.getElementById("activity"),
+      rolesTable: document.getElementById("rolesTable"),
+      roleCountBadge: document.getElementById("roleCountBadge"),
+      weekStamp: document.getElementById("weekStamp"),
+      openRoles: document.getElementById("openRoles"),
+      tth: document.getElementById("tth"),
+      offerRate: document.getElementById("offerRate"),
+      sla: document.getElementById("sla"),
+      addRole: document.getElementById("addRole"),
+      export: document.getElementById("export"),
+    };
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[s]));
     }
 
-    // KPI count-up (slow)
-    function animateCount(el, to, duration = 2600) {
-      const start = performance.now();
-      const from = 0;
-      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-      function tick(now) {
-        const t = Math.min(1, (now - start) / duration);
-        const v = Math.round(from + (to - from) * easeOutCubic(t));
-        el.textContent = String(v);
-        if (t < 1) requestAnimationFrame(tick);
+    function setWeekStamp(){
+      const d = new Date();
+      const fmt = d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+      els.weekStamp.textContent = fmt;
+    }
+
+    function renderRoles(){
+      els.rolesTable.innerHTML = "";
+      const rows = data.roles.map(r => {
+        const st = r.status === "good" ? "good" : (r.status === "warn" ? "warn" : "bad");
+        const stageLabel = r.stage;
+        const pri = r.priority;
+        const priTag = pri === "High" ? "warn" : (pri === "Medium" ? "" : "good");
+        return `
+          <tr>
+            <td title="${escapeHtml(r.role)}">${escapeHtml(r.role)}</td>
+            <td>${escapeHtml(r.team)}</td>
+            <td><span class="tag ${priTag}">${escapeHtml(pri)}</span></td>
+            <td><span class="status ${st}"><i></i>${escapeHtml(stageLabel)}</span></td>
+          </tr>
+        `;
+      }).join("");
+      els.rolesTable.innerHTML = rows;
+      els.roleCountBadge.textContent = `${data.roles.length} roles`;
+      els.openRoles.textContent = String(data.roles.length);
+    }
+
+    function renderActivity(){
+      els.activity.innerHTML = data.activity.map(a => `
+        <div class="actItem">
+          <div class="avatar" aria-hidden="true"></div>
+          <div class="txt">
+            <p class="t" title="${escapeHtml(a.t)}">${escapeHtml(a.t)}</p>
+            <p class="s">${escapeHtml(a.s)}</p>
+          </div>
+          <time aria-label="time">${escapeHtml(a.when)}</time>
+        </div>
+      `).join("");
+    }
+
+    function makePipelineCard(c){
+      const tagHtml = c.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+      const tone = c.tone === "good" ? "good" : (c.tone === "warn" ? "warn" : "bad");
+      const badge = c.tone === "good" ? "Strong" : (c.tone === "warn" ? "Watch" : "At risk");
+      return `
+        <div class="item" data-text="${escapeHtml((c.name + " " + c.role + " " + c.tags.join(" ")).toLowerCase())}">
+          <div class="name">
+            <span title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</span>
+            <span class="tag ${tone}">${badge}</span>
+          </div>
+          <div class="role" title="${escapeHtml(c.role)}">${escapeHtml(c.role)}</div>
+          <div class="tags">${tagHtml}</div>
+        </div>
+      `;
+    }
+
+    function renderBoard(filterText){
+      const f = (filterText || "").trim().toLowerCase();
+      els.boardBadge.textContent = f ? `FILTER: ${filterText}` : "FILTER: none";
+
+      // Clear
+      for (const k of Object.keys(els.cols)) els.cols[k].innerHTML = "";
+
+      // Place
+      const grouped = { Sourced: [], Screen: [], Onsite: [], Offer: [] };
+      data.pipeline.forEach(c => grouped[c.stage]?.push(c));
+
+      for (const stage of Object.keys(grouped)){
+        const cards = grouped[stage]
+          .filter(c => {
+            if (!f) return true;
+            const hay = (c.name + " " + c.role + " " + c.tags.join(" ")).toLowerCase();
+            return hay.includes(f);
+          })
+          .map(makePipelineCard)
+          .join("");
+        els.cols[stage].innerHTML = cards;
+        els.counts[stage].textContent = String(grouped[stage].length);
       }
-      requestAnimationFrame(tick);
-    }
-    function hookKpiCountUp() {
-      const ids = ["kpiLiveRoles","kpiOnHold","kpiOffers","kpiHires"];
-      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-      const tryAnimate = (el) => {
-        if (el.dataset.counted === "1") return;
-        const raw = (el.textContent || "").trim();
-        if (!/^\d+$/.test(raw)) return;
-        const to = Number(raw) || 0;
-        el.dataset.counted = "1";
-        el.textContent = "0";
-        animateCount(el, to, 2600);
-      };
-      els.forEach(el => tryAnimate(el));
-      const mo = new MutationObserver(() => els.forEach(el => tryAnimate(el)));
-      els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
+
+      // Update counts to match visible for "stale feel"
+      // (keeps header count as total; visible count implied by filter badge)
     }
 
-    function hookLegendDropIn() {
-      const legend = document.getElementById("candidateSourcesLegend");
-      if (!legend) return;
-      const animateLegend = () => {
-        const items = legend.querySelectorAll(".legend-item");
-        items.forEach((item) => {
-          item.classList.remove("animate-in");
-          item.classList.remove("animate-pre");
-          item.style.animationDelay = "";
-          item.classList.add("animate-pre");
+    function hookNav(){
+      document.querySelectorAll(".nav button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
         });
-        requestAnimationFrame(() => {
-          items.forEach((item, i) => {
-            item.style.animationDelay = `${i * 260}ms`;
-            void item.offsetWidth;
-            item.classList.add("animate-in");
-            item.classList.remove("animate-pre");
-          });
-        });
-      };
-      animateLegend();
-      const mo = new MutationObserver(() => animateLegend());
-      mo.observe(legend, { childList:true, subtree:true });
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      hookKpiCountUp();
-      hookLegendDropIn();
-    });
-  </script>
-
-  <!-- ✅ TWO BOATS (cross same point, different timing so they never touch) -->
-  <script>
-    (function(){
-      const layer = document.getElementById("boatLayer");
-      const aBoat = document.getElementById("boatA");
-      const bBoat = document.getElementById("boatB");
-      if (!layer || !aBoat || !bBoat) return;
-      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-      const imgA = document.getElementById("boatImgA");
-      const imgB = document.getElementById("boatImgB");
-      const fallback = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
-      [imgA,imgB].forEach(img=>{
-        if (!img) return;
-        let i=0;
-        img.onerror=()=>{ i++; if(i<fallback.length) img.src=fallback[i]; };
-        img.src=fallback[0];
       });
+    }
 
-      const aDashes = Array.from(layer.querySelectorAll(".wakeDash.a"));
-      const bDashes = Array.from(layer.querySelectorAll(".wakeDash.b"));
-      if (aDashes.length !== 12 || bDashes.length !== 12) return;
+    function keyboardShortcuts(){
+      window.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
+        const isMac = navigator.platform.toLowerCase().includes("mac");
+        const mod = isMac ? e.metaKey : e.ctrlKey;
 
-      /* Lines CROSS at the same point (roughly center of layer) */
-      const lineA = { x1: -160, y1: 138, x2: 1320, y2: 58 };  // down-left -> up-right
-      const lineB = { x1: 1320, y1: 58,  x2: -160, y2: 138 }; // up-right -> down-left
-
-      const DURATION = 160000;    // slow
-      const PHASE_B = 0.52;       // ✅ time offset so boats never meet at the crossing
-      const back = 110;           // px behind boat center = stern start
-      const dashStep = 22;        // px between dashes
-
-      function lerp(a,b,t){ return a + (b-a)*t; }
-      function posOnLine(line, p){ return { x: lerp(line.x1, line.x2, p), y: lerp(line.y1, line.y2, p) }; }
-
-      function setBoat(el, line, p){
-        const pt = posOnLine(line, p);
-        const angle = Math.atan2(line.y2-line.y1, line.x2-line.x1) * 180/Math.PI;
-        el.style.transform = `translate(${pt.x}px, ${pt.y}px) translate(-50%,-50%) rotate(${angle}deg)`;
-      }
-
-      function setDashes(dashes, line, p){
-        const dx = line.x2-line.x1, dy = line.y2-line.y1;
-        const len = Math.hypot(dx,dy) || 1;
-        const ux = dx/len, uy = dy/len;
-
-        const boatPt = posOnLine(line, p);
-        const sternX = boatPt.x - ux*back;
-        const sternY = boatPt.y - uy*back;
-
-        for(let i=0;i<dashes.length;i++){
-          const dash = dashes[i];
-          const dist = i * dashStep;
-          const x = sternX - ux*dist;
-          const y = sternY - uy*dist;
-
-          const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
-          dash.style.opacity = String(Math.max(0.10, fade));
-          dash.style.transform = `translate(${x}px, ${y}px) translate(-50%,-50%)`;
+        if (mod && key === "k"){
+          e.preventDefault();
+          els.q.focus();
         }
-      }
+        if (!mod && key === "n"){
+          // quick demo action
+          pulseButton(els.addRole);
+        }
+      });
+    }
 
-      function loop(now){
-        const t = now || performance.now();
-        const pA = (t % DURATION) / DURATION;
-        const pB = (pA + PHASE_B) % 1; // ✅ different timing => no collision
+    function pulseButton(btn){
+      btn.animate(
+        [{transform:"translateY(0)"},{transform:"translateY(-2px)"},{transform:"translateY(0)"}],
+        {duration:260, easing:"ease-out"}
+      );
+    }
 
-        setBoat(aBoat, lineA, pA);
-        setDashes(aDashes, lineA, pA);
+    function wireButtons(){
+      els.addRole.addEventListener("click", () => {
+        const newRole = { role: "New Role (Draft)", team: "TBD", priority: "Medium", stage: "Sourcing", status: "warn" };
+        data.roles.unshift(newRole);
+        renderRoles();
+        flashMeta();
+      });
+      els.export.addEventListener("click", () => {
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          roles: data.roles,
+          pipeline: data.pipeline,
+          activity: data.activity
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "polestar-hiring-dashboard.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        pulseButton(els.export);
+      });
+    }
 
-        setBoat(bBoat, lineB, pB);
-        setDashes(bDashes, lineB, pB);
+    function flashMeta(){
+      const chips = document.querySelectorAll(".chip");
+      chips.forEach((c,i) => {
+        c.animate([{transform:"translateY(0)"},{transform:"translateY(-2px)"},{transform:"translateY(0)"}], {duration:220, delay:i*40, easing:"ease-out"});
+      });
+    }
 
-        requestAnimationFrame(loop);
-      }
+    function computeTopMetrics(){
+      // Lightweight derived metrics (demo)
+      const open = data.roles.length;
+      const offer = data.pipeline.filter(p => p.stage === "Offer").length;
+      const onsite = data.pipeline.filter(p => p.stage === "Onsite").length;
+      const screen = data.pipeline.filter(p => p.stage === "Screen").length;
 
-      requestAnimationFrame(loop);
-    })();
-  </script>
+      // Time-to-hire proxy: base - more offers lowers
+      const tth = Math.max(18, 40 - offer*2 - onsite*0.8 + screen*0.2);
+      els.tth.textContent = `${tth.toFixed(1)} days`;
 
-  <!-- Your existing dashboard logic stays exactly as-is -->
-  <script src="dashboard.js"></script>
+      // Offer accept proxy: base + good offers - bad offers
+      const offerTones = data.pipeline.filter(p => p.stage === "Offer").map(p => p.tone);
+      const good = offerTones.filter(t => t === "good").length;
+      const bad = offerTones.filter(t => t === "bad").length;
+      const rate = Math.max(35, Math.min(95, 70 + good*8 - bad*10));
+      els.offerRate.textContent = `${Math.round(rate)}%`;
 
-  <!-- Splash animation -->
-  <script>
-    window.addEventListener("load", () => {
-      window.scrollTo(0, 0);
+      // SLA proxy: more screens/onsites & fewer "bad" improves
+      const badCount = data.pipeline.filter(p => p.tone === "bad").length;
+      const sla = Math.max(70, Math.min(99, 94 - badCount*2 + onsite*0.4));
+      els.sla.textContent = `${Math.round(sla)}%`;
 
-      const splash = document.getElementById("splash");
-      const splashLogo = document.getElementById("splashLogo");
-      const headerLogo = document.getElementById("headerLogo");
-      if (!splash || !splashLogo || !headerLogo) return;
+      els.openRoles.textContent = String(open);
+    }
 
-      const run = () => {
-        const startRect = splashLogo.getBoundingClientRect();
-        const targetRect = headerLogo.getBoundingClientRect();
+    // Init
+    setWeekStamp();
+    renderRoles();
+    renderActivity();
+    computeTopMetrics();
+    renderBoard("");
 
-        const startCx = startRect.left + startRect.width / 2;
-        const startCy = startRect.top + startRect.height / 2;
-        const targetCx = targetRect.left + targetRect.width / 2;
-        const targetCy = targetRect.top + targetRect.height / 2;
+    hookNav();
+    keyboardShortcuts();
+    wireButtons();
 
-        const dx = targetCx - startCx;
-        const dy = targetCy - startCy;
-        const scale = targetRect.width / startRect.width;
-
-        requestAnimationFrame(() => {
-          splashLogo.style.transform =
-            `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
-          splash.classList.add("fade");
-        });
-
-        setTimeout(() => {
-          splash.remove();
-          window.scrollTo(0, 0);
-        }, 980);
-      };
-
-      Promise.allSettled([
-        splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
-        headerLogo.decode ? headerLogo.decode() : Promise.resolve()
-      ]).then(run);
+    let t;
+    els.q.addEventListener("input", (e) => {
+      clearTimeout(t);
+      t = setTimeout(() => renderBoard(e.target.value), 40);
     });
+
+    // Keep animation path consistent with container width changes by scaling via CSS only (no JS needed).
   </script>
 </body>
 </html>
