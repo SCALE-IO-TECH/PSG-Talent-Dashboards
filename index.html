@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hiring Dashboard</title>
 
-  <!-- Prevent scroll-restore BEFORE paint -->
+  <!-- Prevent scroll restore BEFORE paint -->
   <script>
     try { history.scrollRestoration = "manual"; } catch(e) {}
     window.addEventListener("pageshow", () => { window.scrollTo(0,0); }, { once:true });
@@ -39,13 +39,11 @@
       color:var(--text);
       padding:28px;
       overflow-x:hidden;
-
-      /* ✅ Solid base only (glows moved to fixed layer below) */
       background: var(--bg);
       position: relative;
     }
 
-    /* ✅ FIXED glow layer: viewport-based (no “half cut”, no seams) */
+    /* ✅ FIXED glow layer: viewport-based (no seams/cut lines) */
     body::before{
       content:"";
       position: fixed;
@@ -55,11 +53,9 @@
       background:
         radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
-        /* same idea as before, but spread to avoid a hard stop line */
         linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%);
     }
 
-    /* Keep all page content above the glow layer */
     .dashboard{
       position: relative;
       z-index: 1;
@@ -67,9 +63,7 @@
       margin:0 auto;
       display:grid;
       gap:20px;
-
-      /* ✅ 36px breathing room at the bottom */
-      padding-bottom:36px;
+      padding-bottom:36px; /* ✅ bottom breathing room */
     }
 
     h1, h2{
@@ -99,7 +93,6 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
-
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -157,6 +150,7 @@
       align-items:stretch;
     }
 
+    /* Rows */
     .row{
       display:flex;
       justify-content:space-between;
@@ -166,16 +160,24 @@
       gap:14px;
     }
     .row:last-child{ border-bottom:none; }
-    .row .title{ font-weight:700; }
+
+    .leftBlock{ min-width:0; }
+    .title{
+      font-weight:800;
+      font-size:22px;
+      line-height:1.2;
+      margin:0;
+      word-break:break-word;
+    }
 
     .meta{
-      margin-top:6px;
+      margin-top:8px;
       display:flex;
       flex-wrap:wrap;
-      gap:8px;
+      gap:10px;
       align-items:center;
-      color:rgba(255,255,255,.65);
-      font-size:12px;
+      color:rgba(255,255,255,.70);
+      font-size:14px;
     }
 
     .team{
@@ -189,7 +191,7 @@
       align-items:center;
       padding:6px 12px;
       border-radius:999px;
-      font-size:11px;
+      font-size:12px;
       font-weight:800;
       letter-spacing:.12em;
       text-transform:uppercase;
@@ -199,15 +201,16 @@
     }
 
     .stage{
-      padding:6px 12px;
+      padding:8px 14px;
       border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.12em;
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.14em;
       text-transform:uppercase;
       background:rgba(255,255,255,.12);
       white-space:nowrap;
       color:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.08);
     }
     .stage.offer{
       background:rgba(247,142,98,.18);
@@ -220,12 +223,13 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
+    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
       background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
       border:1px solid rgba(255,255,255,.08);
-      padding:12px 16px;
+      padding:18px 22px; /* more padding so it doesn't touch edges */
       overflow:hidden;
       position:relative;
     }
@@ -252,21 +256,25 @@
     }
 
     .legend{
-      margin-top:10px;
+      margin-top:12px;
       display:grid;
-      gap:8px;
+      gap:10px;
     }
     .legend-item{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding:6px 10px;
-      border-radius:12px;
+      padding:10px 12px;
+      border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(0,0,0,.10);
-      font-size:12px;
+      font-size:13px;
       color:rgba(255,255,255,.88);
+
+      /* start hidden for drop-in */
+      opacity:0;
+      transform: translateY(-8px);
     }
     .legend-left{
       display:flex;
@@ -292,6 +300,15 @@
       letter-spacing:.04em;
     }
 
+    /* Legend drop-in animation */
+    @keyframes legendDropIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .legend-item.animate-in{
+      animation: legendDropIn 420ms ease forwards;
+    }
+
     .list-item{
       padding:10px 0;
       border-bottom:1px solid var(--stroke);
@@ -300,6 +317,7 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
+    /* Quick Links */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -310,7 +328,6 @@
       flex-wrap:wrap;
       align-items:center;
     }
-
     .quick-links a{
       display:inline-flex;
       align-items:center;
@@ -320,26 +337,22 @@
       opacity:.82;
       transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
     }
-
     .quick-links a:hover{
       opacity:1;
       transform: translateY(-1px);
     }
-
     .quick-links .logo-link{
       padding:8px 12px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.10);
     }
-
     .quick-links img{
-      height:28px;
-      max-width:130px;
+      height:30px; /* slightly bigger as requested */
+      max-width:140px;
       object-fit:contain;
       display:block;
     }
-
     .quick-links .text-link{
       padding:8px 12px;
       border-radius:999px;
@@ -351,7 +364,6 @@
       text-transform:uppercase;
       white-space:nowrap;
     }
-
     .quick-links .text-link:hover{
       color:#fff;
       border-color: rgba(247,142,98,.35);
@@ -375,9 +387,10 @@
       .two-col{ grid-template-columns:1fr; }
       .equal-two{ grid-template-columns:1fr; }
       .chart-wrap{ height:220px; }
+      .title{ font-size:20px; }
     }
 
-    /* Splash overlay (kept) */
+    /* Splash overlay */
     .splash{
       position:fixed;
       inset:0;
@@ -391,7 +404,6 @@
       opacity:0;
       pointer-events:none;
     }
-
     .splash-logo{
       position:fixed;
       left:50%;
@@ -409,6 +421,7 @@
       .splash, .splash-logo { transition:none !important; }
       .card{ transition:none !important; }
       .card:hover{ transform:none !important; }
+      .legend-item{ opacity:1 !important; transform:none !important; }
     }
   </style>
 </head>
@@ -538,18 +551,366 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="dashboard.js"></script>
 
   <script>
+    // =========================
+    // CONFIG (your published Google Sheet)
+    // =========================
+    const PUB_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub";
+    const GIDS = {
+      live_roles: 0,
+      status: 1256252635,
+      new_starters: 2080311953,
+      candidate_sources: 1950940614,
+      progress: 322463420,
+      challenges: 868728520,
+      key_focus: 575160875
+    };
+
+    function csvUrl(gid){
+      return `${PUB_BASE}?gid=${gid}&single=true&output=csv`;
+    }
+
+    // =========================
+    // Utils
+    // =========================
+    function parseCSV(text){
+      // Minimal CSV parser handling quoted commas/newlines
+      const rows = [];
+      let row = [];
+      let cur = "";
+      let inQuotes = false;
+
+      for (let i=0; i<text.length; i++){
+        const c = text[i];
+        const next = text[i+1];
+
+        if (c === '"' && inQuotes && next === '"'){ cur += '"'; i++; continue; }
+        if (c === '"'){ inQuotes = !inQuotes; continue; }
+
+        if (!inQuotes && (c === ",")){
+          row.push(cur);
+          cur = "";
+          continue;
+        }
+        if (!inQuotes && (c === "\n")){
+          row.push(cur);
+          rows.push(row);
+          row = [];
+          cur = "";
+          continue;
+        }
+        if (c !== "\r") cur += c;
+      }
+      row.push(cur);
+      rows.push(row);
+      return rows;
+    }
+
+    function rowsToObjects(rows){
+      const header = (rows[0] || []).map(h => (h || "").trim());
+      const out = [];
+      for (let i=1; i<rows.length; i++){
+        const r = rows[i];
+        if (!r || r.every(x => String(x || "").trim() === "")) continue;
+        const obj = {};
+        for (let j=0; j<header.length; j++){
+          obj[header[j]] = (r[j] ?? "").trim();
+        }
+        out.push(obj);
+      }
+      return out;
+    }
+
+    async function fetchSheetObjects(gid){
+      const res = await fetch(csvUrl(gid), { cache: "no-store" });
+      const text = await res.text();
+      return rowsToObjects(parseCSV(text));
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    function stageClass(stage){
+      const s = String(stage || "").toLowerCase();
+      if (s.includes("offer")) return "offer";
+      if (s.includes("hire")) return "hired";
+      return "";
+    }
+
+    // =========================
+    // KPI count-up animation
+    // =========================
+    function animateCount(el, to, opts = {}) {
+      const duration = opts.duration ?? 900;
+      const from = opts.from ?? 0;
+
+      const start = performance.now();
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const v = Math.round(from + (to - from) * easeOutCubic(t));
+        el.textContent = String(v);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // =========================
+    // Candidate sources chart
+    // =========================
+    let sourcesChart = null;
+
+    function buildLegend(items, total){
+      const legendEl = document.getElementById("candidateSourcesLegend");
+      legendEl.innerHTML = "";
+
+      items.forEach((it, i) => {
+        const pct = total > 0 ? Math.round((it.value / total) * 100) : 0;
+        const div = document.createElement("div");
+        div.className = "legend-item";
+        div.innerHTML = `
+          <div class="legend-left">
+            <span class="legend-dot" style="background:${it.color}"></span>
+            <span class="legend-name">${escapeHtml(it.label)}</span>
+          </div>
+          <div class="legend-pct">${pct}%</div>
+        `;
+        legendEl.appendChild(div);
+      });
+
+      // Drop in one-by-one
+      const nodes = legendEl.querySelectorAll(".legend-item");
+      nodes.forEach((node, i) => {
+        node.style.animationDelay = `${i * 90}ms`;
+        void node.offsetWidth;
+        node.classList.add("animate-in");
+      });
+    }
+
+    function renderSourcesDonut(dataRows){
+      const emptyEl = document.getElementById("candidateSourcesEmpty");
+      const canvas = document.getElementById("candidateSourcesChart");
+      const ctx = canvas.getContext("2d");
+
+      const cleaned = dataRows
+        .map(r => ({
+          label: (r.Source || r.source || r.SOURCE || "").trim(),
+          value: Number((r.Amount || r.amount || r.AMOUNT || "0").toString().replace(/[^0-9.\-]/g,"")) || 0
+        }))
+        .filter(x => x.label && x.value >= 0);
+
+      const total = cleaned.reduce((a,b)=>a+b.value,0);
+
+      if (!cleaned.length || total <= 0){
+        emptyEl.textContent = "No source data";
+        emptyEl.style.display = "flex";
+        if (sourcesChart){ sourcesChart.destroy(); sourcesChart = null; }
+        document.getElementById("candidateSourcesLegend").innerHTML = "";
+        return;
+      }
+
+      emptyEl.style.display = "none";
+
+      // A tight modern palette that fits the brand (no rainbow)
+      const palette = [
+        "rgba(247,142,98,0.95)",
+        "rgba(255,255,255,0.75)",
+        "rgba(247,142,98,0.55)",
+        "rgba(255,255,255,0.45)",
+        "rgba(247,142,98,0.35)",
+        "rgba(255,255,255,0.30)"
+      ];
+
+      const labels = cleaned.map(x => x.label);
+      const values = cleaned.map(x => x.value);
+      const colors = cleaned.map((_, i) => palette[i % palette.length]);
+
+      if (sourcesChart) sourcesChart.destroy();
+
+      sourcesChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderColor: "rgba(255,255,255,0.10)",
+            borderWidth: 1,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "72%",
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const v = ctx.raw || 0;
+                  const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+                  return ` ${ctx.label}: ${pct}% (${v})`;
+                }
+              }
+            }
+          },
+          animation: {
+            duration: 2200,     // ✅ slower wind-up
+            easing: "easeOutQuart"
+          }
+        }
+      });
+
+      buildLegend(cleaned.map((x,i)=>({label:x.label,value:x.value,color:colors[i]})), total);
+    }
+
+    // =========================
+    // Render blocks
+    // =========================
+    function renderLiveRoles(rows){
+      const wrap = document.getElementById("liveRolesList");
+      if (!rows.length){
+        wrap.innerHTML = `<div class="list-item">—</div>`;
+        return;
+      }
+
+      wrap.innerHTML = rows.map(r => {
+        const title = r.Job_Title || r["Job Title"] || r.Title || "";
+        const team = r.Team || "";
+        const loc = r.Location || "";
+        const applicants = r.Applicants || "";
+        const stage = r.Current_Stage || r.CurrentStage || r.Stage || "";
+
+        const stageCls = stageClass(stage);
+
+        return `
+          <div class="row">
+            <div class="leftBlock">
+              <div class="title">${escapeHtml(title)}</div>
+              <div class="meta">
+                ${team ? `<span class="team">${escapeHtml(team)}</span>` : ""}
+                ${loc ? `<span class="pill">${escapeHtml(loc)}</span>` : ""}
+                ${applicants !== "" ? `<span>${escapeHtml(applicants)} applicants</span>` : ""}
+              </div>
+            </div>
+            <div class="stage ${stageCls}">${escapeHtml(stage || "OPEN")}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderNewStarters(rows){
+      const wrap = document.getElementById("newStartersList");
+      if (!rows.length){
+        wrap.innerHTML = `<div class="list-item">—</div>`;
+        return;
+      }
+
+      wrap.innerHTML = rows.map(r => {
+        const name = r.Name || r.Candidate || r["New Starter"] || r.Starter || "";
+        const job = r.Job_Title || r["Job Title"] || r.Role || "";
+        const team = r.Team || "";
+        const date = r.Start_Date || r["Start Date"] || r.Date || "";
+
+        // Team beneath job title (your request)
+        return `
+          <div class="row">
+            <div class="leftBlock">
+              <div class="title">${escapeHtml(name)}</div>
+              <div class="meta" style="flex-direction:column; align-items:flex-start; gap:6px;">
+                ${job ? `<div style="color:rgba(255,255,255,.78); font-size:15px;">${escapeHtml(job)}</div>` : ""}
+                ${team ? `<div class="team" style="font-size:16px;">${escapeHtml(team)}</div>` : ""}
+              </div>
+            </div>
+            ${date ? `<div class="pill">${escapeHtml(date)}</div>` : `<div class="pill">—</div>`}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderSimpleList(targetId, rows){
+      const wrap = document.getElementById(targetId);
+      const lines = [];
+
+      rows.forEach(r => {
+        const firstKey = Object.keys(r)[0];
+        const val = (r[firstKey] || "").trim();
+        if (val) lines.push(val);
+      });
+
+      if (!lines.length){
+        wrap.innerHTML = `<div class="list-item">—</div>`;
+        return;
+      }
+
+      wrap.innerHTML = lines.map(t => `<div class="list-item">${escapeHtml(t)}</div>`).join("");
+    }
+
+    // =========================
+    // Load + animate
+    // =========================
+    async function loadAll(){
+      // Fetch in parallel
+      const [
+        liveRoles,
+        status,
+        newStarters,
+        candidateSources,
+        progress,
+        challenges,
+        keyFocus
+      ] = await Promise.all([
+        fetchSheetObjects(GIDS.live_roles).catch(()=>[]),
+        fetchSheetObjects(GIDS.status).catch(()=>[]),
+        fetchSheetObjects(GIDS.new_starters).catch(()=>[]),
+        fetchSheetObjects(GIDS.candidate_sources).catch(()=>[]),
+        fetchSheetObjects(GIDS.progress).catch(()=>[]),
+        fetchSheetObjects(GIDS.challenges).catch(()=>[]),
+        fetchSheetObjects(GIDS.key_focus).catch(()=>[])
+      ]);
+
+      // KPIs from STATUS tab (first row)
+      const s0 = status[0] || {};
+      const liveRolesKpi = Number(s0.Live_Roles ?? s0.LiveRoles ?? s0["Live Roles"] ?? 0) || 0;
+      const onHoldKpi   = Number(s0.On_Hold ?? s0.OnHold ?? s0["On Hold"] ?? 0) || 0;
+      const offersKpi   = Number(s0.Offers ?? 0) || 0;
+      const hiresKpi    = Number(s0.Hires ?? 0) || 0;
+
+      animateCount(document.getElementById("kpiLiveRoles"), liveRolesKpi, { duration: 1000 });
+      animateCount(document.getElementById("kpiOnHold"),   onHoldKpi,   { duration: 1000 });
+      animateCount(document.getElementById("kpiOffers"),   offersKpi,   { duration: 1000 });
+      animateCount(document.getElementById("kpiHires"),    hiresKpi,    { duration: 1000 });
+
+      // Lists
+      renderLiveRoles(liveRoles);
+      renderNewStarters(newStarters);
+      renderSimpleList("progressList", progress);
+      renderSimpleList("challengesList", challenges);
+      renderSimpleList("keyFocusList", keyFocus);
+
+      // Donut
+      renderSourcesDonut(candidateSources);
+    }
+
+    // =========================
+    // Splash animation (logo pulls into header while overlay fades)
+    // =========================
     window.addEventListener("load", () => {
       window.scrollTo(0, 0);
 
       const splash = document.getElementById("splash");
       const splashLogo = document.getElementById("splashLogo");
       const headerLogo = document.getElementById("headerLogo");
-      if (!splash || !splashLogo || !headerLogo) return;
 
-      const run = () => {
+      const runSplash = () => {
+        if (!splash || !splashLogo || !headerLogo) return;
+
         const startRect = splashLogo.getBoundingClientRect();
         const targetRect = headerLogo.getBoundingClientRect();
 
@@ -575,9 +936,16 @@
       };
 
       Promise.allSettled([
-        splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
-        headerLogo.decode ? headerLogo.decode() : Promise.resolve()
-      ]).then(run);
+        splashLogo?.decode ? splashLogo.decode() : Promise.resolve(),
+        headerLogo?.decode ? headerLogo.decode() : Promise.resolve()
+      ]).then(runSplash);
+
+      // Load data + animations
+      loadAll().catch(() => {
+        // Fail softly
+        document.getElementById("candidateSourcesEmpty").textContent = "Failed to load";
+        document.getElementById("candidateSourcesEmpty").style.display = "flex";
+      });
     });
   </script>
 </body>
