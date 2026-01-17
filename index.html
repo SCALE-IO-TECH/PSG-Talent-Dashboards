@@ -106,7 +106,7 @@
       height:3px;
       width:min(420px, 78vw);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:22px auto 18px; /* ✅ more space above line */
+      margin:22px auto 18px;
       border-radius:999px;
       opacity:.95;
     }
@@ -246,7 +246,10 @@
     .legend-item.animate-in{ animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards; }
 
     /* =========================
-       Boat animation
+       Boat animation (CHANGED ONLY HERE)
+       - Uses your dinghy image
+       - Slower
+       - Trail comes from CENTER of stern (boat anchor set to stern)
        ========================= */
     .topScene{ position: relative; }
     .boatLayer{
@@ -263,41 +266,20 @@
       will-change: offset-distance, opacity;
     }
 
-    /* ✅ Bird’s-eye boat: a top-down “capsule” with a subtle bow marker */
     .boat{
-      width:34px;
-      height:18px;
+      width:54px;                 /* dinghy slightly bigger */
+      height:auto;
       opacity:.9;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
       offset-distance: 0%;
+      offset-anchor: 12% 50%;     /* ✅ anchor at stern center so wake starts from back */
     }
-    .boatTop{
-      width:34px; height:18px; position:relative;
-    }
-    .boatTop .body{
-      position:absolute; inset:0;
-      border-radius: 999px;
-      background: rgba(247,142,98,.92);
-    }
-    .boatTop .bow{
-      position:absolute;
-      left:26px; top:6px;
-      width:6px; height:6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.55);
-      box-shadow: 0 0 0 2px rgba(247,142,98,.25);
-      opacity:.9;
-    }
-    .boatTop .mid{
-      position:absolute;
-      left:10px; top:5px;
-      width:12px; height:8px;
-      border-radius: 6px;
-      background: rgba(255,255,255,.30);
-      opacity:.9;
+    .boat img{
+      width:54px;
+      height:auto;
+      display:block;
     }
 
-    /* 7 trail dashes */
     .wake{
       width:12px;
       height:3px;
@@ -340,16 +322,13 @@
         <div class="wake w7"></div>
 
         <div class="boat" id="psgBoat">
-          <div class="boatTop">
-            <div class="body"></div>
-            <div class="mid"></div>
-            <div class="bow"></div>
-          </div>
+          <!-- ✅ Put this PNG in the same folder as index.html -->
+          <img src="Untitled design (15).png" alt="" aria-hidden="true">
         </div>
       </div>
 
       <!-- ✅ more padding below logo -->
-      <div style="display:flex; justify-content:center; margin-bottom:18px;">
+      <div style="display:flex; justify-content:center; margin-bottom:22px;">
         <img
           src="PSG Logo - White With Orange (1).png"
           alt="Pole Star Global"
@@ -513,19 +492,16 @@
     });
   </script>
 
-  <!-- Boat logic: step-by-step motion (slight “tick”) and 7 dashes behind -->
+  <!-- Boat logic: slower + step-by-step + 7 dashes directly from stern -->
   <script>
     (function(){
       const boat = () => document.getElementById("psgBoat");
       const wakes = () => Array.from(document.querySelectorAll(".boatLayer .wake"));
 
-      // slower boat
-      const DURATION_MS = 56000;
-      const GAP = 0.022;              // spacing between 7 dashes
+      const DURATION_MS = 90000;      // ✅ slower
+      const GAP = 0.022;
       const START_DELAY_MS = 1200;
-
-      // step-by-step: quantize progress to little increments
-      const STEP = 1 / 420;           // smaller = smoother, bigger = more “step”
+      const STEP = 1 / 480;
 
       function loop(now){
         const b = boat();
@@ -533,8 +509,6 @@
 
         const t = now || performance.now();
         const raw = (t % DURATION_MS) / DURATION_MS;
-
-        // quantized movement (step-by-step)
         const prog = Math.round(raw / STEP) * STEP;
 
         b.style.offsetDistance = (prog * 100).toFixed(4) + "%";
