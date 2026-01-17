@@ -1,34 +1,819 @@
-<!-- Boat animation behind the top header -->
-<div class="boatLayer" aria-hidden="true">
-  <svg class="boatSvg" viewBox="0 0 1400 150" preserveAspectRatio="none">
-    <!-- Trail path -->
-    <path class="boatTrail" d="M -120 110 C 120 25 360 25 600 85 S 1040 150 1400 55" />
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hiring Dashboard</title>
 
-    <!-- Boat (simple cartoon tanker) -->
-    <g class="boat">
-      <!-- wake bubble -->
-      <circle cx="0" cy="0" r="0"></circle>
+  <!-- Prevent scroll-restore BEFORE paint -->
+  <script>
+    try { history.scrollRestoration = "manual"; } catch(e) {}
+    window.addEventListener("pageshow", () => { window.scrollTo(0,0); }, { once:true });
+    window.scrollTo(0,0);
+  </script>
 
-      <!-- boat body -->
-      <g transform="translate(0,0)">
-        <!-- hull -->
-        <path d="M 0 95 L 165 95 L 138 118 L 28 118 Q 8 118 0 95 Z"
-              fill="rgba(247,142,98,.92)"/>
-        <!-- deck -->
-        <rect x="35" y="70" width="95" height="22" rx="6"
-              fill="rgba(247,142,98,.82)"/>
-        <!-- bridge -->
-        <rect x="105" y="52" width="32" height="18" rx="5"
-              fill="rgba(255,255,255,.75)"/>
-        <rect x="110" y="56" width="10" height="8" rx="2"
-              fill="rgba(12,47,51,.55)"/>
-        <rect x="124" y="56" width="10" height="8" rx="2"
-              fill="rgba(12,47,51,.55)"/>
-        <!-- containers -->
-        <rect x="42" y="62" width="18" height="8" rx="2" fill="rgba(255,255,255,.28)"/>
-        <rect x="62" y="62" width="18" height="8" rx="2" fill="rgba(255,255,255,.22)"/>
-        <rect x="82" y="62" width="18" height="8" rx="2" fill="rgba(255,255,255,.18)"/>
-      </g>
-    </g>
-  </svg>
-</div>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0c2f33;
+      --accent:#f78e62;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.65);
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    html { scroll-behavior:auto; background: var(--bg); }
+
+    body{
+      margin:0;
+      font-family: "Inter Tight", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      padding:28px;
+      overflow-x:hidden;
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* FIXED glow layer: viewport-based (no seams/cut lines) */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
+        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%);
+    }
+
+    .dashboard{
+      position: relative;
+      z-index: 1;
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      gap:20px;
+      padding-bottom:36px; /* bottom breathing room */
+    }
+
+    h1, h2{
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin:0;
+    }
+
+    h1{
+      font-family: "Unbounded", sans-serif;
+      font-weight:600;
+      font-size:clamp(22px,3vw,32px);
+      text-align:center;
+      margin-bottom:10px;
+    }
+
+    h2{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+      font-weight:800;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
+
+      transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 22px 60px rgba(0,0,0,.42);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .accent-line{
+      height:3px;
+      width:min(420px, 78vw);
+      background:linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin:10px auto 14px;
+      border-radius:999px;
+      opacity:.95;
+    }
+
+    /* KPI BAR */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
+    .kpi{ text-align:center; }
+    .kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+    .kpi .value{
+      margin-top:10px;
+      font-size:clamp(28px,4vw,36px);
+      font-weight:900;
+    }
+
+    /* Layout */
+    .two-col{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:16px;
+      align-items:stretch;
+    }
+    .right-col{
+      display:grid;
+      gap:16px;
+      align-items:stretch;
+    }
+
+    .equal-two{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:stretch;
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      padding:12px 0;
+      border-bottom:1px solid var(--stroke);
+      gap:14px;
+    }
+    .row:last-child{ border-bottom:none; }
+    .row .title{ font-weight:700; }
+
+    .meta{
+      margin-top:6px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      color:rgba(255,255,255,.65);
+      font-size:12px;
+    }
+
+    .team{
+      color:var(--accent);
+      font-weight:400;
+      letter-spacing:.02em;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      background:rgba(255,255,255,.12);
+      white-space:nowrap;
+      color:rgba(255,255,255,.92);
+    }
+
+    .stage{
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      background:rgba(255,255,255,.12);
+      white-space:nowrap;
+      color:rgba(255,255,255,.92);
+    }
+    .stage.offer{
+      background:rgba(247,142,98,.18);
+      color:var(--accent);
+      border:1px solid rgba(247,142,98,.35);
+    }
+    .stage.hired{
+      background:rgba(22,163,74,.22);
+      color:#16a34a;
+      border:1px solid rgba(22,163,74,.35);
+    }
+
+    /* Candidate sources */
+    .chart-wrap{
+      height:190px;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
+      border:1px solid rgba(255,255,255,.08);
+      padding:12px 16px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    #candidateSourcesChart{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
+
+    .chart-empty{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      text-align:center;
+      padding:0 12px;
+      pointer-events:none;
+    }
+
+    .legend{
+      margin-top:10px;
+      display:grid;
+      gap:8px;
+    }
+    .legend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.10);
+      font-size:12px;
+      color:rgba(255,255,255,.88);
+    }
+    .legend-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      box-shadow:0 0 0 4px rgba(255,255,255,.05);
+      flex:0 0 auto;
+    }
+    .legend-name{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      letter-spacing:.02em;
+    }
+    .legend-pct{
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
+    .list-item{
+      padding:10px 0;
+      border-bottom:1px solid var(--stroke);
+      font-size:14px;
+      color:rgba(255,255,255,.85);
+    }
+    .list-item:last-child{ border-bottom:none; }
+
+    .quick-links{
+      margin-top:36px;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:center;
+      gap:22px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .quick-links a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      text-decoration:none;
+      opacity:.82;
+      transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
+    }
+
+    .quick-links a:hover{
+      opacity:1;
+      transform: translateY(-1px);
+    }
+
+    .quick-links .logo-link{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+    }
+
+    .quick-links img{
+      height:28px;
+      max-width:130px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .quick-links .text-link{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      color:rgba(255,255,255,.70);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .quick-links .text-link:hover{
+      color:#fff;
+      border-color: rgba(247,142,98,.35);
+    }
+
+    .powered-by{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      margin-top:18px;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+    }
+    .powered-by img{ height:22px; opacity:.9; }
+
+    @media (max-width:900px){
+      .kpi-grid{ grid-template-columns:1fr 1fr; }
+      .two-col{ grid-template-columns:1fr; }
+      .equal-two{ grid-template-columns:1fr; }
+      .chart-wrap{ height:220px; }
+    }
+
+    /* Splash overlay (kept) */
+    .splash{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background: rgba(12,47,51,.92);
+      opacity:1;
+      pointer-events:auto;
+      transition: opacity 950ms cubic-bezier(.4,0,.2,1);
+    }
+    .splash.fade{
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .splash-logo{
+      position:fixed;
+      left:50%;
+      top:50%;
+      width:min(520px, 76vw);
+      height:auto;
+      filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
+      will-change: transform;
+      transform-origin:center center;
+      transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
+      transition: transform 950ms cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Legend animation classes (do NOT hide by default — only when JS adds .animate-pre) */
+    .legend-item.animate-pre{
+      opacity:0;
+      transform: translateY(-14px);
+    }
+    @keyframes legendDropBounce {
+      0%   { opacity:0; transform: translateY(-14px); }
+      70%  { opacity:1; transform: translateY(4px); }
+      100% { opacity:1; transform: translateY(0); }
+    }
+    .legend-item.animate-in{
+      animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards;
+    }
+
+    /* =========================
+       Subtle boat behind logo/heading
+       ========================= */
+    .topScene{ position: relative; }
+
+    /* Behind header elements but above page glow */
+    .boatLayer{
+      position:absolute;
+      left:0;
+      right:0;
+      top:-6px;
+      height:120px;
+      pointer-events:none;
+      z-index:1;
+      overflow:hidden;
+      opacity:.25; /* VERY subtle */
+    }
+
+    /* Ensure header above boat */
+    #headerLogo, .accent-line, h1{
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Motion path */
+    .boat, .wake{
+      position:absolute;
+      offset-path: path("M -60 86 C 160 16 360 18 560 64 S 980 120 1280 44");
+      offset-rotate: 0deg;
+      will-change: offset-distance, opacity, transform;
+      transform: translate(-50%,-50%);
+    }
+
+    .boat{
+      width:26px;
+      height:14px;
+      animation: boatMove 18s linear infinite;
+      opacity:.85;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.22));
+    }
+
+    /* Dashed “- - -” trail segments: 7 dashes behind boat, then fade out */
+    .wake{
+      width:10px;
+      height:3px;
+      border-radius:999px;
+      background: rgba(247,142,98,.95);
+      animation: wakeMove 18s linear infinite;
+      opacity:0;
+    }
+    /* Staggered behind boat */
+    .wake.w1 { animation-delay: -0.55s; }
+    .wake.w2 { animation-delay: -0.80s; }
+    .wake.w3 { animation-delay: -1.05s; }
+    .wake.w4 { animation-delay: -1.30s; }
+    .wake.w5 { animation-delay: -1.55s; }
+    .wake.w6 { animation-delay: -1.80s; }
+    .wake.w7 { animation-delay: -2.05s; }
+
+    @keyframes boatMove{
+      0%   { offset-distance: 0%;  opacity:0; }
+      6%   { opacity:.85; }
+      94%  { opacity:.85; }
+      100% { offset-distance: 100%; opacity:0; }
+    }
+    @keyframes wakeMove{
+      0%   { offset-distance: 0%;  opacity:0; }
+      8%   { opacity:.55; }
+      18%  { opacity:.35; }
+      30%  { opacity:0; }    /* disappears after ~7 dashes */
+      100% { offset-distance: 100%; opacity:0; }
+    }
+
+    /* Tiny cartoon tanker */
+    .boatIcon{
+      width:26px;
+      height:14px;
+      position:relative;
+    }
+    .boatIcon .hull{
+      position:absolute; left:0; top:6px;
+      width:26px; height:8px;
+      border-radius: 2px 10px 8px 4px;
+      background: rgba(247,142,98,.95);
+    }
+    .boatIcon .nose{
+      position:absolute; right:-2px; top:7px;
+      width:6px; height:7px;
+      border-radius: 2px 8px 8px 2px;
+      background: rgba(247,142,98,.95);
+      transform: skewX(-12deg);
+    }
+    .boatIcon .deck{
+      position:absolute; left:7px; top:2px;
+      width:11px; height:5px;
+      border-radius: 3px;
+      background: rgba(255,255,255,.55);
+    }
+    .boatIcon .stack{
+      position:absolute; left:17px; top:1px;
+      width:4px; height:4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,.45);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .boat, .wake { animation:none !important; opacity:0 !important; }
+      .legend-item{ animation:none !important; }
+      .splash, .splash-logo { transition:none !important; }
+      .card{ transition:none !important; }
+      .card:hover{ transform:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Splash overlay -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <img
+      src="PSG Logo - White With Orange (1).png"
+      alt="Pole Star Global"
+      class="splash-logo"
+      id="splashLogo"
+    />
+  </div>
+
+  <div class="dashboard">
+
+    <!-- Top scene (boat behind header only) -->
+    <div class="topScene">
+      <div class="boatLayer" aria-hidden="true">
+        <!-- 7 wake dashes -->
+        <div class="wake w1"></div>
+        <div class="wake w2"></div>
+        <div class="wake w3"></div>
+        <div class="wake w4"></div>
+        <div class="wake w5"></div>
+        <div class="wake w6"></div>
+        <div class="wake w7"></div>
+
+        <!-- boat -->
+        <div class="boat">
+          <div class="boatIcon">
+            <div class="deck"></div>
+            <div class="stack"></div>
+            <div class="hull"></div>
+            <div class="nose"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; margin-bottom:8px;">
+        <img
+          src="PSG Logo - White With Orange (1).png"
+          alt="Pole Star Global"
+          id="headerLogo"
+          style="height:64px;"
+        >
+      </div>
+
+      <div class="accent-line"></div>
+      <h1>Hiring Dashboard</h1>
+    </div>
+
+    <!-- KPI BAR -->
+    <div class="card">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="label">Live Roles</div>
+          <div class="value" id="kpiLiveRoles">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">On Hold</div>
+          <div class="value" id="kpiOnHold">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Offers</div>
+          <div class="value" id="kpiOffers">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Hires</div>
+          <div class="value" id="kpiHires">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Roles + Right Column -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Live Roles</h2>
+        <div id="liveRolesList"></div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <h2>Candidate Sources</h2>
+          <div class="chart-wrap">
+            <canvas id="candidateSourcesChart" aria-label="Candidate sources chart"></canvas>
+            <div id="candidateSourcesEmpty" class="chart-empty">Loading…</div>
+          </div>
+          <div id="candidateSourcesLegend" class="legend"></div>
+        </div>
+
+        <div class="card">
+          <h2>New Starters</h2>
+          <div id="newStartersList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress / Challenges equal -->
+    <div class="equal-two">
+      <div class="card">
+        <h2>Progress</h2>
+        <div id="progressList">
+          <div class="list-item">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Challenges</h2>
+        <div id="challengesList">
+          <div class="list-item">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Focus -->
+    <div class="card">
+      <h2>Key Focus</h2>
+      <div id="keyFocusList">
+        <div class="list-item">—</div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="quick-links" aria-label="Quick Links">
+      <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
+        <img src="Teamtailor.webp" alt="Teamtailor">
+      </a>
+
+      <a class="logo-link" href="https://app.hibob.com" target="_blank" rel="noopener">
+        <img src="bob.png" alt="HiBob">
+      </a>
+
+      <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
+        Management Handbook
+      </a>
+
+      <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
+        Manager Guidelines
+      </a>
+    </div>
+
+    <!-- Powered by -->
+    <div class="powered-by">
+      <span>Powered by</span>
+      <img src="scaleio.svg" alt="ScaleIO">
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Behaviour-only additions (safe):
+       - Slower donut animation
+       - KPI count-up slower
+       - Legend drops in one-by-one slower + bounce
+  -->
+  <script>
+    // Slow the donut wind-up without changing chart styling
+    if (window.Chart && Chart.defaults) {
+      Chart.defaults.animation.duration = 2600;
+      Chart.defaults.animation.easing = "easeOutQuart";
+    }
+
+    // KPI count-up (slow)
+    function animateCount(el, to, duration = 2100) {
+      const start = performance.now();
+      const from = 0;
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const v = Math.round(from + (to - from) * easeOutCubic(t));
+        el.textContent = String(v);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // Animate KPIs when dashboard.js sets them
+    function hookKpiCountUp() {
+      const ids = ["kpiLiveRoles","kpiOnHold","kpiOffers","kpiHires"];
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+
+      const tryAnimate = (el) => {
+        if (el.dataset.counted === "1") return;
+        const raw = (el.textContent || "").trim();
+        if (!/^\d+$/.test(raw)) return;
+        const to = Number(raw) || 0;
+        el.dataset.counted = "1";
+        el.textContent = "0";
+        animateCount(el, to, 2100);
+      };
+
+      // if dashboard.js has already written them
+      els.forEach(el => tryAnimate(el));
+
+      const mo = new MutationObserver((muts) => {
+        for (const m of muts) {
+          const el = m.target;
+          if (el && el.nodeType === 1) tryAnimate(el);
+        }
+      });
+
+      els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
+    }
+
+    // Legend drop-in one-by-one (safe even if legend items differ)
+    function hookLegendDropIn() {
+      const legend = document.getElementById("candidateSourcesLegend");
+      if (!legend) return;
+
+      const animateLegend = () => {
+        const items = legend.querySelectorAll(".legend-item");
+        items.forEach((item, i) => {
+          // reset safely
+          item.classList.remove("animate-in");
+          item.classList.remove("animate-pre");
+          item.style.animationDelay = "";
+
+          // prep hidden state only when we animate (so it never gets stuck hidden)
+          item.classList.add("animate-pre");
+        });
+
+        // next frame: apply animation with stagger
+        requestAnimationFrame(() => {
+          items.forEach((item, i) => {
+            item.style.animationDelay = `${i * 200}ms`; // slower stagger
+            void item.offsetWidth;
+            item.classList.add("animate-in");
+            item.classList.remove("animate-pre");
+          });
+        });
+      };
+
+      animateLegend();
+      const mo = new MutationObserver(() => animateLegend());
+      mo.observe(legend, { childList:true, subtree:true });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      hookKpiCountUp();
+      hookLegendDropIn();
+    });
+  </script>
+
+  <!-- Your existing dashboard logic stays exactly as-is -->
+  <script src="dashboard.js"></script>
+
+  <!-- Splash animation: logo flies to header while overlay fades -->
+  <script>
+    window.addEventListener("load", () => {
+      window.scrollTo(0, 0);
+
+      const splash = document.getElementById("splash");
+      const splashLogo = document.getElementById("splashLogo");
+      const headerLogo = document.getElementById("headerLogo");
+      if (!splash || !splashLogo || !headerLogo) return;
+
+      const run = () => {
+        const startRect = splashLogo.getBoundingClientRect();
+        const targetRect = headerLogo.getBoundingClientRect();
+
+        const startCx = startRect.left + startRect.width / 2;
+        const startCy = startRect.top + startRect.height / 2;
+        const targetCx = targetRect.left + targetRect.width / 2;
+        const targetCy = targetRect.top + targetRect.height / 2;
+
+        const dx = targetCx - startCx;
+        const dy = targetCy - startCy;
+        const scale = targetRect.width / startRect.width;
+
+        requestAnimationFrame(() => {
+          splashLogo.style.transform =
+            `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
+          splash.classList.add("fade");
+        });
+
+        setTimeout(() => {
+          splash.remove();
+          window.scrollTo(0, 0);
+        }, 980);
+      };
+
+      Promise.allSettled([
+        splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
+        headerLogo.decode ? headerLogo.decode() : Promise.resolve()
+      ]).then(run);
+    });
+  </script>
+</body>
+</html>
