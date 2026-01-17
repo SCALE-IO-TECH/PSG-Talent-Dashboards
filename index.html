@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hiring Dashboard</title>
 
+  <!-- Force top-of-page and disable scroll restore BEFORE render -->
+  <script>
+    try { history.scrollRestoration = "manual"; } catch(e) {}
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  </script>
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +40,7 @@
       padding:28px;
       overflow-x:hidden;
 
-      /* ✅ ORIGINAL GLOW BACKGROUND (DO NOT CHANGE) */
+      /* ORIGINAL PAGE GLOWS */
       background:
         radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
@@ -40,9 +48,12 @@
         var(--bg);
     }
 
-    /* Prevent scroll-restore / "halfway down" during splash */
+    /* Hard lock scroll during splash so you NEVER land mid-page */
     body.splashing{
+      position:fixed;
+      inset:0;
       overflow:hidden;
+      width:100%;
     }
 
     h1, h2{
@@ -74,14 +85,16 @@
       position:relative;
     }
 
+    /* Cards: add subtle glass backing so glows don't wash OVER content */
     .card{
-      background:var(--card);
+      background: rgba(0,0,0,.18);
       border:1px solid var(--stroke);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
 
-      /* ✅ Hover lift */
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -100,6 +113,7 @@
       opacity:.95;
     }
 
+    /* KPI BAR */
     .kpi-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -118,6 +132,7 @@
       font-weight:900;
     }
 
+    /* Layout */
     .two-col{
       display:grid;
       grid-template-columns:2fr 1fr;
@@ -130,6 +145,7 @@
       align-items:stretch;
     }
 
+    /* Bottom pair: Progress + Challenges equal size */
     .equal-two{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -137,6 +153,7 @@
       align-items:stretch;
     }
 
+    /* Rows (used for roles + starters) */
     .row{
       display:flex;
       justify-content:space-between;
@@ -202,6 +219,7 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
+    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
@@ -233,6 +251,7 @@
       pointer-events:none;
     }
 
+    /* Legend under chart */
     .legend{
       margin-top:10px;
       display:grid;
@@ -282,6 +301,7 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
+    /* Quick Links */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -339,6 +359,7 @@
       border-color: rgba(247,142,98,.35);
     }
 
+    /* Powered by */
     .powered-by{
       display:flex;
       justify-content:center;
@@ -360,32 +381,27 @@
     }
 
     /* =========================
-       Splash overlay (correct glow + visible pullback)
+       Splash overlay (fade while pulling back)
        ========================= */
     .splash{
       position:fixed;
       inset:0;
       z-index:9999;
 
-      /* ✅ EXACT SAME BACKGROUND AS BODY (so glows match perfectly) */
+      /* EXACT SAME GLOW BACKGROUND */
       background:
         radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
         var(--bg);
 
-      display:block;
       opacity:1;
       pointer-events:auto;
 
-      /* ✅ fades while logo moves (same duration) */
+      /* Fade matches logo pullback */
       transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
-
-    .splash.fade{
-      opacity:0;
-      pointer-events:none;
-    }
+    .splash.fade{ opacity:0; pointer-events:none; }
 
     .splash-logo{
       position:fixed;
@@ -400,7 +416,6 @@
       /* Start centered */
       transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
 
-      /* ✅ motion matches overlay fade */
       transition: transform 950ms cubic-bezier(.4,0,.2,1);
     }
 
@@ -539,19 +554,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="dashboard.js"></script>
 
-  <!-- Splash animation: logo flies to header while overlay fades out -->
+  <!-- Splash animation: move + fade together, then force top again -->
   <script>
     window.addEventListener("load", () => {
-      // Force start at top (prevents "halfway down" view)
+      // Hard force top NOW and again after splash (prevents restored scroll)
       window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
 
       const splash = document.getElementById("splash");
       const splashLogo = document.getElementById("splashLogo");
       const headerLogo = document.getElementById("headerLogo");
-      if (!splash || !splashLogo || !headerLogo) return;
+      if (!splash || !splashLogo || !headerLogo) {
+        document.body.classList.remove("splashing");
+        return;
+      }
 
       const run = () => {
-        // Compute centers
         const startRect = splashLogo.getBoundingClientRect();
         const targetRect = headerLogo.getBoundingClientRect();
 
@@ -564,24 +583,22 @@
         const dy = targetCy - startCy;
         const scale = targetRect.width / startRect.width;
 
-        // Start move + fade together
         requestAnimationFrame(() => {
           splashLogo.style.transform =
             `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
-          splash.classList.add("fade");
+          splash.classList.add("fade"); // fade overlay WHILE it moves
         });
 
-        // Unlock scroll and remove overlay after transition ends
-        const cleanup = () => {
+        // End: unlock scroll, remove splash, force top again
+        setTimeout(() => {
           document.body.classList.remove("splashing");
-          splash.removeEventListener("transitionend", cleanup);
           splash.remove();
-        };
-
-        splash.addEventListener("transitionend", cleanup);
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 980);
       };
 
-      // Wait for images to decode so positions are accurate
       Promise.allSettled([
         splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
         headerLogo.decode ? headerLogo.decode() : Promise.resolve()
