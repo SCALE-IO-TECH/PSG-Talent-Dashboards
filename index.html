@@ -71,8 +71,6 @@
       text-transform:uppercase;
       margin:0;
     }
-
-    /* ✅ ONLY change requested: force header font back to Unbounded */
     h1{
       font-family: "Unbounded", sans-serif;
       font-weight:600;
@@ -80,7 +78,6 @@
       text-align:center;
       margin-bottom:10px;
     }
-
     h2{
       font-size:13px;
       color:var(--muted);
@@ -136,7 +133,6 @@
       color:rgba(255,255,255,.65);
       font-size:12px;
     }
-
     .team{ color:var(--accent); font-weight:400; letter-spacing:.02em; }
 
     .pill{
@@ -152,7 +148,6 @@
       white-space:nowrap;
       color:rgba(255,255,255,.92);
     }
-
     .stage{
       padding:6px 12px;
       border-radius:999px;
@@ -177,22 +172,12 @@
       overflow:hidden;
       position:relative;
     }
-
     #candidateSourcesChart{ width:100% !important; height:100% !important; display:block; }
-
     .chart-empty{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--muted);
-      font-size:12px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      text-align:center;
-      padding:0 12px;
-      pointer-events:none;
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--muted); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+      text-align:center; padding:0 12px; pointer-events:none;
     }
 
     .legend{ margin-top:10px; display:grid; gap:8px; }
@@ -210,14 +195,9 @@
     .list-item:last-child{ border-bottom:none; }
 
     .quick-links{
-      margin-top:36px;
-      padding-top:18px;
+      margin-top:36px; padding-top:18px;
       border-top:1px solid rgba(255,255,255,.10);
-      display:flex;
-      justify-content:center;
-      gap:22px;
-      flex-wrap:wrap;
-      align-items:center;
+      display:flex; justify-content:center; gap:22px; flex-wrap:wrap; align-items:center;
     }
     .quick-links a{
       display:inline-flex; align-items:center; justify-content:center; gap:10px;
@@ -276,38 +256,28 @@
     .legend-item.animate-in{ animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards; }
 
     /* =========================
-       Boat animation layer
-       ✅ Wake is now SATELLITE-TRACKED from stern-center (left-middle)
-       - Wake dashes are positioned from recorded stern points (not offset-path)
-       - This guarantees the trail starts exactly from the back centre of the image
+       TWO BOATS (almost straight lines) + 12 dashes behind each
        ========================= */
     .topScene{ position: relative; }
     .boatLayer{
       position:absolute;
-      left:0; right:0; top:-8px;
+      left:0; right:0; top:0;
       height:190px;
       pointer-events:none;
       z-index:1;
       overflow:hidden;
       opacity:.22;
     }
-
     #headerLogo, .accent-line, h1{ position: relative; z-index: 2; }
 
-    .boat{
+    .boatA, .boatB{
       position:absolute;
-      /* brought DOWN so boat stays on-screen more */
-      offset-path: path("M -120 112 C 80 34 260 46 350 104 C 450 168 600 158 700 90 C 820 26 940 36 1040 96 C 1140 156 1280 158 1380 98 C 1460 56 1540 66 1660 90");
-      offset-rotate: auto;
-      transform: translate(-50%,-50%);
-      will-change: offset-distance;
       width:220px;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
-      offset-distance: 0%;
-      /* anchor point = stern center (left-middle) */
-      offset-anchor: 0% 50%;
+      will-change: transform;
+      opacity:.95;
     }
-    .boat img{ width:220px; height:auto; display:block; }
+    .boatA img, .boatB img{ width:220px; height:auto; display:block; }
 
     .wakeDash{
       position:absolute;
@@ -346,18 +316,26 @@
     <!-- Top scene -->
     <div class="topScene">
       <div class="boatLayer" aria-hidden="true" id="boatLayer">
-        <!-- 12 satellite-track dashes -->
-        <div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div>
-        <div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div>
-        <div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div><div class="wakeDash"></div>
-
-        <!-- boat -->
-        <div class="boat" id="psgBoat">
-          <img id="boatImg" src="Untitled design (16).png" alt="" aria-hidden="true">
+        <!-- Boat A -->
+        <div class="boatA" id="boatA">
+          <img id="boatImgA" src="Untitled design (16).png" alt="" aria-hidden="true">
         </div>
+        <!-- 12 dashes for A -->
+        <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
+        <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
+        <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
+
+        <!-- Boat B -->
+        <div class="boatB" id="boatB">
+          <img id="boatImgB" src="Untitled design (16).png" alt="" aria-hidden="true">
+        </div>
+        <!-- 12 dashes for B -->
+        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
+        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
+        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
       </div>
 
-      <!-- ✅ 40px top padding (as requested) -->
+      <!-- 40px top padding -->
       <div style="display:flex; justify-content:center; padding-top:40px; margin-bottom:28px;">
         <img
           src="PSG Logo - White With Orange (1).png"
@@ -470,11 +448,9 @@
       }
       requestAnimationFrame(tick);
     }
-
     function hookKpiCountUp() {
       const ids = ["kpiLiveRoles","kpiOnHold","kpiOffers","kpiHires"];
       const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-
       const tryAnimate = (el) => {
         if (el.dataset.counted === "1") return;
         const raw = (el.textContent || "").trim();
@@ -484,23 +460,14 @@
         el.textContent = "0";
         animateCount(el, to, 2600);
       };
-
       els.forEach(el => tryAnimate(el));
-
-      const mo = new MutationObserver((muts) => {
-        for (const m of muts) {
-          const el = m.target;
-          if (el && el.nodeType === 1) tryAnimate(el);
-        }
-      });
-
-      see: els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
+      const mo = new MutationObserver(() => els.forEach(el => tryAnimate(el)));
+      els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
     }
 
     function hookLegendDropIn() {
       const legend = document.getElementById("candidateSourcesLegend");
       if (!legend) return;
-
       const animateLegend = () => {
         const items = legend.querySelectorAll(".legend-item");
         items.forEach((item) => {
@@ -509,7 +476,6 @@
           item.style.animationDelay = "";
           item.classList.add("animate-pre");
         });
-
         requestAnimationFrame(() => {
           items.forEach((item, i) => {
             item.style.animationDelay = `${i * 260}ms`;
@@ -519,7 +485,6 @@
           });
         });
       };
-
       animateLegend();
       const mo = new MutationObserver(() => animateLegend());
       mo.observe(legend, { childList:true, subtree:true });
@@ -531,82 +496,87 @@
     });
   </script>
 
-  <!-- ✅ BOAT + SATELLITE WAKE (stern-center tracked) -->
+  <!-- ✅ TWO BOATS + 12 Dashes each (simple straight tracks) -->
   <script>
     (function(){
-      const boat = document.getElementById("psgBoat");
       const layer = document.getElementById("boatLayer");
-      const dashes = Array.from(document.querySelectorAll(".wakeDash"));
-      const img = document.getElementById("boatImg");
-      if (!boat || !layer || dashes.length !== 12) return;
+      const aBoat = document.getElementById("boatA");
+      const bBoat = document.getElementById("boatB");
+      if (!layer || !aBoat || !bBoat) return;
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      // Robust boat filename fallback
-      if (img){
-        const fallbacks = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
-        let idx = 0;
-        img.onerror = () => { idx++; if (idx < fallbacks.length) img.src = fallbacks[idx]; };
-        img.src = fallbacks[0];
+      const imgA = document.getElementById("boatImgA");
+      const imgB = document.getElementById("boatImgB");
+      const fallback = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
+      [imgA,imgB].forEach(img=>{
+        if (!img) return;
+        let i=0;
+        img.onerror=()=>{ i++; if(i<fallback.length) img.src=fallback[i]; };
+        img.src=fallback[0];
+      });
+
+      const aDashes = Array.from(layer.querySelectorAll(".wakeDash.a"));
+      const bDashes = Array.from(layer.querySelectorAll(".wakeDash.b"));
+      if (aDashes.length !== 12 || bDashes.length !== 12) return;
+
+      // Lines inside the layer (almost straight). Coordinates are within layer box.
+      // A goes left->right slightly down; B goes right->left slightly down (crossing).
+      const lineA = { x1: -140, y1: 48,  x2: 1320, y2: 92 };
+      const lineB = { x1: 1320, y1: 120, x2: -140, y2: 64 };
+
+      const DURATION = 160000; // slow
+      const TRAIL = 12;        // 12 dashes
+      const GAP = 0.016;       // spacing in progress units between dashes
+
+      function lerp(a,b,t){ return a + (b-a)*t; }
+      function posOnLine(line, p){
+        return { x: lerp(line.x1, line.x2, p), y: lerp(line.y1, line.y2, p) };
       }
 
-      const DURATION_MS = 140000;  // slow
-      const START_DELAY_MS = 900;
-
-      // Store many stern points; we sample them to render 12 dashes
-      const history = [];
-      const MAX_HISTORY = 240;     // enough for smooth spacing
-      const SAMPLE_EVERY_MS = 80;  // how often we record a stern point
-      let lastSample = 0;
-
-      function recordSternPoint(now){
-        const boatRect = boat.getBoundingClientRect();
-        const layerRect = layer.getBoundingClientRect();
-
-        // ✅ Stern center point: "very back of image" = left side, vertical center
-        const sternX_page = boatRect.left + 0; // extreme back edge
-        const sternY_page = boatRect.top + (boatRect.height / 2);
-
-        const x = sternX_page - layerRect.left;
-        const y = sternY_page - layerRect.top;
-
-        history.push({x,y, t: now});
-        if (history.length > MAX_HISTORY) history.splice(0, history.length - MAX_HISTORY);
+      function setBoat(el, line, p){
+        const pt = posOnLine(line, p);
+        // Face direction
+        const angle = Math.atan2(line.y2-line.y1, line.x2-line.x1) * 180/Math.PI;
+        el.style.transform = `translate(${pt.x}px, ${pt.y}px) translate(-50%,-50%) rotate(${angle}deg)`;
       }
 
-      function renderDashes(){
-        // We want 12 dashes spaced back along the recorded path, with dash[0] closest to the stern.
-        const step = 8; // how many recorded points between each dash (tweak spacing)
-        for (let i = 0; i < dashes.length; i++){
-          const idx = history.length - 1 - (i * step);
+      // stern point = left-middle of the boat image after rotation:
+      // we emulate it by placing dashes a fixed pixel distance behind the boat along the line direction.
+      function setDashes(dashes, line, p){
+        const dx = line.x2-line.x1;
+        const dy = line.y2-line.y1;
+        const len = Math.hypot(dx,dy) || 1;
+        const ux = dx/len, uy = dy/len;           // unit direction
+        const back = 110;                          // px behind the boat to start trail exactly from stern
+
+        const boatPt = posOnLine(line, p);
+        const sternX = boatPt.x - ux*back;
+        const sternY = boatPt.y - uy*back;
+
+        for(let i=0;i<dashes.length;i++){
           const dash = dashes[i];
-          if (idx < 0){
-            dash.style.opacity = "0";
-            continue;
-          }
-          const p = history[idx];
+
+          // each dash further behind along the direction
+          const dist = i * 22; // px spacing between dashes
+          const x = sternX - ux*dist;
+          const y = sternY - uy*dist;
 
           const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
           dash.style.opacity = String(Math.max(0.10, fade));
-          dash.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%,-50%)`;
+          dash.style.transform = `translate(${x}px, ${y}px) translate(-50%,-50%)`;
         }
       }
 
       function loop(now){
         const t = now || performance.now();
-        const raw = (t % DURATION_MS) / DURATION_MS;
+        const p = (t % DURATION) / DURATION;
 
-        // Move boat smoothly
-        boat.style.offsetDistance = (raw * 100).toFixed(4) + "%";
+        // A forward, B forward on its own line (since line is reversed, it still moves "forward" visually)
+        setBoat(aBoat, lineA, p);
+        setDashes(aDashes, lineA, p);
 
-        if (t > START_DELAY_MS){
-          if (t - lastSample >= SAMPLE_EVERY_MS){
-            lastSample = t;
-            recordSternPoint(t);
-          }
-          renderDashes();
-        } else {
-          dashes.forEach(d => d.style.opacity = "0");
-        }
+        setBoat(bBoat, lineB, p);
+        setDashes(bDashes, lineB, p);
 
         requestAnimationFrame(loop);
       }
