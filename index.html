@@ -15,7 +15,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900;1,200..900&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -93,7 +93,6 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
-
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -225,11 +224,7 @@
       position:relative;
     }
 
-    #candidateSourcesChart{
-      width:100% !important;
-      height:100% !important;
-      display:block;
-    }
+    #candidateSourcesChart{ width:100% !important; height:100% !important; display:block; }
 
     .chart-empty{
       position:absolute;
@@ -282,10 +277,7 @@
       white-space:nowrap;
       letter-spacing:.02em;
     }
-    .legend-pct{
-      font-weight:900;
-      letter-spacing:.04em;
-    }
+    .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
     .list-item{
       padding:10px 0;
@@ -305,7 +297,6 @@
       flex-wrap:wrap;
       align-items:center;
     }
-
     .quick-links a{
       display:inline-flex;
       align-items:center;
@@ -315,26 +306,19 @@
       opacity:.82;
       transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
     }
-
-    .quick-links a:hover{
-      opacity:1;
-      transform: translateY(-1px);
-    }
-
+    .quick-links a:hover{ opacity:1; transform: translateY(-1px); }
     .quick-links .logo-link{
       padding:8px 12px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.10);
     }
-
     .quick-links img{
       height:28px;
       max-width:130px;
       object-fit:contain;
       display:block;
     }
-
     .quick-links .text-link{
       padding:8px 12px;
       border-radius:999px;
@@ -346,11 +330,7 @@
       text-transform:uppercase;
       white-space:nowrap;
     }
-
-    .quick-links .text-link:hover{
-      color:#fff;
-      border-color: rgba(247,142,98,.35);
-    }
+    .quick-links .text-link:hover{ color:#fff; border-color: rgba(247,142,98,.35); }
 
     .powered-by{
       display:flex;
@@ -383,11 +363,7 @@
       pointer-events:auto;
       transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
-    .splash.fade{
-      opacity:0;
-      pointer-events:none;
-    }
-
+    .splash.fade{ opacity:0; pointer-events:none; }
     .splash-logo{
       position:fixed;
       left:50%;
@@ -402,10 +378,7 @@
     }
 
     /* Legend animation */
-    .legend-item.animate-pre{
-      opacity:0;
-      transform: translateY(-14px);
-    }
+    .legend-item.animate-pre{ opacity:0; transform: translateY(-14px); }
     @keyframes legendDropBounce {
       0%   { opacity:0; transform: translateY(-14px); }
       70%  { opacity:1; transform: translateY(4px); }
@@ -416,10 +389,10 @@
     }
 
     /* =========================
-       Boat animation layer (VISIBLE + CORRECT WAKE)
-       - We animate offset-distance on BOAT and on each DASH.
-       - We set offset-anchor so the "position point" is the stern center.
-       - Smooth movement (no quantized stepping).
+       Boat animation layer (UPDATED)
+       - 12 dashes
+       - Wake anchored to stern center (left-middle) via offset-anchor
+       - Path moved DOWN so boat stays on-screen more
        ========================= */
     .topScene{ position: relative; }
 
@@ -428,21 +401,19 @@
       left:0;
       right:0;
       top:-8px;
-      height:150px;
+      height:170px;
       pointer-events:none;
       z-index:1;
       overflow:hidden;
       opacity:.22;
     }
 
-    #headerLogo, .accent-line, h1{
-      position: relative;
-      z-index: 2;
-    }
+    #headerLogo, .accent-line, h1{ position: relative; z-index: 2; }
 
     .boat, .wake{
       position:absolute;
-      offset-path: path("M -120 86 C 80 6 260 20 350 78 C 450 142 600 132 700 64 C 820 0 940 10 1040 70 C 1140 130 1280 132 1380 72 C 1460 30 1540 40 1660 64");
+      /* moved DOWN: y values increased */
+      offset-path: path("M -120 104 C 80 26 260 38 350 96 C 450 160 600 150 700 82 C 820 18 940 28 1040 88 C 1140 148 1280 150 1380 90 C 1460 48 1540 58 1660 82");
       offset-rotate: auto;
       transform: translate(-50%,-50%);
       will-change: offset-distance, opacity;
@@ -454,7 +425,8 @@
       opacity:.92;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
       offset-distance: 0%;
-      offset-anchor: 6% 50%; /* ✅ stern center (rear is left on this image) */
+      /* ✅ stern center = LEFT side, vertical middle */
+      offset-anchor: 0% 50%;
     }
     .boat img{
       width:220px;
@@ -498,14 +470,10 @@
     <!-- Top scene -->
     <div class="topScene">
       <div class="boatLayer" aria-hidden="true">
-        <!-- 7 trail dashes -->
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
+        <!-- 12 trail dashes -->
+        <div class="wake"></div><div class="wake"></div><div class="wake"></div><div class="wake"></div>
+        <div class="wake"></div><div class="wake"></div><div class="wake"></div><div class="wake"></div>
+        <div class="wake"></div><div class="wake"></div><div class="wake"></div><div class="wake"></div>
 
         <!-- boat -->
         <div class="boat" id="psgBoat">
@@ -513,7 +481,8 @@
         </div>
       </div>
 
-      <div style="display:flex; justify-content:center; margin-bottom:28px;">
+      <!-- ✅ Logo lowered: 40px top padding -->
+      <div style="display:flex; justify-content:center; padding-top:40px; margin-bottom:28px;">
         <img
           src="PSG Logo - White With Orange (1).png"
           alt="Pole Star Global"
@@ -689,7 +658,7 @@
     });
   </script>
 
-  <!-- ✅ BOAT: smooth + wake exactly behind stern center -->
+  <!-- ✅ BOAT: smooth + wake anchored to very BACK of the image (left-middle) -->
   <script>
     (function(){
       const boat = document.getElementById("psgBoat");
@@ -697,7 +666,7 @@
       if (!boat || dashes.length === 0) return;
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      // Ensure boat image loads even if filename differs
+      // Robust boat filename fallback
       const boatImg = document.getElementById("boatImg");
       if (boatImg){
         const fallbacks = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
@@ -707,14 +676,13 @@
       }
 
       const DURATION_MS = 140000; // slow
-      const GAP = 0.020;          // spacing
+      const GAP = 0.012;          // tighter spacing because 12 dashes
       const START_DELAY_MS = 900;
 
       function loop(now){
         const t = now || performance.now();
         const raw = (t % DURATION_MS) / DURATION_MS;
 
-        // Smooth continuous movement
         boat.style.offsetDistance = (raw * 100).toFixed(4) + "%";
 
         const show = t > START_DELAY_MS;
@@ -730,11 +698,10 @@
           let p = raw - GAP * (i + 1);
           if (p < 0) p += 1;
 
-          // Dash follows exact same path but behind boat
           w.style.offsetDistance = (p * 100).toFixed(4) + "%";
 
           const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
-          w.style.opacity = String(Math.max(0.12, fade));
+          w.style.opacity = String(Math.max(0.10, fade));
         }
 
         requestAnimationFrame(loop);
