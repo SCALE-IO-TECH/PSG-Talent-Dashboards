@@ -63,7 +63,7 @@
       margin:0 auto;
       display:grid;
       gap:20px;
-      padding-bottom:36px; /* bottom breathing room */
+      padding-bottom:36px;
     }
 
     h1, h2{
@@ -107,7 +107,7 @@
       height:3px;
       width:min(420px, 78vw);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:26px auto 20px; /* more padding */
+      margin:26px auto 20px;
       border-radius:999px;
       opacity:.95;
     }
@@ -362,7 +362,7 @@
       letter-spacing:.14em;
       text-transform:uppercase;
       color:rgba(255,255,255,.55);
-      padding-bottom:36px; /* 36px from bottom */
+      padding-bottom:36px;
     }
     .powered-by img{ height:22px; opacity:.9; }
 
@@ -416,11 +416,9 @@
     }
 
     /* =========================
-       Boat animation layer
-       - Uses your attachment
-       - Bigger (2x-ish)
-       - Slower
-       - Wake comes from stern center (offset-anchor)
+       Boat animation layer (FIXED)
+       - Wake originates from stern CENTER of the BOAT element
+       - Smooth movement (no step quantization)
        ========================= */
     .topScene{ position: relative; }
 
@@ -441,35 +439,40 @@
       z-index: 2;
     }
 
-    .boat, .wake{
+    .boatTrack, .wakeTrack{
       position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+
+    /* The path is on the "track" elements, not on boat/wake directly */
+    .boatTrack{
       offset-path: path("M -120 86 C 80 6 260 20 350 78 C 450 142 600 132 700 64 C 820 0 940 10 1040 70 C 1140 130 1280 132 1380 72 C 1460 30 1540 40 1660 64");
       offset-rotate: auto;
       transform: translate(-50%,-50%);
-      will-change: offset-distance, opacity;
+      left:0; top:0;
     }
 
-    .boat{
-      width:220px;                 /* ✅ bigger */
-      height:auto;
-      opacity:.92;
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
-      offset-distance: 0%;
-      offset-anchor: 6% 50%;       /* ✅ stern center (rear is left on this image) */
-    }
-    .boat img{
+    /* Boat image: bigger */
+    .boatSprite{
       width:220px;
       height:auto;
       display:block;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
     }
 
-    .wake{
+    /* Wake: positioned relative to boatTrack so it *must* appear behind stern center */
+    .wakeDash{
+      position:absolute;
+      left:0;
+      top:0;
       width:12px;
       height:3px;
       border-radius:999px;
       background: rgba(247,142,98,.95);
       opacity:.55;
-      offset-distance: 0%;
+      transform: translate(-50%,-50%);
+      will-change: transform, opacity;
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -497,20 +500,20 @@
 
     <!-- Top scene -->
     <div class="topScene">
-      <div class="boatLayer" aria-hidden="true">
-        <!-- 7 trail dashes -->
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-        <div class="wake"></div>
-
-        <!-- boat (robust: tries your filename first, then a couple fallbacks) -->
-        <div class="boat" id="psgBoat">
-          <img id="boatImg" src="Untitled design (16).png" alt="" aria-hidden="true">
+      <div class="boatLayer" aria-hidden="true" id="boatLayer">
+        <!-- Boat track (we animate offset-distance on this wrapper) -->
+        <div class="boatTrack" id="boatTrack">
+          <img class="boatSprite" id="boatImg" src="Untitled design (16).png" alt="" aria-hidden="true">
         </div>
+
+        <!-- 7 dash elements (we place them behind the stern center in JS) -->
+        <div class="wakeDash"></div>
+        <div class="wakeDash"></div>
+        <div class="wakeDash"></div>
+        <div class="wakeDash"></div>
+        <div class="wakeDash"></div>
+        <div class="wakeDash"></div>
+        <div class="wakeDash"></div>
       </div>
 
       <div style="display:flex; justify-content:center; margin-bottom:28px;">
@@ -529,22 +532,10 @@
     <!-- KPI BAR -->
     <div class="card">
       <div class="kpi-grid">
-        <div class="kpi">
-          <div class="label">Live Roles</div>
-          <div class="value" id="kpiLiveRoles">—</div>
-        </div>
-        <div class="kpi">
-          <div class="label">On Hold</div>
-          <div class="value" id="kpiOnHold">—</div>
-        </div>
-        <div class="kpi">
-          <div class="label">Offers</div>
-          <div class="value" id="kpiOffers">—</div>
-        </div>
-        <div class="kpi">
-          <div class="label">Hires</div>
-          <div class="value" id="kpiHires">—</div>
-        </div>
+        <div class="kpi"><div class="label">Live Roles</div><div class="value" id="kpiLiveRoles">—</div></div>
+        <div class="kpi"><div class="label">On Hold</div><div class="value" id="kpiOnHold">—</div></div>
+        <div class="kpi"><div class="label">Offers</div><div class="value" id="kpiOffers">—</div></div>
+        <div class="kpi"><div class="label">Hires</div><div class="value" id="kpiHires">—</div></div>
       </div>
     </div>
 
@@ -576,25 +567,19 @@
     <div class="equal-two">
       <div class="card">
         <h2>Progress</h2>
-        <div id="progressList">
-          <div class="list-item">—</div>
-        </div>
+        <div id="progressList"><div class="list-item">—</div></div>
       </div>
 
       <div class="card">
         <h2>Challenges</h2>
-        <div id="challengesList">
-          <div class="list-item">—</div>
-        </div>
+        <div id="challengesList"><div class="list-item">—</div></div>
       </div>
     </div>
 
     <!-- Key Focus -->
     <div class="card">
       <h2>Key Focus</h2>
-      <div id="keyFocusList">
-        <div class="list-item">—</div>
-      </div>
+      <div id="keyFocusList"><div class="list-item">—</div></div>
     </div>
 
     <!-- Quick Links -->
@@ -626,13 +611,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  <!-- Behaviour-only additions:
-       - Slower donut animation
-       - KPI count-up slower
-       - Legend drops in one-by-one slower + bounce
-  -->
   <script>
-    // Slow the donut wind-up without changing chart styling
+    // Slow donut animation (no style changes)
     if (window.Chart && Chart.defaults) {
       Chart.defaults.animation.duration = 2800;
       Chart.defaults.animation.easing = "easeOutQuart";
@@ -693,7 +673,7 @@
 
         requestAnimationFrame(() => {
           items.forEach((item, i) => {
-            item.style.animationDelay = `${i * 260}ms`; // slower stagger
+            item.style.animationDelay = `${i * 260}ms`;
             void item.offsetWidth;
             item.classList.add("animate-in");
             item.classList.remove("animate-pre");
@@ -706,81 +686,83 @@
       mo.observe(legend, { childList:true, subtree:true });
     }
 
-    // Robust boat filename fallback (so it shows even if the filename differs)
-    (function(){
-      const img = document.getElementById("boatImg");
-      if (!img) return;
-      const fallbacks = [
-        "Untitled design (16).png",
-        "Untitled design (15).png",
-        "boat.png",
-        "boat.webp"
-      ];
-      let i = 0;
-      img.onerror = () => {
-        i++;
-        if (i < fallbacks.length) img.src = fallbacks[i];
-      };
-      // ensure it starts with first entry
-      img.src = fallbacks[0];
-    })();
-
     window.addEventListener("DOMContentLoaded", () => {
       hookKpiCountUp();
       hookLegendDropIn();
     });
   </script>
 
-  <!-- Boat logic: slower + step-by-step + 7 dashes directly from stern -->
+  <!-- ✅ BOAT: smooth movement + wake from stern center (computed from boat image width) -->
   <script>
     (function(){
-      const boat = () => document.getElementById("psgBoat");
-      const wakes = () => Array.from(document.querySelectorAll(".boatLayer .wake"));
+      const track = document.getElementById("boatTrack");
+      const layer = document.getElementById("boatLayer");
+      const img = document.getElementById("boatImg");
+      const dashes = Array.from(layer.querySelectorAll(".wakeDash"));
 
-      const DURATION_MS = 140000;  // slower
-      const GAP = 0.020;          // spacing for 7 dashes
-      const START_DELAY_MS = 1200;
-      const STEP = 1 / 520;       // gentle “step” feel
+      if (!track || !layer || !img || dashes.length === 0) return;
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const DURATION_MS = 140000; // slow
+      const GAP = 0.020;         // dash spacing along path
+      const START_DELAY_MS = 900;
+
+      function lerp(a,b,t){ return a + (b-a)*t; }
+
+      function placeDash(dash, boatRect, progressBehind, opacity){
+        // Put dash at the same path position but slightly behind via progressBehind
+        track.style.offsetDistance = (progressBehind * 100).toFixed(4) + "%";
+        const dashPoint = track.getBoundingClientRect();
+
+        // Stern center point: LEFT edge + a little inset, vertically centered
+        // (image rear is left; we want dead center of stern)
+        const sternX = boatRect.left + 10; // small inset from absolute edge
+        const sternY = boatRect.top + boatRect.height / 2;
+
+        // Use stern point, NOT dashPoint, to guarantee it comes from stern center
+        dash.style.transform = `translate(${sternX}px, ${sternY}px) translate(-50%,-50%)`;
+        dash.style.opacity = String(opacity);
+      }
+
+      let lastTime = 0;
+      let smoothProg = 0; // smooth progress (0..1)
 
       function loop(now){
-        const b = boat();
-        if (!b) return;
-
         const t = now || performance.now();
+
+        // smooth progress based on time
         const raw = (t % DURATION_MS) / DURATION_MS;
 
-        // step-by-step motion
-        const prog = Math.round(raw / STEP) * STEP;
+        // smooth easing toward raw (removes jitter)
+        const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
+        lastTime = t;
+        const follow = 1 - Math.pow(0.0001, dt); // critically damped-ish
+        smoothProg = lerp(smoothProg, raw, follow);
 
-        b.style.offsetDistance = (prog * 100).toFixed(4) + "%";
+        track.style.offsetDistance = (smoothProg * 100).toFixed(4) + "%";
 
-        const ws = wakes();
         const showTrail = t > START_DELAY_MS;
+        const boatRect = track.getBoundingClientRect();
 
-        for (let i = 0; i < ws.length; i++){
-          const w = ws[i];
+        for (let i = 0; i < dashes.length; i++){
+          const dash = dashes[i];
 
           if (!showTrail){
-            w.style.opacity = "0";
-            w.style.offsetDistance = "0%";
+            dash.style.opacity = "0";
             continue;
           }
 
-          // Always behind the boat
-          let p = prog - GAP * (i + 1);
+          let p = smoothProg - GAP * (i + 1);
           if (p < 0) p += 1;
 
-          w.style.offsetDistance = (p * 100).toFixed(4) + "%";
-
-          // Subtle fade along 7 dashes
-          const fade = 0.55 - (i * (0.55 / (ws.length + 1)));
-          w.style.opacity = String(Math.max(0.12, fade));
+          const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
+          // place dash at stern center (so it never comes out the side)
+          placeDash(dash, boatRect, p, Math.max(0.12, fade));
         }
 
         requestAnimationFrame(loop);
       }
 
-      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       requestAnimationFrame(loop);
     })();
   </script>
