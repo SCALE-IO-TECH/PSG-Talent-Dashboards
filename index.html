@@ -107,7 +107,7 @@
       height:3px;
       width:min(420px, 78vw);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:10px auto 14px;
+      margin:18px auto 18px; /* ✅ more padding above and below */
       border-radius:999px;
       opacity:.95;
     }
@@ -415,11 +415,7 @@
     }
 
     /* =========================
-       Boat animation (ONLY CHANGED THIS SECTION)
-       - Boat moves slowly first
-       - Exactly 7 dashes always visible
-       - Dashes are "left behind" (trail), not moving with the boat
-       - S/figure-8-ish path
+       Boat animation (UNCHANGED)
        ========================= */
     .topScene{ position: relative; }
 
@@ -440,7 +436,6 @@
       z-index: 2;
     }
 
-    /* Path is applied to each element; JS sets offset-distance */
     .boat, .wake{
       position:absolute;
       offset-path: path("M -90 82 C 60 5 240 20 330 76 C 420 130 560 124 650 62 C 750 0 860 0 950 62 C 1040 124 1170 132 1260 72 C 1345 26 1410 36 1480 62");
@@ -449,7 +444,6 @@
       will-change: offset-distance, opacity;
     }
 
-    /* Boat: a bit bigger, clearer */
     .boat{
       width:46px;
       height:24px;
@@ -458,7 +452,6 @@
       offset-distance: 0%;
     }
 
-    /* Exactly 7 trail dashes */
     .wake{
       width:12px;
       height:3px;
@@ -468,7 +461,6 @@
       offset-distance: 0%;
     }
 
-    /* Better-looking tiny tanker (CSS) */
     .boatIcon{
       width:46px;
       height:24px;
@@ -571,7 +563,8 @@
         </div>
       </div>
 
-      <div style="display:flex; justify-content:center; margin-bottom:8px;">
+      <!-- ✅ Slightly more gap below logo -->
+      <div style="display:flex; justify-content:center; margin-bottom:14px;">
         <img
           src="PSG Logo - White With Orange (1).png"
           alt="Pole Star Global"
@@ -581,6 +574,8 @@
       </div>
 
       <div class="accent-line"></div>
+
+      <!-- ✅ Slightly more gap above heading via accent-line margins -->
       <h1>Hiring Dashboard</h1>
     </div>
 
@@ -690,13 +685,11 @@
        - Legend drops in one-by-one slower + bounce
   -->
   <script>
-    // Slow the donut wind-up without changing chart styling
     if (window.Chart && Chart.defaults) {
       Chart.defaults.animation.duration = 2800;
       Chart.defaults.animation.easing = "easeOutQuart";
     }
 
-    // KPI count-up (slow)
     function animateCount(el, to, duration = 2200) {
       const start = performance.now();
       const from = 0;
@@ -710,7 +703,6 @@
       requestAnimationFrame(tick);
     }
 
-    // Animate KPIs when dashboard.js sets them
     function hookKpiCountUp() {
       const ids = ["kpiLiveRoles","kpiOnHold","kpiOffers","kpiHires"];
       const els = ids.map(id => document.getElementById(id)).filter(Boolean);
@@ -737,7 +729,6 @@
       els.forEach(el => mo.observe(el, { childList:true, characterData:true, subtree:true }));
     }
 
-    // Legend drop-in one-by-one (safe even if legend items differ)
     function hookLegendDropIn() {
       const legend = document.getElementById("candidateSourcesLegend");
       if (!legend) return;
@@ -753,7 +744,7 @@
 
         requestAnimationFrame(() => {
           items.forEach((item, i) => {
-            item.style.animationDelay = `${i * 220}ms`; // slower stagger + bounce
+            item.style.animationDelay = `${i * 220}ms`;
             void item.offsetWidth;
             item.classList.add("animate-in");
             item.classList.remove("animate-pre");
@@ -772,31 +763,27 @@
     });
   </script>
 
-  <!-- ✅ Boat logic (ONLY affects the boat + 7 dashes; nothing else) -->
+  <!-- ✅ Boat logic (unchanged) -->
   <script>
     (function(){
       const boat = () => document.getElementById("psgBoat");
       const wakes = () => Array.from(document.querySelectorAll(".boatLayer .wake"));
 
-      // Slow boat like an actual boat
-      const DURATION_MS = 52000;          // slower
-      const GAP = 0.022;                 // spacing between the 7 dashes (percent of path)
-      const START_DELAY_MS = 1200;       // boat moves first, then trail appears
+      const DURATION_MS = 52000;
+      const GAP = 0.022;
+      const START_DELAY_MS = 1200;
 
-      // Keep exactly 7 dashes visible, always behind the boat, looping seamlessly.
       function loop(now){
         const b = boat();
         if (!b) return;
 
         const t = now || performance.now();
-        const raw = (t % DURATION_MS) / DURATION_MS; // 0..1
-        const prog = raw; // boat progress
+        const raw = (t % DURATION_MS) / DURATION_MS;
+        const prog = raw;
 
-        // Boat position
         b.style.offsetDistance = (prog * 100).toFixed(4) + "%";
 
         const ws = wakes();
-        // Trail starts AFTER the boat has moved a bit
         const showTrail = t > START_DELAY_MS;
 
         for (let i = 0; i < ws.length; i++){
@@ -808,15 +795,11 @@
             continue;
           }
 
-          // Behind boat by GAP * (i+1)
           let p = prog - GAP * (i + 1);
-
-          // Wrap so the dashes sit behind even at the start of the loop
           if (p < 0) p += 1;
 
           w.style.offsetDistance = (p * 100).toFixed(4) + "%";
 
-          // Subtle fade along the 7 dashes (last one faint)
           const fade = 0.55 - (i * (0.55 / (ws.length + 1)));
           w.style.opacity = String(Math.max(0.10, fade));
         }
@@ -824,9 +807,7 @@
         requestAnimationFrame(loop);
       }
 
-      // Reduced motion: do nothing
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
       requestAnimationFrame(loop);
     })();
   </script>
