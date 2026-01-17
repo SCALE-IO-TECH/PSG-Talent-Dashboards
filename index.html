@@ -20,13 +20,6 @@
       --stroke:rgba(255,255,255,.12);
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:18px;
-
-      /* keep the exact glow background in ONE place so splash can match perfectly */
-      --page-bg:
-        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
-        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
-        var(--bg);
     }
 
     *{ box-sizing:border-box; }
@@ -35,10 +28,21 @@
     body{
       margin:0;
       font-family: "Inter Tight", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--page-bg);
       color:var(--text);
       padding:28px;
       overflow-x:hidden;
+
+      /* ✅ ORIGINAL GLOW BACKGROUND (DO NOT CHANGE) */
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
+        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
+        var(--bg);
+    }
+
+    /* Prevent scroll-restore / "halfway down" during splash */
+    body.splashing{
+      overflow:hidden;
     }
 
     h1, h2{
@@ -47,7 +51,6 @@
       margin:0;
     }
 
-    /* HIRING DASHBOARD FONT */
     h1{
       font-family: "Unbounded", sans-serif;
       font-weight:600;
@@ -77,6 +80,8 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
+
+      /* ✅ Hover lift */
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -86,7 +91,6 @@
       border-color: rgba(255,255,255,.18);
     }
 
-    /* Accent fade line under logo */
     .accent-line{
       height:3px;
       width:min(420px, 78vw);
@@ -96,7 +100,6 @@
       opacity:.95;
     }
 
-    /* KPI BAR */
     .kpi-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -115,7 +118,6 @@
       font-weight:900;
     }
 
-    /* Layout */
     .two-col{
       display:grid;
       grid-template-columns:2fr 1fr;
@@ -128,7 +130,6 @@
       align-items:stretch;
     }
 
-    /* Bottom pair: Progress + Challenges equal size */
     .equal-two{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -136,7 +137,6 @@
       align-items:stretch;
     }
 
-    /* Rows (used for roles + starters) */
     .row{
       display:flex;
       justify-content:space-between;
@@ -158,14 +158,12 @@
       font-size:12px;
     }
 
-    /* TEAM STYLE — orange but NOT bold */
     .team{
       color:var(--accent);
       font-weight:400;
       letter-spacing:.02em;
     }
 
-    /* Neutral pill style (Location + Start Date) */
     .pill{
       display:inline-flex;
       align-items:center;
@@ -180,7 +178,6 @@
       color:rgba(255,255,255,.92);
     }
 
-    /* Stage pill */
     .stage{
       padding:6px 12px;
       border-radius:999px;
@@ -205,7 +202,6 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
-    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
@@ -237,7 +233,6 @@
       pointer-events:none;
     }
 
-    /* Legend under chart */
     .legend{
       margin-top:10px;
       display:grid;
@@ -287,7 +282,6 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
-    /* Quick Links (above powered-by) */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -345,7 +339,6 @@
       border-color: rgba(247,142,98,.35);
     }
 
-    /* Powered by */
     .powered-by{
       display:flex;
       justify-content:center;
@@ -367,64 +360,59 @@
     }
 
     /* =========================
-       Splash overlay (logo-to-header)
+       Splash overlay (correct glow + visible pullback)
        ========================= */
     .splash{
       position:fixed;
       inset:0;
       z-index:9999;
-      /* EXACT SAME BACKGROUND AS PAGE — preserves glows */
-      background: var(--page-bg);
+
+      /* ✅ EXACT SAME BACKGROUND AS BODY (so glows match perfectly) */
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
+        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
+        var(--bg);
+
       display:block;
       opacity:1;
-      transition: opacity 520ms ease;
+      pointer-events:auto;
+
+      /* ✅ fades while logo moves (same duration) */
+      transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
-    .splash.hide{
+
+    .splash.fade{
       opacity:0;
       pointer-events:none;
     }
 
-    /* Centered splash logo that animates to header logo position */
     .splash-logo{
       position:fixed;
       left:50%;
       top:50%;
       width:min(520px, 76vw);
       height:auto;
-      transform-origin:center center;
       filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
-      will-change: transform, opacity;
-      opacity:1;
+      will-change: transform;
+      transform-origin:center center;
 
-      /* base transform: center it */
+      /* Start centered */
       transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
 
-      transition:
-        transform 900ms cubic-bezier(.4,0,.2,1),
-        opacity 520ms ease;
-    }
-
-    /* Animate class sets the fly-to transform (applied inline by JS) */
-    .splash-logo.fly{
-      opacity:1;
+      /* ✅ motion matches overlay fade */
+      transition: transform 950ms cubic-bezier(.4,0,.2,1);
     }
 
     @media (prefers-reduced-motion: reduce){
-      .splash-logo,
-      .splash{
-        transition:none !important;
-      }
-      .card{
-        transition:none !important;
-      }
-      .card:hover{
-        transform:none !important;
-      }
+      .splash, .splash-logo { transition:none !important; }
+      .card{ transition:none !important; }
+      .card:hover{ transform:none !important; }
     }
   </style>
 </head>
 
-<body>
+<body class="splashing">
   <!-- Splash overlay -->
   <div class="splash" id="splash" aria-hidden="true">
     <img
@@ -521,7 +509,7 @@
       </div>
     </div>
 
-    <!-- Quick Links (above powered-by) -->
+    <!-- Quick Links -->
     <div class="quick-links" aria-label="Quick Links">
       <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
         <img src="Teamtailor.webp" alt="Teamtailor">
@@ -551,20 +539,22 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="dashboard.js"></script>
 
-  <!-- Splash animation script: logo lands exactly on header logo -->
+  <!-- Splash animation: logo flies to header while overlay fades out -->
   <script>
     window.addEventListener("load", () => {
+      // Force start at top (prevents "halfway down" view)
+      window.scrollTo(0, 0);
+
       const splash = document.getElementById("splash");
       const splashLogo = document.getElementById("splashLogo");
       const headerLogo = document.getElementById("headerLogo");
       if (!splash || !splashLogo || !headerLogo) return;
 
-      // Ensure images are laid out
       const run = () => {
+        // Compute centers
         const startRect = splashLogo.getBoundingClientRect();
         const targetRect = headerLogo.getBoundingClientRect();
 
-        // We animate by moving the centered splashLogo to the target logo CENTER
         const startCx = startRect.left + startRect.width / 2;
         const startCy = startRect.top + startRect.height / 2;
         const targetCx = targetRect.left + targetRect.width / 2;
@@ -574,29 +564,28 @@
         const dy = targetCy - startCy;
         const scale = targetRect.width / startRect.width;
 
-        // Trigger transform
+        // Start move + fade together
         requestAnimationFrame(() => {
-          splashLogo.classList.add("fly");
           splashLogo.style.transform =
             `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
+          splash.classList.add("fade");
         });
 
-        // Fade overlay after landing
-        setTimeout(() => splash.classList.add("hide"), 900);
+        // Unlock scroll and remove overlay after transition ends
+        const cleanup = () => {
+          document.body.classList.remove("splashing");
+          splash.removeEventListener("transitionend", cleanup);
+          splash.remove();
+        };
 
-        // Remove from DOM shortly after fade
-        setTimeout(() => splash.remove(), 1500);
+        splash.addEventListener("transitionend", cleanup);
       };
 
-      // If the logo isn't decoded yet, wait a tick
-      if (splashLogo.complete && headerLogo.complete) {
-        run();
-      } else {
-        Promise.allSettled([
-          splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
-          headerLogo.decode ? headerLogo.decode() : Promise.resolve()
-        ]).then(run);
-      }
+      // Wait for images to decode so positions are accurate
+      Promise.allSettled([
+        splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
+        headerLogo.decode ? headerLogo.decode() : Promise.resolve()
+      ]).then(run);
     });
   </script>
 </body>
