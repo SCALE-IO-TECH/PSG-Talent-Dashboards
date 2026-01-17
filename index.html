@@ -569,7 +569,7 @@
 
       // ✅ Start just off the left edge so it begins entering shortly after start,
       // while still being NOT visible at t=0.
-      const OFFSCREEN_P = 0.155;
+      const OFFSCREEN_P = 0.135;
 
       function lerp(a,b,t){ return a + (b-a)*t; }
       function posOnLine(line, p){ return { x: lerp(line.x1, line.x2, p), y: lerp(line.y1, line.y2, p) }; }
