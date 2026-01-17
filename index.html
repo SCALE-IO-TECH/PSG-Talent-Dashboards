@@ -20,19 +20,22 @@
       --stroke:rgba(255,255,255,.12);
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:18px;
-    }
 
-    *{ box-sizing:border-box; }
-    html, body { height:100%; }
-
-    body{
-      margin:0;
-      font-family: "Inter Tight", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:
+      /* keep the exact glow background in ONE place so splash can match perfectly */
+      --page-bg:
         radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%),
         var(--bg);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family: "Inter Tight", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--page-bg);
       color:var(--text);
       padding:28px;
       overflow-x:hidden;
@@ -65,6 +68,7 @@
       margin:0 auto;
       display:grid;
       gap:20px;
+      position:relative;
     }
 
     .card{
@@ -283,7 +287,7 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
-    /* Quick Links */
+    /* Quick Links (above powered-by) */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -341,7 +345,7 @@
       border-color: rgba(247,142,98,.35);
     }
 
-    /* Powered by footer */
+    /* Powered by */
     .powered-by{
       display:flex;
       justify-content:center;
@@ -368,34 +372,54 @@
     .splash{
       position:fixed;
       inset:0;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(180deg, rgba(12,47,51,.96), rgba(12,47,51,.99));
       z-index:9999;
-    }
-
-    .splash-logo{
-      width:min(520px, 76vw);
-      height:auto;
-      filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
-      transform-origin: top left;
-      will-change: transform, opacity;
-      opacity:0;
-      transform: translateY(10px) scale(1.02);
-      transition:
-        transform 900ms cubic-bezier(.4,0,.2,1),
-        opacity 650ms ease;
-    }
-
-    .splash.show .splash-logo{
+      /* EXACT SAME BACKGROUND AS PAGE — preserves glows */
+      background: var(--page-bg);
+      display:block;
       opacity:1;
-      transform: translateY(0) scale(1);
+      transition: opacity 520ms ease;
     }
-
-    .splash.fade{
-      transition: opacity 600ms ease;
+    .splash.hide{
       opacity:0;
       pointer-events:none;
+    }
+
+    /* Centered splash logo that animates to header logo position */
+    .splash-logo{
+      position:fixed;
+      left:50%;
+      top:50%;
+      width:min(520px, 76vw);
+      height:auto;
+      transform-origin:center center;
+      filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
+      will-change: transform, opacity;
+      opacity:1;
+
+      /* base transform: center it */
+      transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
+
+      transition:
+        transform 900ms cubic-bezier(.4,0,.2,1),
+        opacity 520ms ease;
+    }
+
+    /* Animate class sets the fly-to transform (applied inline by JS) */
+    .splash-logo.fly{
+      opacity:1;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .splash-logo,
+      .splash{
+        transition:none !important;
+      }
+      .card{
+        transition:none !important;
+      }
+      .card:hover{
+        transform:none !important;
+      }
     }
   </style>
 </head>
@@ -529,47 +553,51 @@
 
   <!-- Splash animation script: logo lands exactly on header logo -->
   <script>
-    (function () {
+    window.addEventListener("load", () => {
       const splash = document.getElementById("splash");
       const splashLogo = document.getElementById("splashLogo");
       const headerLogo = document.getElementById("headerLogo");
       if (!splash || !splashLogo || !headerLogo) return;
 
-      // Show initial fade-in
-      requestAnimationFrame(() => splash.classList.add("show"));
-
-      function run() {
-        const splashRect = splashLogo.getBoundingClientRect();
+      // Ensure images are laid out
+      const run = () => {
+        const startRect = splashLogo.getBoundingClientRect();
         const targetRect = headerLogo.getBoundingClientRect();
 
-        const scale = targetRect.width / splashRect.width;
-        const dx = targetRect.left - splashRect.left;
-        const dy = targetRect.top - splashRect.top;
+        // We animate by moving the centered splashLogo to the target logo CENTER
+        const startCx = startRect.left + startRect.width / 2;
+        const startCy = startRect.top + startRect.height / 2;
+        const targetCx = targetRect.left + targetRect.width / 2;
+        const targetCy = targetRect.top + targetRect.height / 2;
 
-        // Trigger the "fly into" animation
+        const dx = targetCx - startCx;
+        const dy = targetCy - startCy;
+        const scale = targetRect.width / startRect.width;
+
+        // Trigger transform
         requestAnimationFrame(() => {
-          splashLogo.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-          splashLogo.style.opacity = "0";
+          splashLogo.classList.add("fly");
+          splashLogo.style.transform =
+            `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scale})`;
         });
 
-        // Fade overlay AFTER logo reaches destination
-        setTimeout(() => {
-          splash.classList.add("fade");
-        }, 900);
+        // Fade overlay after landing
+        setTimeout(() => splash.classList.add("hide"), 900);
 
-        // Remove overlay shortly after fade
-        setTimeout(() => {
-          splash.remove();
-        }, 1500);
-      }
+        // Remove from DOM shortly after fade
+        setTimeout(() => splash.remove(), 1500);
+      };
 
-      // Wait for images/layout to be stable
-      if (document.readyState === "complete") {
+      // If the logo isn't decoded yet, wait a tick
+      if (splashLogo.complete && headerLogo.complete) {
         run();
       } else {
-        window.addEventListener("load", run, { once: true });
+        Promise.allSettled([
+          splashLogo.decode ? splashLogo.decode() : Promise.resolve(),
+          headerLogo.decode ? headerLogo.decode() : Promise.resolve()
+        ]).then(run);
       }
-    })();
+    });
   </script>
 </body>
 </html>
