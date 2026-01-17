@@ -63,7 +63,7 @@
       margin:0 auto;
       display:grid;
       gap:20px;
-      padding-bottom:36px;
+      padding-bottom:36px; /* bottom breathing room */
     }
 
     h1, h2{
@@ -93,6 +93,7 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
+
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -106,28 +107,76 @@
       height:3px;
       width:min(420px, 78vw);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:22px auto 18px;
+      margin:26px auto 20px; /* more padding */
       border-radius:999px;
       opacity:.95;
     }
 
     /* KPI BAR */
-    .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
     .kpi{ text-align:center; }
-    .kpi .label{ font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
-    .kpi .value{ margin-top:10px; font-size:clamp(28px,4vw,36px); font-weight:900; }
+    .kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+    .kpi .value{
+      margin-top:10px;
+      font-size:clamp(28px,4vw,36px);
+      font-weight:900;
+    }
 
     /* Layout */
-    .two-col{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; }
-    .right-col{ display:grid; gap:16px; align-items:stretch; }
-    .equal-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
+    .two-col{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:16px;
+      align-items:stretch;
+    }
+    .right-col{
+      display:grid;
+      gap:16px;
+      align-items:stretch;
+    }
 
-    .row{ display:flex; justify-content:space-between; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--stroke); gap:14px; }
+    .equal-two{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:stretch;
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      padding:12px 0;
+      border-bottom:1px solid var(--stroke);
+      gap:14px;
+    }
     .row:last-child{ border-bottom:none; }
     .row .title{ font-weight:700; }
 
-    .meta{ margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:rgba(255,255,255,.65); font-size:12px; }
-    .team{ color:var(--accent); font-weight:400; letter-spacing:.02em; }
+    .meta{
+      margin-top:6px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      color:rgba(255,255,255,.65);
+      font-size:12px;
+    }
+
+    .team{
+      color:var(--accent);
+      font-weight:400;
+      letter-spacing:.02em;
+    }
 
     .pill{
       display:inline-flex;
@@ -154,8 +203,16 @@
       white-space:nowrap;
       color:rgba(255,255,255,.92);
     }
-    .stage.offer{ background:rgba(247,142,98,.18); color:var(--accent); border:1px solid rgba(247,142,98,.35); }
-    .stage.hired{ background:rgba(22,163,74,.22); color:#16a34a; border:1px solid rgba(22,163,74,.35); }
+    .stage.offer{
+      background:rgba(247,142,98,.18);
+      color:var(--accent);
+      border:1px solid rgba(247,142,98,.35);
+    }
+    .stage.hired{
+      background:rgba(22,163,74,.22);
+      color:#16a34a;
+      border:1px solid rgba(22,163,74,.35);
+    }
 
     /* Candidate sources */
     .chart-wrap{
@@ -167,48 +224,145 @@
       overflow:hidden;
       position:relative;
     }
-    #candidateSourcesChart{ width:100% !important; height:100% !important; display:block; }
+
+    #candidateSourcesChart{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
+
     .chart-empty{
-      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-      color:var(--muted); font-size:12px; letter-spacing:.14em; text-transform:uppercase; text-align:center; padding:0 12px;
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      text-align:center;
+      padding:0 12px;
       pointer-events:none;
     }
 
-    .legend{ margin-top:10px; display:grid; gap:8px; }
-    .legend-item{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.10); font-size:12px; color:rgba(255,255,255,.88);
+    .legend{
+      margin-top:10px;
+      display:grid;
+      gap:8px;
     }
-    .legend-left{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .legend-dot{ width:10px; height:10px; border-radius:999px; box-shadow:0 0 0 4px rgba(255,255,255,.05); flex:0 0 auto; }
-    .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
-    .legend-pct{ font-weight:900; letter-spacing:.04em; }
+    .legend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.10);
+      font-size:12px;
+      color:rgba(255,255,255,.88);
+    }
+    .legend-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      box-shadow:0 0 0 4px rgba(255,255,255,.05);
+      flex:0 0 auto;
+    }
+    .legend-name{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      letter-spacing:.02em;
+    }
+    .legend-pct{
+      font-weight:900;
+      letter-spacing:.04em;
+    }
 
-    .list-item{ padding:10px 0; border-bottom:1px solid var(--stroke); font-size:14px; color:rgba(255,255,255,.85); }
+    .list-item{
+      padding:10px 0;
+      border-bottom:1px solid var(--stroke);
+      font-size:14px;
+      color:rgba(255,255,255,.85);
+    }
     .list-item:last-child{ border-bottom:none; }
 
     .quick-links{
-      margin-top:36px; padding-top:18px; border-top:1px solid rgba(255,255,255,.10);
-      display:flex; justify-content:center; gap:22px; flex-wrap:wrap; align-items:center;
+      margin-top:36px;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:center;
+      gap:22px;
+      flex-wrap:wrap;
+      align-items:center;
     }
+
     .quick-links a{
-      display:inline-flex; align-items:center; justify-content:center; gap:10px;
-      text-decoration:none; opacity:.82; transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      text-decoration:none;
+      opacity:.82;
+      transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
     }
-    .quick-links a:hover{ opacity:1; transform: translateY(-1px); }
-    .quick-links .logo-link{ padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.10); }
-    .quick-links img{ height:28px; max-width:130px; object-fit:contain; display:block; }
+
+    .quick-links a:hover{
+      opacity:1;
+      transform: translateY(-1px);
+    }
+
+    .quick-links .logo-link{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+    }
+
+    .quick-links img{
+      height:28px;
+      max-width:130px;
+      object-fit:contain;
+      display:block;
+    }
+
     .quick-links .text-link{
-      padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.10); color:rgba(255,255,255,.70);
-      font-size:11px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      color:rgba(255,255,255,.70);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      white-space:nowrap;
     }
-    .quick-links .text-link:hover{ color:#fff; border-color: rgba(247,142,98,.35); }
+
+    .quick-links .text-link:hover{
+      color:#fff;
+      border-color: rgba(247,142,98,.35);
+    }
 
     .powered-by{
-      display:flex; justify-content:center; align-items:center; gap:10px;
-      margin-top:18px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.55);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      margin-top:18px;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+      padding-bottom:36px; /* 36px from bottom */
     }
     .powered-by img{ height:22px; opacity:.9; }
 
@@ -221,15 +375,25 @@
 
     /* Splash overlay */
     .splash{
-      position:fixed; inset:0; z-index:9999;
+      position:fixed;
+      inset:0;
+      z-index:9999;
       background: rgba(12,47,51,.92);
-      opacity:1; pointer-events:auto;
+      opacity:1;
+      pointer-events:auto;
       transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
-    .splash.fade{ opacity:0; pointer-events:none; }
+    .splash.fade{
+      opacity:0;
+      pointer-events:none;
+    }
+
     .splash-logo{
-      position:fixed; left:50%; top:50%;
-      width:min(520px, 76vw); height:auto;
+      position:fixed;
+      left:50%;
+      top:50%;
+      width:min(520px, 76vw);
+      height:auto;
       filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
       will-change: transform;
       transform-origin:center center;
@@ -237,45 +401,64 @@
       transition: transform 950ms cubic-bezier(.4,0,.2,1);
     }
 
-    .legend-item.animate-pre{ opacity:0; transform: translateY(-14px); }
+    /* Legend animation */
+    .legend-item.animate-pre{
+      opacity:0;
+      transform: translateY(-14px);
+    }
     @keyframes legendDropBounce {
       0%   { opacity:0; transform: translateY(-14px); }
       70%  { opacity:1; transform: translateY(4px); }
       100% { opacity:1; transform: translateY(0); }
     }
-    .legend-item.animate-in{ animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards; }
+    .legend-item.animate-in{
+      animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards;
+    }
 
     /* =========================
-       Boat animation (CHANGED ONLY HERE)
-       - Uses Untitled design (16).png
-       - 2x-ish bigger
-       - Wake originates from stern center via offset-anchor
+       Boat animation layer
+       - Uses your attachment
+       - Bigger (2x-ish)
+       - Slower
+       - Wake comes from stern center (offset-anchor)
        ========================= */
     .topScene{ position: relative; }
+
     .boatLayer{
-      position:absolute; left:0; right:0; top:-8px; height:140px;
-      pointer-events:none; z-index:1; overflow:hidden; opacity:.22;
+      position:absolute;
+      left:0;
+      right:0;
+      top:-8px;
+      height:150px;
+      pointer-events:none;
+      z-index:1;
+      overflow:hidden;
+      opacity:.22;
     }
-    #headerLogo, .accent-line, h1{ position: relative; z-index: 2; }
+
+    #headerLogo, .accent-line, h1{
+      position: relative;
+      z-index: 2;
+    }
 
     .boat, .wake{
       position:absolute;
-      offset-path: path("M -90 82 C 60 5 240 20 330 76 C 420 130 560 124 650 62 C 750 0 860 0 950 62 C 1040 124 1170 132 1260 72 C 1345 26 1410 36 1480 62");
+      offset-path: path("M -120 86 C 80 6 260 20 350 78 C 450 142 600 132 700 64 C 820 0 940 10 1040 70 C 1140 130 1280 132 1380 72 C 1460 30 1540 40 1660 64");
       offset-rotate: auto;
       transform: translate(-50%,-50%);
       will-change: offset-distance, opacity;
     }
 
     .boat{
-      width:140px;                 /* ✅ bigger (about ~2x vs prior) */
+      width:220px;                 /* ✅ bigger */
       height:auto;
-      opacity:.9;
+      opacity:.92;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
       offset-distance: 0%;
-      offset-anchor: 6% 50%;       /* ✅ stern center (rear is left in this image) */
+      offset-anchor: 6% 50%;       /* ✅ stern center (rear is left on this image) */
     }
     .boat img{
-      width:140px;
+      width:220px;
       height:auto;
       display:block;
     }
@@ -300,6 +483,7 @@
 </head>
 
 <body>
+  <!-- Splash overlay -->
   <div class="splash" id="splash" aria-hidden="true">
     <img
       src="PSG Logo - White With Orange (1).png"
@@ -311,23 +495,25 @@
 
   <div class="dashboard">
 
+    <!-- Top scene -->
     <div class="topScene">
       <div class="boatLayer" aria-hidden="true">
-        <div class="wake w1"></div>
-        <div class="wake w2"></div>
-        <div class="wake w3"></div>
-        <div class="wake w4"></div>
-        <div class="wake w5"></div>
-        <div class="wake w6"></div>
-        <div class="wake w7"></div>
+        <!-- 7 trail dashes -->
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
 
+        <!-- boat (robust: tries your filename first, then a couple fallbacks) -->
         <div class="boat" id="psgBoat">
-          <!-- ✅ Put this PNG in the same folder as index.html -->
-          <img src="Untitled design (16).png" alt="" aria-hidden="true">
+          <img id="boatImg" src="Untitled design (16).png" alt="" aria-hidden="true">
         </div>
       </div>
 
-      <div style="display:flex; justify-content:center; margin-bottom:22px;">
+      <div style="display:flex; justify-content:center; margin-bottom:28px;">
         <img
           src="PSG Logo - White With Orange (1).png"
           alt="Pole Star Global"
@@ -340,15 +526,29 @@
       <h1>Hiring Dashboard</h1>
     </div>
 
+    <!-- KPI BAR -->
     <div class="card">
       <div class="kpi-grid">
-        <div class="kpi"><div class="label">Live Roles</div><div class="value" id="kpiLiveRoles">—</div></div>
-        <div class="kpi"><div class="label">On Hold</div><div class="value" id="kpiOnHold">—</div></div>
-        <div class="kpi"><div class="label">Offers</div><div class="value" id="kpiOffers">—</div></div>
-        <div class="kpi"><div class="label">Hires</div><div class="value" id="kpiHires">—</div></div>
+        <div class="kpi">
+          <div class="label">Live Roles</div>
+          <div class="value" id="kpiLiveRoles">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">On Hold</div>
+          <div class="value" id="kpiOnHold">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Offers</div>
+          <div class="value" id="kpiOffers">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Hires</div>
+          <div class="value" id="kpiHires">—</div>
+        </div>
       </div>
     </div>
 
+    <!-- Live Roles + Right Column -->
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
@@ -372,37 +572,51 @@
       </div>
     </div>
 
+    <!-- Progress / Challenges -->
     <div class="equal-two">
       <div class="card">
         <h2>Progress</h2>
-        <div id="progressList"><div class="list-item">—</div></div>
+        <div id="progressList">
+          <div class="list-item">—</div>
+        </div>
       </div>
+
       <div class="card">
         <h2>Challenges</h2>
-        <div id="challengesList"><div class="list-item">—</div></div>
+        <div id="challengesList">
+          <div class="list-item">—</div>
+        </div>
       </div>
     </div>
 
+    <!-- Key Focus -->
     <div class="card">
       <h2>Key Focus</h2>
-      <div id="keyFocusList"><div class="list-item">—</div></div>
+      <div id="keyFocusList">
+        <div class="list-item">—</div>
+      </div>
     </div>
 
+    <!-- Quick Links -->
     <div class="quick-links" aria-label="Quick Links">
       <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
         <img src="Teamtailor.webp" alt="Teamtailor">
       </a>
+
       <a class="logo-link" href="https://app.hibob.com" target="_blank" rel="noopener">
         <img src="bob.png" alt="HiBob">
       </a>
+
       <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
         Management Handbook
       </a>
+
       <a class="text-link" href="https://app.hibob.com/docs/company-docs/preview/576473" target="_blank" rel="noopener">
         Manager Guidelines
       </a>
     </div>
 
+    <!-- Powered by -->
     <div class="powered-by">
       <span>Powered by</span>
       <img src="scaleio.svg" alt="ScaleIO">
@@ -412,13 +626,20 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
+  <!-- Behaviour-only additions:
+       - Slower donut animation
+       - KPI count-up slower
+       - Legend drops in one-by-one slower + bounce
+  -->
   <script>
+    // Slow the donut wind-up without changing chart styling
     if (window.Chart && Chart.defaults) {
       Chart.defaults.animation.duration = 2800;
       Chart.defaults.animation.easing = "easeOutQuart";
     }
 
-    function animateCount(el, to, duration = 2200) {
+    // KPI count-up (slow)
+    function animateCount(el, to, duration = 2600) {
       const start = performance.now();
       const from = 0;
       const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
@@ -442,7 +663,7 @@
         const to = Number(raw) || 0;
         el.dataset.counted = "1";
         el.textContent = "0";
-        animateCount(el, to, 2200);
+        animateCount(el, to, 2600);
       };
 
       els.forEach(el => tryAnimate(el));
@@ -472,7 +693,7 @@
 
         requestAnimationFrame(() => {
           items.forEach((item, i) => {
-            item.style.animationDelay = `${i * 220}ms`;
+            item.style.animationDelay = `${i * 260}ms`; // slower stagger
             void item.offsetWidth;
             item.classList.add("animate-in");
             item.classList.remove("animate-pre");
@@ -484,6 +705,25 @@
       const mo = new MutationObserver(() => animateLegend());
       mo.observe(legend, { childList:true, subtree:true });
     }
+
+    // Robust boat filename fallback (so it shows even if the filename differs)
+    (function(){
+      const img = document.getElementById("boatImg");
+      if (!img) return;
+      const fallbacks = [
+        "Untitled design (16).png",
+        "Untitled design (15).png",
+        "boat.png",
+        "boat.webp"
+      ];
+      let i = 0;
+      img.onerror = () => {
+        i++;
+        if (i < fallbacks.length) img.src = fallbacks[i];
+      };
+      // ensure it starts with first entry
+      img.src = fallbacks[0];
+    })();
 
     window.addEventListener("DOMContentLoaded", () => {
       hookKpiCountUp();
@@ -497,10 +737,10 @@
       const boat = () => document.getElementById("psgBoat");
       const wakes = () => Array.from(document.querySelectorAll(".boatLayer .wake"));
 
-      const DURATION_MS = 110000;  // ✅ slower (boat-like)
-      const GAP = 0.022;
+      const DURATION_MS = 140000;  // slower
+      const GAP = 0.020;          // spacing for 7 dashes
       const START_DELAY_MS = 1200;
-      const STEP = 1 / 520;
+      const STEP = 1 / 520;       // gentle “step” feel
 
       function loop(now){
         const b = boat();
@@ -508,6 +748,8 @@
 
         const t = now || performance.now();
         const raw = (t % DURATION_MS) / DURATION_MS;
+
+        // step-by-step motion
         const prog = Math.round(raw / STEP) * STEP;
 
         b.style.offsetDistance = (prog * 100).toFixed(4) + "%";
@@ -524,11 +766,13 @@
             continue;
           }
 
+          // Always behind the boat
           let p = prog - GAP * (i + 1);
           if (p < 0) p += 1;
 
           w.style.offsetDistance = (p * 100).toFixed(4) + "%";
 
+          // Subtle fade along 7 dashes
           const fade = 0.55 - (i * (0.55 / (ws.length + 1)));
           w.style.opacity = String(Math.max(0.12, fade));
         }
@@ -541,8 +785,10 @@
     })();
   </script>
 
+  <!-- Your existing dashboard logic stays exactly as-is -->
   <script src="dashboard.js"></script>
 
+  <!-- Splash animation: logo flies to header while overlay fades -->
   <script>
     window.addEventListener("load", () => {
       window.scrollTo(0, 0);
