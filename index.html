@@ -23,6 +23,7 @@
     }
 
     *{ box-sizing:border-box; }
+    html, body { height:100%; }
 
     body{
       margin:0;
@@ -43,6 +44,7 @@
       margin:0;
     }
 
+    /* HIRING DASHBOARD FONT */
     h1{
       font-family: "Unbounded", sans-serif;
       font-weight:600;
@@ -63,7 +65,6 @@
       margin:0 auto;
       display:grid;
       gap:20px;
-      position:relative;
     }
 
     .card{
@@ -81,6 +82,7 @@
       border-color: rgba(255,255,255,.18);
     }
 
+    /* Accent fade line under logo */
     .accent-line{
       height:3px;
       width:min(420px, 78vw);
@@ -122,6 +124,7 @@
       align-items:stretch;
     }
 
+    /* Bottom pair: Progress + Challenges equal size */
     .equal-two{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -129,6 +132,7 @@
       align-items:stretch;
     }
 
+    /* Rows (used for roles + starters) */
     .row{
       display:flex;
       justify-content:space-between;
@@ -150,12 +154,14 @@
       font-size:12px;
     }
 
+    /* TEAM STYLE — orange but NOT bold */
     .team{
       color:var(--accent);
       font-weight:400;
       letter-spacing:.02em;
     }
 
+    /* Neutral pill style (Location + Start Date) */
     .pill{
       display:inline-flex;
       align-items:center;
@@ -170,6 +176,7 @@
       color:rgba(255,255,255,.92);
     }
 
+    /* Stage pill */
     .stage{
       padding:6px 12px;
       border-radius:999px;
@@ -194,6 +201,7 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
+    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
@@ -225,6 +233,7 @@
       pointer-events:none;
     }
 
+    /* Legend under chart */
     .legend{
       margin-top:10px;
       display:grid;
@@ -354,57 +363,63 @@
     }
 
     /* =========================
-       Splash overlay animation
+       Splash overlay (logo-to-header)
        ========================= */
     .splash{
       position:fixed;
       inset:0;
       display:grid;
       place-items:center;
-      background:linear-gradient(180deg, rgba(12,47,51,.92), rgba(12,47,51,.98));
+      background:linear-gradient(180deg, rgba(12,47,51,.96), rgba(12,47,51,.99));
       z-index:9999;
-      animation: splashFadeOut 900ms ease 1100ms forwards;
     }
 
-    .splash .logo{
+    .splash-logo{
       width:min(520px, 76vw);
       height:auto;
       filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
+      transform-origin: top left;
+      will-change: transform, opacity;
       opacity:0;
-      transform: translateY(12px) scale(1.02);
-      animation: splashIn 650ms ease forwards, logoPullBack 900ms ease 1100ms forwards;
-      transform-origin: center;
+      transform: translateY(10px) scale(1.02);
+      transition:
+        transform 900ms cubic-bezier(.4,0,.2,1),
+        opacity 650ms ease;
     }
 
-    @keyframes splashIn{
-      to{ opacity:1; transform:translateY(0) scale(1); }
+    .splash.show .splash-logo{
+      opacity:1;
+      transform: translateY(0) scale(1);
     }
 
-    @keyframes splashFadeOut{
-      to{ opacity:0; visibility:hidden; pointer-events:none; }
-    }
-
-    /* "Pull back into position" feel */
-    @keyframes logoPullBack{
-      to{
-        transform: translateY(-120px) scale(.28);
-        opacity:0;
-      }
+    .splash.fade{
+      transition: opacity 600ms ease;
+      opacity:0;
+      pointer-events:none;
     }
   </style>
 </head>
 
 <body>
   <!-- Splash overlay -->
-  <div class="splash" aria-hidden="true">
-    <img class="logo" src="PSG Logo - White With Orange (1).png" alt="Pole Star Global">
+  <div class="splash" id="splash" aria-hidden="true">
+    <img
+      src="PSG Logo - White With Orange (1).png"
+      alt="Pole Star Global"
+      class="splash-logo"
+      id="splashLogo"
+    />
   </div>
 
   <div class="dashboard">
 
     <div style="display:flex; justify-content:center; margin-bottom:8px;">
-      <!-- Header logo stays in place (splash "pulls back" toward here visually) -->
-      <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" style="height:64px;">
+      <img
+        src="PSG Logo - White With Orange (1).png"
+        alt="Pole Star Global"
+        id="headerLogo"
+        style="height:64px;"
+      >
     </div>
 
     <div class="accent-line"></div>
@@ -482,7 +497,7 @@
       </div>
     </div>
 
-    <!-- Quick Links -->
+    <!-- Quick Links (above powered-by) -->
     <div class="quick-links" aria-label="Quick Links">
       <a class="logo-link" href="https://app.teamtailor.com" target="_blank" rel="noopener">
         <img src="Teamtailor.webp" alt="Teamtailor">
@@ -511,5 +526,50 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="dashboard.js"></script>
+
+  <!-- Splash animation script: logo lands exactly on header logo -->
+  <script>
+    (function () {
+      const splash = document.getElementById("splash");
+      const splashLogo = document.getElementById("splashLogo");
+      const headerLogo = document.getElementById("headerLogo");
+      if (!splash || !splashLogo || !headerLogo) return;
+
+      // Show initial fade-in
+      requestAnimationFrame(() => splash.classList.add("show"));
+
+      function run() {
+        const splashRect = splashLogo.getBoundingClientRect();
+        const targetRect = headerLogo.getBoundingClientRect();
+
+        const scale = targetRect.width / splashRect.width;
+        const dx = targetRect.left - splashRect.left;
+        const dy = targetRect.top - splashRect.top;
+
+        // Trigger the "fly into" animation
+        requestAnimationFrame(() => {
+          splashLogo.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+          splashLogo.style.opacity = "0";
+        });
+
+        // Fade overlay AFTER logo reaches destination
+        setTimeout(() => {
+          splash.classList.add("fade");
+        }, 900);
+
+        // Remove overlay shortly after fade
+        setTimeout(() => {
+          splash.remove();
+        }, 1500);
+      }
+
+      // Wait for images/layout to be stable
+      if (document.readyState === "complete") {
+        run();
+      } else {
+        window.addEventListener("load", run, { once: true });
+      }
+    })();
+  </script>
 </body>
 </html>
