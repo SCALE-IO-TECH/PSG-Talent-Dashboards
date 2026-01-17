@@ -247,9 +247,9 @@
 
     /* =========================
        Boat animation (CHANGED ONLY HERE)
-       - Uses your dinghy image
-       - Slower
-       - Trail comes from CENTER of stern (boat anchor set to stern)
+       - Uses Untitled design (16).png
+       - 2x-ish bigger
+       - Wake originates from stern center via offset-anchor
        ========================= */
     .topScene{ position: relative; }
     .boatLayer{
@@ -267,15 +267,15 @@
     }
 
     .boat{
-      width:54px;                 /* dinghy slightly bigger */
+      width:140px;                 /* ✅ bigger (about ~2x vs prior) */
       height:auto;
       opacity:.9;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
       offset-distance: 0%;
-      offset-anchor: 12% 50%;     /* ✅ anchor at stern center so wake starts from back */
+      offset-anchor: 6% 50%;       /* ✅ stern center (rear is left in this image) */
     }
     .boat img{
-      width:54px;
+      width:140px;
       height:auto;
       display:block;
     }
@@ -323,11 +323,10 @@
 
         <div class="boat" id="psgBoat">
           <!-- ✅ Put this PNG in the same folder as index.html -->
-          <img src="Untitled design (15).png" alt="" aria-hidden="true">
+          <img src="Untitled design (16).png" alt="" aria-hidden="true">
         </div>
       </div>
 
-      <!-- ✅ more padding below logo -->
       <div style="display:flex; justify-content:center; margin-bottom:22px;">
         <img
           src="PSG Logo - White With Orange (1).png"
@@ -498,10 +497,10 @@
       const boat = () => document.getElementById("psgBoat");
       const wakes = () => Array.from(document.querySelectorAll(".boatLayer .wake"));
 
-      const DURATION_MS = 90000;      // ✅ slower
+      const DURATION_MS = 110000;  // ✅ slower (boat-like)
       const GAP = 0.022;
       const START_DELAY_MS = 1200;
-      const STEP = 1 / 480;
+      const STEP = 1 / 520;
 
       function loop(now){
         const b = boat();
