@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hiring Dashboard</title>
 
-  <!-- Stop browser scroll restoration BEFORE anything paints -->
+  <!-- Prevent scroll-restore BEFORE paint -->
   <script>
     try { history.scrollRestoration = "manual"; } catch(e) {}
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
+    // pageshow catches BFCache reloads that often restore scroll
+    window.addEventListener("pageshow", () => { window.scrollTo(0,0); }, { once:true });
+    window.scrollTo(0,0);
   </script>
 
   <!-- Google Fonts -->
@@ -31,6 +32,7 @@
 
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
+    html { scroll-behavior:auto; }
 
     body{
       margin:0;
@@ -39,7 +41,7 @@
       padding:28px;
       overflow-x:hidden;
 
-      /* ✅ RESTORED: ORIGINAL PERFECT GLOWS (UNCHANGED) */
+      /* ✅ EXACT ORIGINAL GLOWS — DO NOT CHANGE */
       background:
         radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
@@ -75,17 +77,18 @@
       gap:20px;
       position:relative;
 
-      /* ✅ NEW: bottom breathing room so Powered by isn't flush */
+      /* ✅ 36px breathing room at the bottom (ScaleIO not flush) */
       padding-bottom:36px;
     }
 
-    /* ✅ Hover lift stays */
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:20px;
+
+      /* ✅ hover lift */
       transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
       will-change: transform;
     }
@@ -143,6 +146,7 @@
       align-items:stretch;
     }
 
+    /* Rows */
     .row{
       display:flex;
       justify-content:space-between;
@@ -206,6 +210,7 @@
       border:1px solid rgba(22,163,74,.35);
     }
 
+    /* Candidate sources */
     .chart-wrap{
       height:190px;
       border-radius:14px;
@@ -286,6 +291,7 @@
     }
     .list-item:last-child{ border-bottom:none; }
 
+    /* Quick Links */
     .quick-links{
       margin-top:36px;
       padding-top:18px;
@@ -363,16 +369,21 @@
       .chart-wrap{ height:220px; }
     }
 
-    /* Splash overlay: transparent so glows stay exact */
+    /* =========================
+       Splash overlay (WITH overlay + fades while moving)
+       ========================= */
     .splash{
       position:fixed;
       inset:0;
       z-index:9999;
-      background: transparent;
-      backdrop-filter: blur(1px) brightness(.92);
-      -webkit-backdrop-filter: blur(1px) brightness(.92);
+
+      /* ✅ Real overlay tint (like calculator) */
+      background: rgba(12,47,51,.92);
+
       opacity:1;
       pointer-events:auto;
+
+      /* overlay fades while logo moves */
       transition: opacity 950ms cubic-bezier(.4,0,.2,1);
     }
     .splash.fade{
@@ -389,6 +400,7 @@
       filter: drop-shadow(0 22px 40px rgba(0,0,0,.45));
       will-change: transform;
       transform-origin:center center;
+
       transform: translate(-50%, -50%) translate(0px, 0px) scale(1);
       transition: transform 950ms cubic-bezier(.4,0,.2,1);
     }
@@ -528,12 +540,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="dashboard.js"></script>
 
-  <!-- Splash animation: pull to header while overlay fades (glows unchanged) -->
+  <!-- Splash animation: logo flies to header while overlay fades -->
   <script>
     window.addEventListener("load", () => {
       window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
 
       const splash = document.getElementById("splash");
       const splashLogo = document.getElementById("splashLogo");
@@ -562,8 +572,6 @@
         setTimeout(() => {
           splash.remove();
           window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
         }, 980);
       };
 
