@@ -294,7 +294,7 @@
       animation: legendDropBounce 980ms cubic-bezier(.2,.9,.2,1.2) forwards;
     }
 
-    /* TWO BOATS layer */
+    /* BOAT layer */
     .topScene{ position: relative; }
     .boatLayer{
       position:absolute;
@@ -307,14 +307,14 @@
     }
     #headerLogo, .accent-line, h1{ position:relative; z-index:2; }
 
-    .boatA, .boatB{
+    .boatA{
       position:absolute;
       width:220px;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
       will-change: transform;
       opacity:.95;
     }
-    .boatA img, .boatB img{ width:220px; height:auto; display:block; }
+    .boatA img{ width:220px; height:auto; display:block; }
 
     .wakeDash{
       position:absolute;
@@ -350,7 +350,7 @@
 
   <div class="dashboard">
 
-    <!-- Header + boats -->
+    <!-- Header + boat -->
     <div class="topScene">
       <div class="boatLayer" aria-hidden="true" id="boatLayer">
         <!-- Boat A -->
@@ -361,15 +361,6 @@
         <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
         <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
         <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
-
-        <!-- Boat B -->
-        <div class="boatB" id="boatB">
-          <img id="boatImgB" src="Untitled design (16).png" alt="" aria-hidden="true">
-        </div>
-        <!-- 12 dashes B -->
-        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
-        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
-        <div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div><div class="wakeDash b"></div>
       </div>
 
       <!-- Logo: 40px top padding -->
@@ -544,41 +535,40 @@
     });
   </script>
 
-  <!-- ✅ TWO BOATS: start off-screen + cross paths + NEVER touch (hard safety rule) -->
+  <!-- ✅ ONE BOAT ONLY: same behaviour, enters view quicker -->
   <script>
     (function(){
       const layer = document.getElementById("boatLayer");
       const aBoat = document.getElementById("boatA");
-      const bBoat = document.getElementById("boatB");
-      if (!layer || !aBoat || !bBoat) return;
+      if (!layer || !aBoat) return;
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
       const imgA = document.getElementById("boatImgA");
-      const imgB = document.getElementById("boatImgB");
       const fallback = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
-      [imgA,imgB].forEach(img=>{
-        if (!img) return;
+      if (imgA) {
         let i=0;
-        img.onerror=()=>{ i++; if(i<fallback.length) img.src=fallback[i]; };
-        img.src=fallback[0];
-      });
+        imgA.onerror=()=>{ i++; if(i<fallback.length) imgA.src=fallback[i]; };
+        imgA.src=fallback[0];
+      }
+
+      // If Boat B / B dashes exist in markup (older file), hide them safely
+      const bBoat = document.getElementById("boatB");
+      if (bBoat) bBoat.style.display = "none";
+      layer.querySelectorAll(".wakeDash.b").forEach(el => el.style.display = "none");
 
       const aDashes = Array.from(layer.querySelectorAll(".wakeDash.a"));
-      const bDashes = Array.from(layer.querySelectorAll(".wakeDash.b"));
-      if (aDashes.length !== 12 || bDashes.length !== 12) return;
+      if (aDashes.length !== 12) return;
 
-      // Lines cross (same crossing point), endpoints well off-screen
       const lineA = { x1: -380, y1: 148, x2: 1580, y2: 56 };
-      const lineB = { x1: 1580, y1: 56,  x2: -380, y2: 148 };
 
-      const DURATION = 160000;                         // slow
-      const START_DELAY_B = Math.round(DURATION * 0.52); // B waits OFFSCREEN then starts
-      const back = 110;                                 // stern start
-      const dashStep = 22;                              // dash spacing
-      const SAFE_DIST = 220;                            // hard no-touch radius (bigger than boat width)
+      const DURATION = 160000;     // same slow speed as before
+      const back = 110;
+      const dashStep = 22;
+
+      // ✅ Start further along the path so it appears sooner
+      const START_OFFSET = 0.22;   // increase for even quicker entry
+
       const t0 = performance.now();
-
-      let bPhaseNudge = 0; // adjusts B timing if it ever gets too close
 
       function lerp(a,b,t){ return a + (b-a)*t; }
       function posOnLine(line, p){ return { x: lerp(line.x1, line.x2, p), y: lerp(line.y1, line.y2, p) }; }
@@ -614,41 +604,12 @@
         }
       }
 
-      function dist(a,b){
-        const dx = a.x - b.x, dy = a.y - b.y;
-        return Math.hypot(dx,dy);
-      }
-
       function loop(now){
         const t = (now || performance.now()) - t0;
+        const pA = (((t % DURATION) / DURATION) + START_OFFSET) % 1;
 
-        const pA = (t % DURATION) / DURATION;
-
-        // Boat B: pinned at start (off-screen) until delay passes
-        let pB = 0;
-        if (t >= START_DELAY_B){
-          pB = (((t - START_DELAY_B) / DURATION) + bPhaseNudge) % 1;
-          if (pB < 0) pB += 1;
-        }
-
-        const ptA = setBoat(aBoat, lineA, pA);
+        setBoat(aBoat, lineA, pA);
         setDashes(aDashes, lineA, pA);
-
-        const ptB = setBoat(bBoat, lineB, pB);
-        setDashes(bDashes, lineB, pB);
-
-        // ✅ Hard collision avoidance: if boats ever get too close, nudge B timing away
-        // (wakes can cross; boat bodies never overlap)
-        if (t >= START_DELAY_B) {
-          const d = dist(ptA, ptB);
-          if (d < SAFE_DIST) {
-            // push B along its route a tiny bit each frame until safe
-            bPhaseNudge += 0.0025;
-          } else {
-            // very slowly relax nudge so it doesn't drift forever
-            bPhaseNudge *= 0.9992;
-          }
-        }
 
         requestAnimationFrame(loop);
       }
