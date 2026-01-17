@@ -120,7 +120,15 @@
     .right-col{ display:grid; gap:16px; align-items:stretch; }
     .equal-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
 
-    .row{ display:flex; justify-content:space-between; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--stroke); gap:14px; }
+    /* ✅ FIX: keep stage pill vertically centered (was flex-start) */
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid var(--stroke);
+      gap:14px;
+    }
     .row:last-child{ border-bottom:none; }
     .row .title{ font-weight:700; }
 
@@ -147,8 +155,12 @@
       background:rgba(255,255,255,.12);
       white-space:nowrap;
       color:rgba(255,255,255,.92);
+      line-height:1;
     }
+
     .stage{
+      display:inline-flex;
+      align-items:center;
       padding:6px 12px;
       border-radius:999px;
       font-size:11px;
@@ -158,6 +170,7 @@
       background:rgba(255,255,255,.12);
       white-space:nowrap;
       color:rgba(255,255,255,.92);
+      line-height:1;
     }
     .stage.offer{ background:rgba(247,142,98,.18); color:var(--accent); border:1px solid rgba(247,142,98,.35); }
     .stage.hired{ background:rgba(22,163,74,.22); color:#16a34a; border:1px solid rgba(22,163,74,.35); }
@@ -257,7 +270,8 @@
 
     /* =========================
        TWO BOATS + 12 dashes each
-       ✅ Updated lines: more diagonal + separated so boats never touch
+       - Boats cross the SAME crossing point, but at DIFFERENT TIMES (phase offset)
+       - Wakes can cross; boats never collide
        ========================= */
     .topScene{ position: relative; }
     .boatLayer{
@@ -497,7 +511,7 @@
     });
   </script>
 
-  <!-- ✅ TWO BOATS + 12 Dashes each (more diagonal + separated) -->
+  <!-- ✅ TWO BOATS (cross same point, different timing so they never touch) -->
   <script>
     (function(){
       const layer = document.getElementById("boatLayer");
@@ -520,13 +534,15 @@
       const bDashes = Array.from(layer.querySelectorAll(".wakeDash.b"));
       if (aDashes.length !== 12 || bDashes.length !== 12) return;
 
-      // ✅ More diagonal + vertical separation => never touch
-      // A: lower diagonal (left -> right)
-      const lineA = { x1: -160, y1: 60,  x2: 1320, y2: 140 };
-      // B: upper diagonal (right -> left)
-      const lineB = { x1: 1320, y1: 52, x2: -160, y2: 112 };
+      /* Lines CROSS at the same point (roughly center of layer) */
+      const lineA = { x1: -160, y1: 138, x2: 1320, y2: 58 };  // down-left -> up-right
+      const lineB = { x1: 1320, y1: 58,  x2: -160, y2: 138 }; // up-right -> down-left
 
-      const DURATION = 160000; // slow
+      const DURATION = 160000;    // slow
+      const PHASE_B = 0.52;       // ✅ time offset so boats never meet at the crossing
+      const back = 110;           // px behind boat center = stern start
+      const dashStep = 22;        // px between dashes
+
       function lerp(a,b,t){ return a + (b-a)*t; }
       function posOnLine(line, p){ return { x: lerp(line.x1, line.x2, p), y: lerp(line.y1, line.y2, p) }; }
 
@@ -536,21 +552,18 @@
         el.style.transform = `translate(${pt.x}px, ${pt.y}px) translate(-50%,-50%) rotate(${angle}deg)`;
       }
 
-      // Stern point: start trail a fixed distance behind along the line direction
       function setDashes(dashes, line, p){
         const dx = line.x2-line.x1, dy = line.y2-line.y1;
         const len = Math.hypot(dx,dy) || 1;
         const ux = dx/len, uy = dy/len;
 
         const boatPt = posOnLine(line, p);
-
-        const back = 110; // from boat center to stern center
         const sternX = boatPt.x - ux*back;
         const sternY = boatPt.y - uy*back;
 
         for(let i=0;i<dashes.length;i++){
           const dash = dashes[i];
-          const dist = i * 22; // spacing between dashes
+          const dist = i * dashStep;
           const x = sternX - ux*dist;
           const y = sternY - uy*dist;
 
@@ -562,13 +575,14 @@
 
       function loop(now){
         const t = now || performance.now();
-        const p = (t % DURATION) / DURATION;
+        const pA = (t % DURATION) / DURATION;
+        const pB = (pA + PHASE_B) % 1; // ✅ different timing => no collision
 
-        setBoat(aBoat, lineA, p);
-        setDashes(aDashes, lineA, p);
+        setBoat(aBoat, lineA, pA);
+        setDashes(aDashes, lineA, pA);
 
-        setBoat(bBoat, lineB, p);
-        setDashes(bDashes, lineB, p);
+        setBoat(bBoat, lineB, pB);
+        setDashes(bDashes, lineB, pB);
 
         requestAnimationFrame(loop);
       }
