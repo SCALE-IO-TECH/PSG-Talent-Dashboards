@@ -416,9 +416,10 @@
     }
 
     /* =========================
-       Boat animation layer (FIXED)
-       - Wake originates from stern CENTER of the BOAT element
-       - Smooth movement (no step quantization)
+       Boat animation layer (VISIBLE + CORRECT WAKE)
+       - We animate offset-distance on BOAT and on each DASH.
+       - We set offset-anchor so the "position point" is the stern center.
+       - Smooth movement (no quantized stepping).
        ========================= */
     .topScene{ position: relative; }
 
@@ -439,40 +440,36 @@
       z-index: 2;
     }
 
-    .boatTrack, .wakeTrack{
+    .boat, .wake{
       position:absolute;
-      inset:0;
-      pointer-events:none;
-    }
-
-    /* The path is on the "track" elements, not on boat/wake directly */
-    .boatTrack{
       offset-path: path("M -120 86 C 80 6 260 20 350 78 C 450 142 600 132 700 64 C 820 0 940 10 1040 70 C 1140 130 1280 132 1380 72 C 1460 30 1540 40 1660 64");
       offset-rotate: auto;
       transform: translate(-50%,-50%);
-      left:0; top:0;
+      will-change: offset-distance, opacity;
     }
 
-    /* Boat image: bigger */
-    .boatSprite{
+    .boat{
+      width:220px;
+      height:auto;
+      opacity:.92;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
+      offset-distance: 0%;
+      offset-anchor: 6% 50%; /* ✅ stern center (rear is left on this image) */
+    }
+    .boat img{
       width:220px;
       height:auto;
       display:block;
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
     }
 
-    /* Wake: positioned relative to boatTrack so it *must* appear behind stern center */
-    .wakeDash{
-      position:absolute;
-      left:0;
-      top:0;
+    .wake{
       width:12px;
       height:3px;
       border-radius:999px;
       background: rgba(247,142,98,.95);
       opacity:.55;
-      transform: translate(-50%,-50%);
-      will-change: transform, opacity;
+      offset-distance: 0%;
+      offset-anchor: 50% 50%;
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -500,20 +497,20 @@
 
     <!-- Top scene -->
     <div class="topScene">
-      <div class="boatLayer" aria-hidden="true" id="boatLayer">
-        <!-- Boat track (we animate offset-distance on this wrapper) -->
-        <div class="boatTrack" id="boatTrack">
-          <img class="boatSprite" id="boatImg" src="Untitled design (16).png" alt="" aria-hidden="true">
-        </div>
+      <div class="boatLayer" aria-hidden="true">
+        <!-- 7 trail dashes -->
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
+        <div class="wake"></div>
 
-        <!-- 7 dash elements (we place them behind the stern center in JS) -->
-        <div class="wakeDash"></div>
-        <div class="wakeDash"></div>
-        <div class="wakeDash"></div>
-        <div class="wakeDash"></div>
-        <div class="wakeDash"></div>
-        <div class="wakeDash"></div>
-        <div class="wakeDash"></div>
+        <!-- boat -->
+        <div class="boat" id="psgBoat">
+          <img id="boatImg" src="Untitled design (16).png" alt="" aria-hidden="true">
+        </div>
       </div>
 
       <div style="display:flex; justify-content:center; margin-bottom:28px;">
@@ -692,72 +689,52 @@
     });
   </script>
 
-  <!-- ✅ BOAT: smooth movement + wake from stern center (computed from boat image width) -->
+  <!-- ✅ BOAT: smooth + wake exactly behind stern center -->
   <script>
     (function(){
-      const track = document.getElementById("boatTrack");
-      const layer = document.getElementById("boatLayer");
-      const img = document.getElementById("boatImg");
-      const dashes = Array.from(layer.querySelectorAll(".wakeDash"));
-
-      if (!track || !layer || !img || dashes.length === 0) return;
+      const boat = document.getElementById("psgBoat");
+      const dashes = Array.from(document.querySelectorAll(".boatLayer .wake"));
+      if (!boat || dashes.length === 0) return;
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      const DURATION_MS = 140000; // slow
-      const GAP = 0.020;         // dash spacing along path
-      const START_DELAY_MS = 900;
-
-      function lerp(a,b,t){ return a + (b-a)*t; }
-
-      function placeDash(dash, boatRect, progressBehind, opacity){
-        // Put dash at the same path position but slightly behind via progressBehind
-        track.style.offsetDistance = (progressBehind * 100).toFixed(4) + "%";
-        const dashPoint = track.getBoundingClientRect();
-
-        // Stern center point: LEFT edge + a little inset, vertically centered
-        // (image rear is left; we want dead center of stern)
-        const sternX = boatRect.left + 10; // small inset from absolute edge
-        const sternY = boatRect.top + boatRect.height / 2;
-
-        // Use stern point, NOT dashPoint, to guarantee it comes from stern center
-        dash.style.transform = `translate(${sternX}px, ${sternY}px) translate(-50%,-50%)`;
-        dash.style.opacity = String(opacity);
+      // Ensure boat image loads even if filename differs
+      const boatImg = document.getElementById("boatImg");
+      if (boatImg){
+        const fallbacks = ["Untitled design (16).png","boat.png","Untitled design (15).png"];
+        let idx = 0;
+        boatImg.onerror = () => { idx++; if (idx < fallbacks.length) boatImg.src = fallbacks[idx]; };
+        boatImg.src = fallbacks[0];
       }
 
-      let lastTime = 0;
-      let smoothProg = 0; // smooth progress (0..1)
+      const DURATION_MS = 140000; // slow
+      const GAP = 0.020;          // spacing
+      const START_DELAY_MS = 900;
 
       function loop(now){
         const t = now || performance.now();
-
-        // smooth progress based on time
         const raw = (t % DURATION_MS) / DURATION_MS;
 
-        // smooth easing toward raw (removes jitter)
-        const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
-        lastTime = t;
-        const follow = 1 - Math.pow(0.0001, dt); // critically damped-ish
-        smoothProg = lerp(smoothProg, raw, follow);
+        // Smooth continuous movement
+        boat.style.offsetDistance = (raw * 100).toFixed(4) + "%";
 
-        track.style.offsetDistance = (smoothProg * 100).toFixed(4) + "%";
-
-        const showTrail = t > START_DELAY_MS;
-        const boatRect = track.getBoundingClientRect();
+        const show = t > START_DELAY_MS;
 
         for (let i = 0; i < dashes.length; i++){
-          const dash = dashes[i];
-
-          if (!showTrail){
-            dash.style.opacity = "0";
+          const w = dashes[i];
+          if (!show){
+            w.style.opacity = "0";
+            w.style.offsetDistance = "0%";
             continue;
           }
 
-          let p = smoothProg - GAP * (i + 1);
+          let p = raw - GAP * (i + 1);
           if (p < 0) p += 1;
 
+          // Dash follows exact same path but behind boat
+          w.style.offsetDistance = (p * 100).toFixed(4) + "%";
+
           const fade = 0.55 - (i * (0.55 / (dashes.length + 1)));
-          // place dash at stern center (so it never comes out the side)
-          placeDash(dash, boatRect, p, Math.max(0.12, fade));
+          w.style.opacity = String(Math.max(0.12, fade));
         }
 
         requestAnimationFrame(loop);
@@ -770,7 +747,7 @@
   <!-- Your existing dashboard logic stays exactly as-is -->
   <script src="dashboard.js"></script>
 
-  <!-- Splash animation: logo flies to header while overlay fades -->
+  <!-- Splash animation -->
   <script>
     window.addEventListener("load", () => {
       window.scrollTo(0, 0);
