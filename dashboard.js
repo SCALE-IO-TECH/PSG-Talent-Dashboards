@@ -317,7 +317,7 @@ async function loadTextListFromSheet(gid, containerId) {
     return;
   }
 
-  const body = rows.slice(1); // skip header row
+  const body = rows.slice(1);
   const items = [];
 
   for (const r of body) {
@@ -349,7 +349,6 @@ async function loadPipelineHealth() {
   ]);
   if (iPH < 0) return;
 
-  // ✅ find first non-empty pipeline_health value anywhere in the rows
   let chosen = "";
   for (const r of rows) {
     const v = String(r[iPH] ?? "").trim();
@@ -390,20 +389,21 @@ function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   el.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
 }
 
-/* ✅ NEW: formats "35" or "35 days" as: 35 <small>days</small> */
-function setDaysValue(el, v) {
+/* ✅ NEW: format number + small "days" unit */
+function formatDays(el, v) {
   if (!el) return;
   const raw = String(v ?? "").trim();
   if (!raw) { el.textContent = "—"; return; }
 
-  // Accept: "35", "35 days", "35 day", "35d"
+  // If value is like "35", "35 days", "35d"
   const m = raw.match(/^(\d+(?:\.\d+)?)\s*(days?|d)?$/i);
   if (m) {
-    el.innerHTML = `${esc(m[1])} <span class="unit">days</span>`;
+    const num = m[1];
+    el.innerHTML = `${esc(num)} <span class="unit">days</span>`;
     return;
   }
 
-  // Otherwise, leave as-is (escaped)
+  // fallback: show as-is (escaped)
   el.textContent = raw;
 }
 
@@ -442,10 +442,10 @@ async function loadTimeToOffer() {
   const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
   const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
 
-  // ✅ changed: render number + small "days"
-  setDaysValue(elTarget, tVal);
-  setDaysValue(elCurrent, cVal);
-  setDaysValue(elExpected, eVal);
+  // ✅ changed: render with small "days"
+  formatDays(elTarget, tVal);
+  formatDays(elCurrent, cVal);
+  formatDays(elExpected, eVal);
 }
 
 // ===== INIT =====
