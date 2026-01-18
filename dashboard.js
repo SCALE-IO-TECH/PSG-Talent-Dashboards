@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (SLICK CENTRED BAR)
+   PIPELINE HEALTH (bar + labels; only current highlighted)
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -347,26 +347,18 @@ async function loadPipelineHealth() {
   if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
   if (!chosen) return;
 
-  const norm = chosen.trim().toLowerCase();
+  const norm = String(chosen).trim().toLowerCase().replace(/\s+/g, " ");
 
+  // Only one active at a time
   const steps = Array.from(wrap.querySelectorAll(".pipeline-step"));
   steps.forEach(s => s.classList.remove("active"));
 
-  // Normalize "needs work" spacing
-  const matchKey = (k) => String(k || "").trim().toLowerCase().replace(/\s+/g, " ");
-  const target = steps.find(s => matchKey(s.getAttribute("data-key")) === matchKey(norm));
-  if (target) target.classList.add("active");
+  const target = steps.find(s => {
+    const k = String(s.getAttribute("data-key") || "").trim().toLowerCase().replace(/\s+/g, " ");
+    return k === norm;
+  });
 
-  // Update status text
-  const statusEl = document.getElementById("pipelineHealthStatus");
-  if (statusEl) {
-    const pretty =
-      norm === "ok" ? "OK" :
-      norm === "needs work" ? "Needs work" :
-      norm ? norm.charAt(0).toUpperCase() + norm.slice(1) : "—";
-    statusEl.textContent = pretty;
-    statusEl.setAttribute("data-status", matchKey(norm));
-  }
+  if (target) target.classList.add("active");
 }
 
 /* ===========================
