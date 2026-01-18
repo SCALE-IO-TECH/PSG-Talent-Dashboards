@@ -72,7 +72,6 @@
       margin:0;
     }
 
-    /* ✅ Only header uses Unbounded */
     h1{
       font-family:"Unbounded", sans-serif;
       font-weight:600;
@@ -123,7 +122,6 @@
     .right-col{ display:grid; gap:16px; align-items:stretch; }
     .equal-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
 
-    /* ✅ Pill alignment + size fix */
     .row{
       display:flex;
       justify-content:space-between;
@@ -327,7 +325,33 @@
       will-change: transform, opacity;
     }
 
-    /* ✅ NEW (only styling for the added sections) */
+    /* ✅ NEW section styles (Pipeline bar + Time to offer tooltips) */
+    .pipeline-scale{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+      align-items:center;
+    }
+    .pipeline-step{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      border-radius:999px;
+      padding:10px 8px;
+      text-align:center;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.72);
+      user-select:none;
+    }
+    .pipeline-step.active{
+      border-color: rgba(247,142,98,.40);
+      background: rgba(247,142,98,.16);
+      color: rgba(255,255,255,.95);
+      box-shadow: 0 18px 40px rgba(0,0,0,.28);
+    }
+
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -391,6 +415,8 @@
       background: rgba(0,0,0,.55);
       color: rgba(255,255,255,.90);
       font-size:12px;
+      font-weight:500; /* not bold */
+      line-height:1.35;
       box-shadow: 0 18px 50px rgba(0,0,0,.45);
       opacity:0;
       transform: translateY(-6px);
@@ -404,29 +430,10 @@
       transform: translateY(0);
     }
 
-    .pipeline-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 14px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-      width:fit-content;
-      max-width:100%;
-      color:rgba(255,255,255,.95);
-    }
-    .pipeline-pill.good{
-      border-color: rgba(247,142,98,.35);
-      background: rgba(247,142,98,.12);
-    }
-
     @media (max-width:900px){
       .metric-grid{ grid-template-columns:1fr; }
+      .pipeline-scale{ grid-template-columns:1fr; }
+      .pipeline-step{ border-radius:14px; }
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -455,17 +462,15 @@
     <!-- Header + boat -->
     <div class="topScene">
       <div class="boatLayer" aria-hidden="true" id="boatLayer">
-        <!-- Boat A -->
         <div class="boatA" id="boatA">
           <img id="boatImgA" src="Untitled design (16).png" alt="" aria-hidden="true">
         </div>
-        <!-- 12 dashes A -->
+
         <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
         <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
         <div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div><div class="wakeDash a"></div>
       </div>
 
-      <!-- Logo: 40px top padding -->
       <div style="display:flex; justify-content:center; padding-top:40px; margin-bottom:28px;">
         <img
           src="PSG Logo - White With Orange (1).png"
@@ -532,39 +537,45 @@
       <div id="keyFocusList"><div class="list-item">—</div></div>
     </div>
 
-    <!-- ✅ NEW: Pipeline Health + Time to Offer (added only) -->
+    <!-- ✅ NEW: Pipeline Health + Time to Offer -->
     <div class="equal-two">
       <div class="card">
         <h2>Pipeline Health</h2>
-        <div id="pipelineHealthWrap"><div class="list-item">—</div></div>
+        <div id="pipelineHealthScale" class="pipeline-scale" aria-label="Pipeline health scale">
+          <div class="pipeline-step" data-value="poor">Poor</div>
+          <div class="pipeline-step" data-value="needs work">Needs work</div>
+          <div class="pipeline-step" data-value="ok">OK</div>
+          <div class="pipeline-step" data-value="good">Good</div>
+          <div class="pipeline-step" data-value="excellent">Excellent</div>
+        </div>
       </div>
 
       <div class="card">
         <h2>Time to Offer</h2>
         <div class="metric-grid" aria-label="Time to offer metrics">
           <div class="metric">
-            <div class="k">Target time to offer</div>
+            <div class="k">Target</div>
             <div class="v" id="ttoTarget">—</div>
           </div>
 
           <div class="metric">
-            <div class="k">Current time to offer</div>
+            <div class="k">Current</div>
             <div class="v">
-              <span class="tooltip-anchor" id="ttoCurrentAnchor">
+              <span class="tooltip-anchor" id="ttoCurrentAnchor" tabindex="0">
                 <span id="ttoCurrent">—</span>
                 <span class="info-dot" aria-hidden="true">i</span>
-                <span class="tooltip" id="ttoCurrentTip">based on our last 5 offers</span>
+                <span class="tooltip" id="ttoCurrentTip">Based on our last five offers.</span>
               </span>
             </div>
           </div>
 
           <div class="metric">
-            <div class="k">Expected time to offer</div>
+            <div class="k">Expected</div>
             <div class="v">
-              <span class="tooltip-anchor" id="ttoExpectedAnchor">
+              <span class="tooltip-anchor" id="ttoExpectedAnchor" tabindex="0">
                 <span id="ttoExpected">—</span>
                 <span class="info-dot" aria-hidden="true">i</span>
-                <span class="tooltip" id="ttoExpectedTip">estimated time from sign off to offer extended for the next approved role</span>
+                <span class="tooltip" id="ttoExpectedTip">Estimated time from sign-off to offer extended for the next approved role.</span>
               </span>
             </div>
           </div>
@@ -603,13 +614,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <script>
-    // Slow donut animation (no style changes)
     if (window.Chart && Chart.defaults) {
       Chart.defaults.animation.duration = 2800;
       Chart.defaults.animation.easing = "easeOutQuart";
     }
 
-    // KPI count-up (slow)
     function animateCount(el, to, duration = 2600) {
       const start = performance.now();
       const from = 0;
@@ -708,7 +717,6 @@
 
       const START_DELAY = 1000;
 
-      /* Off-screen */
       const OFFSCREEN_P = 0.135;
 
       function lerp(a,b,t){ return a + (b-a)*t; }
