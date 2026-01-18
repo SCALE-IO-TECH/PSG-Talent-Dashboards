@@ -317,7 +317,7 @@ async function loadTextListFromSheet(gid, containerId) {
     return;
   }
 
-  const body = rows.slice(1);
+  const body = rows.slice(1); // skip header row
   const items = [];
 
   for (const r of body) {
@@ -349,6 +349,7 @@ async function loadPipelineHealth() {
   ]);
   if (iPH < 0) return;
 
+  // ✅ find first non-empty pipeline_health value anywhere in the rows
   let chosen = "";
   for (const r of rows) {
     const v = String(r[iPH] ?? "").trim();
@@ -389,21 +390,20 @@ function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   el.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
 }
 
-/* ✅ NEW: format number + small "days" unit */
-function formatDays(el, v) {
+/* ✅ NEW: format value as "35 <small>days</small>" so unit can be styled smaller */
+function renderDaysValue(el, v) {
   if (!el) return;
   const raw = String(v ?? "").trim();
   if (!raw) { el.textContent = "—"; return; }
 
-  // If value is like "35", "35 days", "35d"
-  const m = raw.match(/^(\d+(?:\.\d+)?)\s*(days?|d)?$/i);
+  // If the sheet contains "35", "35 days", "35d", "35.5 days" etc.
+  const m = raw.match(/^(\d+(?:\.\d+)?)\s*(d|day|days)?$/i);
   if (m) {
-    const num = m[1];
-    el.innerHTML = `${esc(num)} <span class="unit">days</span>`;
+    el.innerHTML = `${esc(m[1])} <span class="unit">days</span>`;
     return;
   }
 
-  // fallback: show as-is (escaped)
+  // fallback: leave as-is
   el.textContent = raw;
 }
 
@@ -442,10 +442,10 @@ async function loadTimeToOffer() {
   const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
   const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
 
-  // ✅ changed: render with small "days"
-  formatDays(elTarget, tVal);
-  formatDays(elCurrent, cVal);
-  formatDays(elExpected, eVal);
+  // ✅ CHANGED: render "days" in a span so CSS can make it smaller
+  renderDaysValue(elTarget, tVal);
+  renderDaysValue(elCurrent, cVal);
+  renderDaysValue(elExpected, eVal);
 }
 
 // ===== INIT =====
