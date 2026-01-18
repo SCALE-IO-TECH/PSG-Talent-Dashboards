@@ -8,9 +8,9 @@ const PROGRESS_GID = "322463420";
 const CHALLENGES_GID = "868728520";
 const KEY_FOCUS_GID = "575160875";
 
-// ✅ NEW GIDs (added only)
-const PIPELINE_HEALTH_GID = "1289702328"; // tab: pipeline_health
-const TIME_TO_OFFER_GID   = "300572217";  // tab: Time_To
+// ✅ NEW GIDs
+const PIPELINE_HEALTH_GID = "1289702328"; // pipeline_health
+const TIME_TO_OFFER_GID   = "300572217";  // Time_To
 
 // Published CSV endpoint (gid-based)
 const PUB_BASE =
@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   ✅ NEW: PIPELINE HEALTH
+   PIPELINE HEALTH (bar)
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -337,30 +337,32 @@ async function loadPipelineHealth() {
 
   const text = await fetchCsvByGid(PIPELINE_HEALTH_GID);
   const rows = csvToRows(text.trim());
-  if (rows.length < 2) {
-    wrap.innerHTML = `<div class="list-item">—</div>`;
-    return;
-  }
+  if (rows.length < 2) return;
 
   const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  // Prefer a named column if present, otherwise first non-empty cell
-  const iSel = pickIndex(headers, [
-    "Selected", "Current", "Pipeline_Health", "Pipeline Health", "Health", "Quality"
-  ]);
-
-  let chosen = "";
-  if (iSel >= 0) chosen = String(dataRow[iSel] ?? "").trim();
+  // Pull the selected value from the sheet.
+  // Prefer common column names; fallback to first non-empty.
+  const iSel = pickIndex(headers, ["Selected","Pipeline_Health","Pipeline Health","Health","Quality","Current"]);
+  let chosen = (iSel >= 0 ? String(dataRow[iSel] ?? "").trim() : "");
   if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
-  if (!chosen) chosen = "—";
+  if (!chosen) return;
 
-  const cls = chosen.trim().toLowerCase();
-  wrap.innerHTML = `<span class="pipeline-pill ${cls === "good" ? "good" : ""}">${esc(chosen)}</span>`;
+  const norm = chosen.trim().toLowerCase();
+
+  // clear previous
+  wrap.querySelectorAll(".pipeline-step").forEach(step => step.classList.remove("active"));
+
+  // Match one of: poor / needs work / ok / good / excellent
+  const target = Array.from(wrap.querySelectorAll(".pipeline-step"))
+    .find(s => String(s.getAttribute("data-key") || "").trim().toLowerCase() === norm);
+
+  if (target) target.classList.add("active");
 }
 
 /* ===========================
-   ✅ NEW: TIME TO OFFER
+   TIME TO OFFER (exact headers)
    =========================== */
 function setupDelayedTooltip(anchorId, tipId, delayMs) {
   const anchor = document.getElementById(anchorId);
@@ -368,38 +370,22 @@ function setupDelayedTooltip(anchorId, tipId, delayMs) {
   if (!anchor || !tip) return;
 
   let t = null;
-
   const show = () => tip.classList.add("show");
   const hide = () => tip.classList.remove("show");
 
-  anchor.addEventListener("mouseenter", () => {
-    t = setTimeout(show, delayMs);
-  });
-  anchor.addEventListener("mouseleave", () => {
-    if (t) clearTimeout(t);
-    t = null;
-    hide();
-  });
+  anchor.addEventListener("mouseenter", () => { t = setTimeout(show, delayMs); });
+  anchor.addEventListener("mouseleave", () => { if (t) clearTimeout(t); t = null; hide(); });
 
-  // keyboard accessibility (optional)
-  anchor.addEventListener("focus", () => {
-    t = setTimeout(show, delayMs);
-  });
-  anchor.addEventListener("blur", () => {
-    if (t) clearTimeout(t);
-    t = null;
-    hide();
-  });
+  anchor.addEventListener("focus", () => { t = setTimeout(show, delayMs); });
+  anchor.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
 }
 
 async function loadTimeToOffer() {
   const elTarget = document.getElementById("ttoTarget");
   const elCurrent = document.getElementById("ttoCurrent");
   const elExpected = document.getElementById("ttoExpected");
-
   if (!elTarget || !elCurrent || !elExpected) return;
 
-  // Tooltip behaviour (hover > 1s)
   setupDelayedTooltip("ttoCurrentAnchor", "ttoCurrentTip", 1000);
   setupDelayedTooltip("ttoExpectedAnchor", "ttoExpectedTip", 1000);
 
@@ -410,22 +396,22 @@ async function loadTimeToOffer() {
   const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  const iTarget = pickIndex(headers, ["Target", "Target_Time_To_Offer", "Target time to offer", "Target_Time", "Target_Days"]);
-  const iCurrent = pickIndex(headers, ["Current", "Current_Time_To_Offer", "Current time to offer", "Current_Time", "Current_Days"]);
-  const iExpected = pickIndex(headers, ["Expected", "Expected_Time_To_Offer", "Expected time to offer", "Expected_Time", "Expected_Days"]);
+  // EXACT header match (case-insensitive): Target, Current, Expected
+  const norm = (s) => String(s || "").trim().toLowerCase();
+  const H = headers.map(norm);
 
-  const target = (iTarget >= 0 ? dataRow[iTarget] : "") ?? "";
-  const current = (iCurrent >= 0 ? dataRow[iCurrent] : "") ?? "";
-  const expected = (iExpected >= 0 ? dataRow[iExpected] : "") ?? "";
+  const iTarget = H.indexOf("target");
+  const iCurrent = H.indexOf("current");
+  const iExpected = H.indexOf("expected");
 
-  // Fallback: if no headers match, use first 3 cells
-  const tVal = String(target || dataRow[0] || "").trim();
-  const cVal = String(current || dataRow[1] || "").trim();
-  const eVal = String(expected || dataRow[2] || "").trim();
+  // Only fallback if those exact columns don't exist
+  const tVal = (iTarget >= 0 ? dataRow[iTarget] : dataRow[0]) ?? "";
+  const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
+  const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
 
-  elTarget.textContent = tVal || "—";
-  elCurrent.textContent = cVal || "—";
-  elExpected.textContent = eVal || "—";
+  elTarget.textContent = String(tVal || "").trim() || "—";
+  elCurrent.textContent = String(cVal || "").trim() || "—";
+  elExpected.textContent = String(eVal || "").trim() || "—";
 }
 
 // ===== INIT =====
@@ -438,7 +424,7 @@ Promise.all([
   loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
   loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
 
-  // ✅ NEW (added only)
+  // ✅ NEW
   loadPipelineHealth(),
   loadTimeToOffer()
 ]).catch(err => console.error(err));
