@@ -50,7 +50,9 @@ const I18N = {
     ok: "OK",
     good: "Good",
     excellent: "Excellent",
-    days: "days"
+    days: "days",
+    offer_stage: "Offer",
+    hired_stage: "Hired"
   },
   es: {
     hiring_dashboard: "Panel de Contratación",
@@ -82,7 +84,9 @@ const I18N = {
     ok: "Aceptable",
     good: "Bueno",
     excellent: "Excelente",
-    days: "días"
+    days: "días",
+    offer_stage: "Oferta",
+    hired_stage: "Contratado"
   },
   fr: {
     hiring_dashboard: "Tableau de Recrutement",
@@ -114,7 +118,9 @@ const I18N = {
     ok: "Correct",
     good: "Bon",
     excellent: "Excellent",
-    days: "jours"
+    days: "jours",
+    offer_stage: "Offre",
+    hired_stage: "Embauché"
   }
 };
 
@@ -131,30 +137,29 @@ function t(key) {
 }
 
 function applyI18n() {
-  // Set document lang
   if (document && document.documentElement) {
     document.documentElement.lang = LANG_META[currentLang]?.htmlLang || "en";
   }
 
-  // Translate all nodes with data-i18n
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (!key) return;
     el.textContent = t(key);
   });
 
-  // Also update language button active state
   document.querySelectorAll("[data-lang]").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
     btn.setAttribute("aria-pressed", btn.getAttribute("data-lang") === currentLang ? "true" : "false");
   });
 
-  // If the Candidate Sources empty text is visible, keep it translated
   const empty = document.getElementById("candidateSourcesEmpty");
   if (empty && empty.style.display !== "none") {
-    // only replace if it matches known english placeholders or is empty
     const raw = (empty.textContent || "").trim();
-    const known = ["Loading…", "No data", "Check headers", "Cargando…", "Sin datos", "Revisa los encabezados", "Chargement…", "Aucune donnée", "Vérifie les en-têtes"];
+    const known = [
+      "Loading…","No data","Check headers",
+      "Cargando…","Sin datos","Revisa los encabezados",
+      "Chargement…","Aucune donnée","Vérifie les en-têtes"
+    ];
     if (!raw || known.includes(raw)) empty.textContent = t("loading");
   }
 }
@@ -165,11 +170,15 @@ function setLanguage(lang) {
   try { localStorage.setItem("ps_lang", lang); } catch(e) {}
   applyI18n();
 
-  // Re-render any strings created by JS using translations
-  // (applicants label, "No data" etc will update next fetch; we can refresh the live roles list now)
+  // Refresh any text that is generated from data
   loadLiveRoles().catch(()=>{});
   loadCandidateSourcesChart().catch(()=>{});
   loadTimeToOffer().catch(()=>{});
+
+  // ✅ NEW: refresh sheet-driven text lists in the chosen language (if language columns exist)
+  loadTextListFromSheet(PROGRESS_GID, "progressList").catch(()=>{});
+  loadTextListFromSheet(CHALLENGES_GID, "challengesList").catch(()=>{});
+  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList").catch(()=>{});
 }
 
 function initLanguageSwitcher() {
@@ -178,13 +187,11 @@ function initLanguageSwitcher() {
     if (saved && I18N[saved]) currentLang = saved;
   } catch(e) {}
 
-  // Hydrate labels on the buttons if present
   document.querySelectorAll("[data-lang]").forEach((btn) => {
     const lang = btn.getAttribute("data-lang");
     const meta = LANG_META[lang];
     if (!meta) return;
-    const label = `${meta.flag} ${meta.code}`;
-    btn.textContent = label;
+    btn.textContent = `${meta.flag} ${meta.code}`;
     btn.addEventListener("click", () => setLanguage(lang));
   });
 
@@ -229,11 +236,33 @@ function toNumber(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function stageClass(stage) {
+/* ===========================
+   Stage translation (sheet-driven)
+   - Keeps CSS class logic working
+   - Translates Offer/Hired in UI language
+   =========================== */
+function canonicalStage(stage) {
   const s = String(stage || "").trim().toLowerCase();
-  if (s === "offer") return "offer";
-  if (s === "hired") return "hired";
+
+  // canonical english
+  if (s === "offer" || s === "offre" || s === "oferta") return "offer";
+  if (s === "hired" || s === "embauché" || s === "embauche" || s === "contratado") return "hired";
+
+  return s;
+}
+
+function stageClass(stage) {
+  const c = canonicalStage(stage);
+  if (c === "offer") return "offer";
+  if (c === "hired") return "hired";
   return "";
+}
+
+function displayStage(stageRaw) {
+  const c = canonicalStage(stageRaw);
+  if (c === "offer") return t("offer_stage");
+  if (c === "hired") return t("hired_stage");
+  return String(stageRaw || "").trim();
 }
 
 function esc(s) {
@@ -300,7 +329,7 @@ async function loadLiveRoles() {
     const team = (r[idx("Team")] ?? "").trim();
     const location = (r[idx("Location")] ?? "").trim();
     const applicants = toNumber(r[idx("Applicants")]);
-    const stage = (r[idx("Current_Stage")] ?? "").trim();
+    const stageRaw = (r[idx("Current_Stage")] ?? "").trim();
 
     const el = document.createElement("div");
     el.className = "row";
@@ -313,7 +342,7 @@ async function loadLiveRoles() {
           <span>${applicants} ${esc(t("applicants"))}</span>
         </div>
       </div>
-      <span class="stage ${stageClass(stage)}">${esc(stage || "—")}</span>
+      <span class="stage ${stageClass(stageRaw)}">${esc(displayStage(stageRaw) || "—")}</span>
     `;
     list.appendChild(el);
   });
@@ -488,6 +517,32 @@ function renderSimpleList(containerId, items) {
   });
 }
 
+/* ✅ NEW: Try to pick a language column if it exists (en/es/fr),
+   otherwise keep original behavior (first non-empty cell). */
+function pickLangColumnIndex(headers) {
+  const norm = (s) =>
+    String(s || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/[_\-]+/g, "");
+
+  const H = headers.map(norm);
+
+  const candidates = {
+    en: ["en","eng","english","anglais","ingles"],
+    es: ["es","esp","spanish","espanol","español","castellano"],
+    fr: ["fr","fra","french","francais","français"]
+  };
+
+  const list = candidates[currentLang] || candidates.en;
+  for (const c of list) {
+    const i = H.indexOf(norm(c));
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
 async function loadTextListFromSheet(gid, containerId) {
   const text = await fetchCsvByGid(gid);
   const rows = csvToRows(text.trim());
@@ -496,11 +551,25 @@ async function loadTextListFromSheet(gid, containerId) {
     return;
   }
 
-  const body = rows.slice(1); // skip header row
+  const headers = rows[0].map(h => String(h).trim());
+  const body = rows.slice(1);
+
+  const langCol = pickLangColumnIndex(headers);
   const items = [];
 
   for (const r of body) {
-    const cell = (r.find(v => String(v).trim() !== "") ?? "").trim();
+    let cell = "";
+
+    // Use language column if present
+    if (langCol >= 0) {
+      cell = String(r[langCol] ?? "").trim();
+    }
+
+    // Fallback to original behavior (first non-empty cell in row)
+    if (!cell) {
+      cell = (r.find(v => String(v).trim() !== "") ?? "").trim();
+    }
+
     if (cell) items.push(cell);
   }
 
@@ -568,7 +637,6 @@ function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   el.addEventListener("blur", () => { if (tmr) clearTimeout(tmr); tmr = null; hide(); });
 }
 
-/* formats "35" or "35 days" as: 35 <span class="unit">days</span> (translated) */
 function setDaysMetric(el, rawVal) {
   if (!el) return;
   const raw = String(rawVal ?? "").trim();
