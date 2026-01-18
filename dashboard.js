@@ -8,7 +8,7 @@ const PROGRESS_GID = "322463420";
 const CHALLENGES_GID = "868728520";
 const KEY_FOCUS_GID = "575160875";
 
-/* ===== ADDED GIDs (new only) ===== */
+// ✅ NEW GIDs (added only)
 const PIPELINE_HEALTH_GID = "1289702328"; // tab: pipeline_health
 const TIME_TO_OFFER_GID   = "300572217";  // tab: Time_To
 
@@ -328,40 +328,70 @@ async function loadTextListFromSheet(gid, containerId) {
   renderSimpleList(containerId, items);
 }
 
-/* ===== ADDED: Pipeline Health (new only) ===== */
+/* ===========================
+   ✅ NEW: PIPELINE HEALTH
+   =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
   if (!wrap) return;
 
   const text = await fetchCsvByGid(PIPELINE_HEALTH_GID);
   const rows = csvToRows(text.trim());
-
-  // Expect: some header row + a data row. We will display the first non-empty value found in the first data row.
   if (rows.length < 2) {
     wrap.innerHTML = `<div class="list-item">—</div>`;
     return;
   }
 
-  rows.shift(); // drop header row
+  const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
-  const selected = (dataRow.find(v => String(v).trim() !== "") || "").trim();
 
-  if (!selected) {
-    wrap.innerHTML = `<div class="list-item">—</div>`;
-    return;
-  }
+  // Prefer a named column if present, otherwise first non-empty cell
+  const iSel = pickIndex(headers, [
+    "Selected", "Current", "Pipeline_Health", "Pipeline Health", "Health", "Quality"
+  ]);
 
-  const cls = selected.trim().toLowerCase().replace(/\s+/g, "_");
-  wrap.innerHTML = `<div class="pipeline-pill ${esc(cls)}">${esc(selected)}</div>`;
+  let chosen = "";
+  if (iSel >= 0) chosen = String(dataRow[iSel] ?? "").trim();
+  if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
+  if (!chosen) chosen = "—";
 
-  // style for current example: "Good"
-  if (selected.trim().toLowerCase() === "good") {
-    const pill = wrap.querySelector(".pipeline-pill");
-    if (pill) pill.classList.add("good");
-  }
+  const cls = chosen.trim().toLowerCase();
+  wrap.innerHTML = `<span class="pipeline-pill ${cls === "good" ? "good" : ""}">${esc(chosen)}</span>`;
 }
 
-/* ===== ADDED: Time to Offer (new only) ===== */
+/* ===========================
+   ✅ NEW: TIME TO OFFER
+   =========================== */
+function setupDelayedTooltip(anchorId, tipId, delayMs) {
+  const anchor = document.getElementById(anchorId);
+  const tip = document.getElementById(tipId);
+  if (!anchor || !tip) return;
+
+  let t = null;
+
+  const show = () => tip.classList.add("show");
+  const hide = () => tip.classList.remove("show");
+
+  anchor.addEventListener("mouseenter", () => {
+    t = setTimeout(show, delayMs);
+  });
+  anchor.addEventListener("mouseleave", () => {
+    if (t) clearTimeout(t);
+    t = null;
+    hide();
+  });
+
+  // keyboard accessibility (optional)
+  anchor.addEventListener("focus", () => {
+    t = setTimeout(show, delayMs);
+  });
+  anchor.addEventListener("blur", () => {
+    if (t) clearTimeout(t);
+    t = null;
+    hide();
+  });
+}
+
 async function loadTimeToOffer() {
   const elTarget = document.getElementById("ttoTarget");
   const elCurrent = document.getElementById("ttoCurrent");
@@ -369,27 +399,46 @@ async function loadTimeToOffer() {
 
   if (!elTarget || !elCurrent || !elExpected) return;
 
+  // Tooltip behaviour (hover > 1s)
+  setupDelayedTooltip("ttoCurrentAnchor", "ttoCurrentTip", 1000);
+  setupDelayedTooltip("ttoExpectedAnchor", "ttoExpectedTip", 1000);
+
   const text = await fetchCsvByGid(TIME_TO_OFFER_GID);
   const rows = csvToRows(text.trim());
-
-  if (rows.length < 2) {
-    elTarget.textContent = "—";
-    elCurrent.textContent = "—";
-    elExpected.textContent = "—";
-    return;
-  }
+  if (rows.length < 2) return;
 
   const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  const iTarget = pickIndex(headers, ["Target", "Target_Time_To_Offer", "Target_TTO", "Target_Time"]);
-  const iCurrent = pickIndex(headers, ["Current", "Current_Time_To_Offer", "Current_TTO", "Current_Time"]);
-  const iExpected = pickIndex(headers, ["Expected", "Expected_Time_To_Offer", "Expected_TTO", "Expected_Time"]);
+  const iTarget = pickIndex(headers, ["Target", "Target_Time_To_Offer", "Target time to offer", "Target_Time", "Target_Days"]);
+  const iCurrent = pickIndex(headers, ["Current", "Current_Time_To_Offer", "Current time to offer", "Current_Time", "Current_Days"]);
+  const iExpected = pickIndex(headers, ["Expected", "Expected_Time_To_Offer", "Expected time to offer", "Expected_Time", "Expected_Days"]);
 
-  let target = "", current = "", expected = "";
+  const target = (iTarget >= 0 ? dataRow[iTarget] : "") ?? "";
+  const current = (iCurrent >= 0 ? dataRow[iCurrent] : "") ?? "";
+  const expected = (iExpected >= 0 ? dataRow[iExpected] : "") ?? "";
 
-  if (iTarget >= 0) target = (dataRow[iTarget] ?? "").trim();
-  if (iCurrent >= 0) current = (dataRow[iCurrent] ?? "").trim();
-  if (iExpected >= 0) expected = (dataRow[iExpected] ?? "").trim();
+  // Fallback: if no headers match, use first 3 cells
+  const tVal = String(target || dataRow[0] || "").trim();
+  const cVal = String(current || dataRow[1] || "").trim();
+  const eVal = String(expected || dataRow[2] || "").trim();
 
-  // fallback: if headers don't match, use first 3 non-empty values
+  elTarget.textContent = tVal || "—";
+  elCurrent.textContent = cVal || "—";
+  elExpected.textContent = eVal || "—";
+}
+
+// ===== INIT =====
+Promise.all([
+  loadStatusKpis(),
+  loadLiveRoles(),
+  loadNewStarters(),
+  loadCandidateSourcesChart(),
+  loadTextListFromSheet(PROGRESS_GID, "progressList"),
+  loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
+  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
+
+  // ✅ NEW (added only)
+  loadPipelineHealth(),
+  loadTimeToOffer()
+]).catch(err => console.error(err));
