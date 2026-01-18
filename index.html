@@ -319,79 +319,80 @@
       will-change: transform, opacity;
     }
 
-    /* ✅ Pipeline (slick centered) */
+    /* ✅ Pipeline Health (centered bar with labels; only active highlighted) */
     #pipelineHealthWrap{
       display:flex;
-      flex-direction:column;
       justify-content:center;
       align-items:center;
-      gap:14px;
-      padding:6px 0 2px;
+      padding:12px 0 2px;
     }
-
-    .pipeline-status{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:6px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.10);
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,.92);
-    }
-
-    .pipeline-bar{
+    .pipeline-grid{
       width:min(520px, 92%);
       display:grid;
       grid-template-columns:repeat(5,1fr);
       gap:10px;
-      align-items:center;
+      text-align:center;
+      align-items:start;
     }
-
-    .pipeline-step{
-      position:relative;
+    .pipeline-item{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      opacity:.35;
+      filter:saturate(.7);
+      transition: opacity .18s ease, filter .18s ease, transform .18s ease;
+    }
+    .pipeline-seg{
+      width:100%;
       height:12px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.12);
-      overflow:hidden;
       background: rgba(0,0,0,.14);
+      overflow:hidden;
+      position:relative;
       box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset;
     }
-
-    .pipeline-step::before{
+    .pipeline-seg::before{
       content:"";
       position:absolute;
       inset:0;
-      opacity:.85;
       background: var(--seg, rgba(255,255,255,.18));
+      opacity:.92;
+    }
+    .pipeline-label{
+      font-size:10px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.60);
+      white-space:nowrap;
     }
 
-    /* segment colours */
-    .pipeline-step[data-key="poor"]{ --seg: rgba(239,68,68,.85); }        /* red */
-    .pipeline-step[data-key="needs work"]{ --seg: rgba(249,115,22,.85); } /* orange */
-    .pipeline-step[data-key="ok"]{ --seg: rgba(250,204,21,.82); }         /* yellow */
-    .pipeline-step[data-key="good"]{ --seg: rgba(34,197,94,.78); }        /* green */
-    .pipeline-step[data-key="excellent"]{ --seg: rgba(22,255,122,.82); }  /* vivid green */
+    /* colours */
+    .pipeline-item[data-key="poor"] .pipeline-seg{ --seg: rgba(239,68,68,.92); }         /* Red */
+    .pipeline-item[data-key="needs work"] .pipeline-seg{ --seg: rgba(249,115,22,.92); } /* Orange */
+    .pipeline-item[data-key="ok"] .pipeline-seg{ --seg: rgba(250,204,21,.92); }         /* Yellow */
+    .pipeline-item[data-key="good"] .pipeline-seg{ --seg: rgba(34,197,94,.88); }        /* Green */
+    .pipeline-item[data-key="excellent"] .pipeline-seg{ --seg: rgba(22,255,122,.92); }  /* Vivid Green */
 
     /* active highlight */
-    .pipeline-step.active{
-      border-color: rgba(255,255,255,.28);
-      box-shadow:
-        0 0 0 2px rgba(255,255,255,.10),
-        0 16px 36px rgba(0,0,0,.25);
+    .pipeline-item.active{
+      opacity:1;
+      filter:saturate(1.2);
       transform: translateY(-1px);
     }
-    .pipeline-step.active::before{
-      opacity:1;
-      filter: saturate(1.25) brightness(1.1);
-      box-shadow: 0 0 18px rgba(255,255,255,.10);
+    .pipeline-item.active .pipeline-seg{
+      border-color: rgba(255,255,255,.30);
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,.10),
+        0 18px 40px rgba(0,0,0,.25);
+    }
+    .pipeline-item.active .pipeline-label{
+      color: rgba(255,255,255,.95);
+      font-weight:900;
     }
 
-    /* Time-to-offer unchanged from your last version */
+    /* Time-to-offer (unchanged) */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -560,14 +561,27 @@
       <div class="card">
         <h2>Pipeline Health</h2>
         <div id="pipelineHealthWrap">
-          <div class="pipeline-status" id="pipelineHealthStatus">—</div>
-
-          <div class="pipeline-bar" aria-label="Pipeline health scale">
-            <div class="pipeline-step" data-key="poor"></div>
-            <div class="pipeline-step" data-key="needs work"></div>
-            <div class="pipeline-step" data-key="ok"></div>
-            <div class="pipeline-step" data-key="good"></div>
-            <div class="pipeline-step" data-key="excellent"></div>
+          <div class="pipeline-grid" aria-label="Pipeline health scale" id="pipelineHealthGrid">
+            <div class="pipeline-item" data-key="poor">
+              <div class="pipeline-seg"></div>
+              <div class="pipeline-label">Poor</div>
+            </div>
+            <div class="pipeline-item" data-key="needs work">
+              <div class="pipeline-seg"></div>
+              <div class="pipeline-label">Needs work</div>
+            </div>
+            <div class="pipeline-item" data-key="ok">
+              <div class="pipeline-seg"></div>
+              <div class="pipeline-label">OK</div>
+            </div>
+            <div class="pipeline-item" data-key="good">
+              <div class="pipeline-seg"></div>
+              <div class="pipeline-label">Good</div>
+            </div>
+            <div class="pipeline-item" data-key="excellent">
+              <div class="pipeline-seg"></div>
+              <div class="pipeline-label">Excellent</div>
+            </div>
           </div>
         </div>
       </div>
