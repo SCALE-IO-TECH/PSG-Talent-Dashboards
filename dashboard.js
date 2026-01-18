@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (SLICK CENTRED BAR) — FIXED HIGHLIGHTING
+   PIPELINE HEALTH (UPDATED FOR SINGLE COLUMN "pipeline_health")
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -342,12 +342,18 @@ async function loadPipelineHealth() {
   const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  const iSel = pickIndex(headers, ["Selected","Pipeline_Health","Pipeline Health","Health","Quality","Current","Status"]);
+  // ✅ Your sheet now: header = pipeline_health, value underneath is one of the 5 options
+  const iSel = pickIndex(headers, [
+    "pipeline_health",
+    "pipeline health",
+    "Pipeline_Health",
+    "Pipeline Health"
+  ]);
+
   let chosen = (iSel >= 0 ? String(dataRow[iSel] ?? "").trim() : "");
   if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
   if (!chosen) return;
 
-  // ✅ robust normaliser (handles extra spaces/punctuation/case)
   const normalise = (v) => String(v || "")
     .toLowerCase()
     .replace(/[_\-]+/g, " ")
@@ -357,17 +363,15 @@ async function loadPipelineHealth() {
 
   const norm = normalise(chosen);
 
-  // ✅ IMPORTANT: your HTML uses .pipeline-step
   const steps = Array.from(wrap.querySelectorAll(".pipeline-step"));
   steps.forEach(s => s.classList.remove("active"));
 
   const target = steps.find(s => normalise(s.getAttribute("data-key")) === norm);
   if (target) target.classList.add("active");
 
-  // Update status text (your HTML currently includes this pill)
+  // If your HTML still has this element, keep it updated (no harm)
   const statusEl = document.getElementById("pipelineHealthStatus");
   if (statusEl) {
-    // Keep "OK" uppercase, "Needs work" formatted, otherwise title case
     const pretty =
       norm === "ok" ? "OK" :
       norm === "needs work" ? "Needs work" :
