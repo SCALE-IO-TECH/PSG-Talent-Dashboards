@@ -319,35 +319,88 @@
       will-change: transform, opacity;
     }
 
-    /* ✅ NEW: Pipeline bar */
-    .pipeline-bar{
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:10px;
-      align-items:center;
-    }
-    .pipeline-step{
+    /* =========================
+       ✅ UPDATED: Pipeline Health (centered + slick + status + color)
+       ========================= */
+    .pipeline-center{
       display:flex;
       flex-direction:column;
-      gap:8px;
-      min-width:0;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      padding:6px 0 2px;
+      min-height:140px;
     }
-    .pipeline-track{
+
+    .pipeline-status{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.95);
+    }
+    .pipeline-status::before{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background: var(--pcolor, rgba(247,142,98,.75));
+      box-shadow: 0 0 0 4px rgba(255,255,255,.05);
+    }
+
+    .pipeline-scale{
+      --fill: 0%;
+      --pcolor: rgba(247,142,98,.65);
+      position:relative;
+      width:min(520px, 92%);
       height:10px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.14);
-      position:relative;
       overflow:hidden;
     }
-    .pipeline-fill{
+    .pipeline-scale::before{
+      content:"";
       position:absolute;
-      inset:0;
-      opacity:0;
-      transform: scaleX(.35);
-      transform-origin:left center;
-      background: rgba(255,255,255,.18);
-      transition: opacity .25s ease, transform .25s ease, background .25s ease;
+      left:0;
+      top:0;
+      bottom:0;
+      width: var(--fill);
+      background: linear-gradient(90deg, rgba(255,255,255,.12), var(--pcolor));
+      box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset;
+    }
+
+    .pipeline-steps{
+      width:min(520px, 92%);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      align-items:start;
+      gap:0;
+      margin-top:8px;
+    }
+
+    .pipeline-step{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+    .pipeline-dot{
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.05);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
     }
     .pipeline-label{
       font-size:10px;
@@ -358,15 +411,18 @@
       overflow:hidden;
       text-overflow:ellipsis;
       text-align:center;
+      max-width:100%;
     }
     .pipeline-step.active .pipeline-label{ color: rgba(255,255,255,.92); }
-    .pipeline-step.active .pipeline-fill{
-      opacity:1;
-      transform: scaleX(1);
-      background: rgba(247,142,98,.45);
+    .pipeline-step.active .pipeline-dot{
+      transform: scale(1.12);
+      border-color: rgba(255,255,255,.30);
+      background: var(--pcolor, rgba(247,142,98,.75));
     }
 
-    /* ✅ NEW: Time-to-offer metrics + tooltip */
+    /* =========================
+       ✅ UPDATED: Time-to-offer (no "i" icon; hover whole metric)
+       ========================= */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -383,6 +439,7 @@
       justify-content:center;
       gap:8px;
       min-height:78px;
+      position:relative;
     }
     .metric .k{
       font-size:11px;
@@ -399,38 +456,18 @@
       gap:10px;
     }
 
-    .tooltip-anchor{
-      position:relative;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-    }
-    .info-dot{
-      width:18px; height:18px;
-      border-radius:999px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:12px;
-      font-weight:900;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.85);
-      flex:0 0 auto;
-    }
     .tooltip{
       position:absolute;
-      left:0;
+      left:12px;
+      right:12px;
       top:calc(100% + 10px);
-      min-width:260px;
-      max-width:360px;
       padding:10px 12px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.55);
       color: rgba(255,255,255,.90);
       font-size:12px;
-      font-weight:400;   /* ✅ not bold */
+      font-weight:400;
       line-height:1.35;
       box-shadow: 0 18px 50px rgba(0,0,0,.45);
       opacity:0;
@@ -439,7 +476,7 @@
       transition: opacity .18s ease, transform .18s ease;
       z-index:30;
       backdrop-filter: blur(6px);
-      letter-spacing:0; /* ✅ normal */
+      letter-spacing:0;
       text-transform:none;
     }
     .tooltip.show{
@@ -551,30 +588,35 @@
       <div id="keyFocusList"><div class="list-item">—</div></div>
     </div>
 
-    <!-- ✅ NEW: Pipeline Health + Time to Offer -->
+    <!-- ✅ UPDATED: Pipeline Health + Time to Offer -->
     <div class="equal-two">
       <div class="card">
         <h2>Pipeline Health</h2>
-        <div id="pipelineHealthWrap">
-          <div class="pipeline-bar" aria-label="Pipeline health scale">
+
+        <div id="pipelineHealthWrap" class="pipeline-center">
+          <div class="pipeline-status" id="pipelineHealthStatus">—</div>
+
+          <div class="pipeline-scale"></div>
+
+          <div class="pipeline-steps" aria-label="Pipeline health scale">
             <div class="pipeline-step" data-key="poor">
-              <div class="pipeline-track"><div class="pipeline-fill"></div></div>
+              <div class="pipeline-dot"></div>
               <div class="pipeline-label">Poor</div>
             </div>
             <div class="pipeline-step" data-key="needs work">
-              <div class="pipeline-track"><div class="pipeline-fill"></div></div>
+              <div class="pipeline-dot"></div>
               <div class="pipeline-label">Needs work</div>
             </div>
             <div class="pipeline-step" data-key="ok">
-              <div class="pipeline-track"><div class="pipeline-fill"></div></div>
+              <div class="pipeline-dot"></div>
               <div class="pipeline-label">OK</div>
             </div>
             <div class="pipeline-step" data-key="good">
-              <div class="pipeline-track"><div class="pipeline-fill"></div></div>
+              <div class="pipeline-dot"></div>
               <div class="pipeline-label">Good</div>
             </div>
             <div class="pipeline-step" data-key="excellent">
-              <div class="pipeline-track"><div class="pipeline-fill"></div></div>
+              <div class="pipeline-dot"></div>
               <div class="pipeline-label">Excellent</div>
             </div>
           </div>
@@ -583,32 +625,23 @@
 
       <div class="card">
         <h2>Time to Offer</h2>
+
         <div class="metric-grid" aria-label="Time to offer metrics">
           <div class="metric">
             <div class="k">Target</div>
             <div class="v" id="ttoTarget">—</div>
           </div>
 
-          <div class="metric">
+          <div class="metric" id="ttoCurrentMetric" tabindex="0">
             <div class="k">Current</div>
-            <div class="v">
-              <span class="tooltip-anchor" id="ttoCurrentAnchor" tabindex="0">
-                <span id="ttoCurrent">—</span>
-                <span class="info-dot" aria-hidden="true">i</span>
-                <span class="tooltip" id="ttoCurrentTip">Based on our last five offers.</span>
-              </span>
-            </div>
+            <div class="v" id="ttoCurrent">—</div>
+            <div class="tooltip" id="ttoCurrentTip">Based on our last five offers.</div>
           </div>
 
-          <div class="metric">
+          <div class="metric" id="ttoExpectedMetric" tabindex="0">
             <div class="k">Expected</div>
-            <div class="v">
-              <span class="tooltip-anchor" id="ttoExpectedAnchor" tabindex="0">
-                <span id="ttoExpected">—</span>
-                <span class="info-dot" aria-hidden="true">i</span>
-                <span class="tooltip" id="ttoExpectedTip">Estimated time from sign-off to offer extended for the next approved role.</span>
-              </span>
-            </div>
+            <div class="v" id="ttoExpected">—</div>
+            <div class="tooltip" id="ttoExpectedTip">Estimated time from sign-off to offer extended for the next approved role.</div>
           </div>
         </div>
       </div>
