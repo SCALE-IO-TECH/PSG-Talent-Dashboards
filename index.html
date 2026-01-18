@@ -324,7 +324,7 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      padding:18px 0 6px; /* CHANGED: dropped down a bit */
+      padding:18px 0 6px; /* ✅ CHANGED: dropped slightly */
     }
 
     .pipeline-bar{
@@ -388,23 +388,28 @@
       box-shadow:
         0 0 0 2px rgba(255,255,255,.10),
         0 18px 40px rgba(0,0,0,.25);
-      transform: translateY(-3px); /* CHANGED: stand out a touch more */
+      transform: translateY(-3px); /* ✅ CHANGED: stands out slightly more */
     }
     .pipeline-step.active .pipeline-label{
       color: rgba(255,255,255,.92);
       font-weight:800;
     }
 
-    /* Time-to-offer */
+    /* Time-to-offer unchanged from your last version */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:16px;
       align-items:stretch;
     }
+
     .metric{
-      border:1px solid rgba(247,142,98,.35);      /* CHANGED: orange border */
-      background:rgba(247,142,98,.18);            /* CHANGED: orange fill */
+      border:1px solid rgba(247,142,98,.55); /* ✅ CHANGED */
+      background:
+        linear-gradient(135deg,
+          rgba(247,142,98,.42) 0%,
+          rgba(247,142,98,.26) 55%,
+          rgba(0,0,0,.12) 100%); /* ✅ CHANGED: premium gradient */
       border-radius:14px;
       padding:12px 12px;
       display:flex;
@@ -413,22 +418,28 @@
       gap:8px;
       min-height:78px;
       position:relative;
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.22),
+        0 0 0 1px rgba(255,255,255,.06) inset; /* ✅ CHANGED */
     }
+
     .metric .k{
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
       color:rgba(255,255,255,.65);
     }
+
     .metric .v{
       font-size:22px;
       font-weight:900;
       line-height:1.05;
       display:flex;
-      align-items:baseline; /* CHANGED: helps number + unit align */
-      gap:10px;
+      align-items:baseline;
+      gap:4px; /* ✅ CHANGED: brings “days” closer */
     }
-    .metric .v .unit{            /* NEW: smaller unit text */
+
+    .metric .v .unit{ /* ✅ NEW: smaller “days” */
       font-size:12px;
       font-weight:800;
       letter-spacing:.12em;
