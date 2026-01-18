@@ -8,6 +8,10 @@ const PROGRESS_GID = "322463420";
 const CHALLENGES_GID = "868728520";
 const KEY_FOCUS_GID = "575160875";
 
+/* ===== ADDED GIDs (new only) ===== */
+const PIPELINE_HEALTH_GID = "1289702328"; // tab: pipeline_health
+const TIME_TO_OFFER_GID   = "300572217";  // tab: Time_To
+
 // Published CSV endpoint (gid-based)
 const PUB_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&gid=";
@@ -324,13 +328,68 @@ async function loadTextListFromSheet(gid, containerId) {
   renderSimpleList(containerId, items);
 }
 
-// ===== INIT =====
-Promise.all([
-  loadStatusKpis(),
-  loadLiveRoles(),
-  loadNewStarters(),
-  loadCandidateSourcesChart(),
-  loadTextListFromSheet(PROGRESS_GID, "progressList"),
-  loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
-  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList")
-]).catch(err => console.error(err));
+/* ===== ADDED: Pipeline Health (new only) ===== */
+async function loadPipelineHealth() {
+  const wrap = document.getElementById("pipelineHealthWrap");
+  if (!wrap) return;
+
+  const text = await fetchCsvByGid(PIPELINE_HEALTH_GID);
+  const rows = csvToRows(text.trim());
+
+  // Expect: some header row + a data row. We will display the first non-empty value found in the first data row.
+  if (rows.length < 2) {
+    wrap.innerHTML = `<div class="list-item">—</div>`;
+    return;
+  }
+
+  rows.shift(); // drop header row
+  const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
+  const selected = (dataRow.find(v => String(v).trim() !== "") || "").trim();
+
+  if (!selected) {
+    wrap.innerHTML = `<div class="list-item">—</div>`;
+    return;
+  }
+
+  const cls = selected.trim().toLowerCase().replace(/\s+/g, "_");
+  wrap.innerHTML = `<div class="pipeline-pill ${esc(cls)}">${esc(selected)}</div>`;
+
+  // style for current example: "Good"
+  if (selected.trim().toLowerCase() === "good") {
+    const pill = wrap.querySelector(".pipeline-pill");
+    if (pill) pill.classList.add("good");
+  }
+}
+
+/* ===== ADDED: Time to Offer (new only) ===== */
+async function loadTimeToOffer() {
+  const elTarget = document.getElementById("ttoTarget");
+  const elCurrent = document.getElementById("ttoCurrent");
+  const elExpected = document.getElementById("ttoExpected");
+
+  if (!elTarget || !elCurrent || !elExpected) return;
+
+  const text = await fetchCsvByGid(TIME_TO_OFFER_GID);
+  const rows = csvToRows(text.trim());
+
+  if (rows.length < 2) {
+    elTarget.textContent = "—";
+    elCurrent.textContent = "—";
+    elExpected.textContent = "—";
+    return;
+  }
+
+  const headers = rows.shift().map(h => String(h).trim());
+  const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
+
+  const iTarget = pickIndex(headers, ["Target", "Target_Time_To_Offer", "Target_TTO", "Target_Time"]);
+  const iCurrent = pickIndex(headers, ["Current", "Current_Time_To_Offer", "Current_TTO", "Current_Time"]);
+  const iExpected = pickIndex(headers, ["Expected", "Expected_Time_To_Offer", "Expected_TTO", "Expected_Time"]);
+
+  let target = "", current = "", expected = "";
+
+  if (iTarget >= 0) target = (dataRow[iTarget] ?? "").trim();
+  if (iCurrent >= 0) current = (dataRow[iCurrent] ?? "").trim();
+  if (iExpected >= 0) expected = (dataRow[iExpected] ?? "").trim();
+
+  // fallback: if headers don't match, use first 3 non-empty values
