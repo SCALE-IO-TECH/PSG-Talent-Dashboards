@@ -329,10 +329,30 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (bar)
+   PIPELINE HEALTH (slick bar + status)
    =========================== */
+function titleCasePipeline(v) {
+  const s = String(v || "").trim().toLowerCase();
+  if (s === "ok") return "OK";
+  if (s === "needs work") return "Needs work";
+  if (s) return s.charAt(0).toUpperCase() + s.slice(1);
+  return "—";
+}
+
+function pipelineColor(key) {
+  // red -> amber -> orange -> green
+  const k = String(key || "").trim().toLowerCase();
+  if (k === "poor") return "rgba(239,68,68,.92)";        // red
+  if (k === "needs work") return "rgba(245,158,11,.92)"; // amber
+  if (k === "ok") return "rgba(249,115,22,.92)";         // orange
+  if (k === "good") return "rgba(34,197,94,.88)";        // green
+  if (k === "excellent") return "rgba(22,163,74,.92)";   // deep green
+  return "rgba(247,142,98,.65)";
+}
+
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
+  const statusEl = document.getElementById("pipelineHealthStatus");
   if (!wrap) return;
 
   const text = await fetchCsvByGid(PIPELINE_HEALTH_GID);
@@ -342,42 +362,57 @@ async function loadPipelineHealth() {
   const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  // Pull the selected value from the sheet.
-  // Prefer common column names; fallback to first non-empty.
   const iSel = pickIndex(headers, ["Selected","Pipeline_Health","Pipeline Health","Health","Quality","Current"]);
   let chosen = (iSel >= 0 ? String(dataRow[iSel] ?? "").trim() : "");
   if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
   if (!chosen) return;
 
-  const norm = chosen.trim().toLowerCase();
+  const key = chosen.trim().toLowerCase();
 
-  // clear previous
-  wrap.querySelectorAll(".pipeline-step").forEach(step => step.classList.remove("active"));
+  // Map to 5 options
+  const keys = ["poor","needs work","ok","good","excellent"];
+  const idx = keys.indexOf(key);
 
-  // Match one of: poor / needs work / ok / good / excellent
-  const target = Array.from(wrap.querySelectorAll(".pipeline-step"))
-    .find(s => String(s.getAttribute("data-key") || "").trim().toLowerCase() === norm);
+  // Clear active states
+  const steps = Array.from(wrap.querySelectorAll(".pipeline-step"));
+  steps.forEach(s => s.classList.remove("active"));
 
-  if (target) target.classList.add("active");
+  if (idx >= 0 && steps[idx]) steps[idx].classList.add("active");
+
+  // Fill up to the active step
+  const bar = wrap.querySelector(".pipeline-scale");
+  if (bar && idx >= 0) {
+    const pct = (idx / 4) * 100;
+    bar.style.setProperty("--fill", `${pct}%`);
+    bar.style.setProperty("--pcolor", pipelineColor(key));
+  }
+
+  if (statusEl) {
+    statusEl.textContent = titleCasePipeline(key);
+    statusEl.style.background = "rgba(0,0,0,.12)";
+    statusEl.style.borderColor = "rgba(255,255,255,.14)";
+    statusEl.style.color = "rgba(255,255,255,.95)";
+    statusEl.style.boxShadow = "0 18px 45px rgba(0,0,0,.25)";
+    statusEl.style.setProperty("--pcolor", pipelineColor(key));
+    statusEl.setAttribute("data-key", key);
+  }
 }
 
 /* ===========================
-   TIME TO OFFER (exact headers)
+   TIME TO OFFER (correct mapping + hover whole metric)
    =========================== */
-function setupDelayedTooltip(anchorId, tipId, delayMs) {
-  const anchor = document.getElementById(anchorId);
-  const tip = document.getElementById(tipId);
-  if (!anchor || !tip) return;
-
+function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
+  if (!el || !tipEl) return;
   let t = null;
-  const show = () => tip.classList.add("show");
-  const hide = () => tip.classList.remove("show");
 
-  anchor.addEventListener("mouseenter", () => { t = setTimeout(show, delayMs); });
-  anchor.addEventListener("mouseleave", () => { if (t) clearTimeout(t); t = null; hide(); });
+  const show = () => tipEl.classList.add("show");
+  const hide = () => tipEl.classList.remove("show");
 
-  anchor.addEventListener("focus", () => { t = setTimeout(show, delayMs); });
-  anchor.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
+  el.addEventListener("mouseenter", () => { t = setTimeout(show, delayMs); });
+  el.addEventListener("mouseleave", () => { if (t) clearTimeout(t); t = null; hide(); });
+
+  el.addEventListener("focus", () => { t = setTimeout(show, delayMs); });
+  el.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
 }
 
 async function loadTimeToOffer() {
@@ -386,8 +421,17 @@ async function loadTimeToOffer() {
   const elExpected = document.getElementById("ttoExpected");
   if (!elTarget || !elCurrent || !elExpected) return;
 
-  setupDelayedTooltip("ttoCurrentAnchor", "ttoCurrentTip", 1000);
-  setupDelayedTooltip("ttoExpectedAnchor", "ttoExpectedTip", 1000);
+  // Tooltip behaviour: hover the whole metric
+  setupDelayedTooltipOnElement(
+    document.getElementById("ttoCurrentMetric"),
+    document.getElementById("ttoCurrentTip"),
+    1000
+  );
+  setupDelayedTooltipOnElement(
+    document.getElementById("ttoExpectedMetric"),
+    document.getElementById("ttoExpectedTip"),
+    1000
+  );
 
   const text = await fetchCsvByGid(TIME_TO_OFFER_GID);
   const rows = csvToRows(text.trim());
@@ -396,15 +440,15 @@ async function loadTimeToOffer() {
   const headers = rows.shift().map(h => String(h).trim());
   const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  // EXACT header match (case-insensitive): Target, Current, Expected
-  const norm = (s) => String(s || "").trim().toLowerCase();
-  const H = headers.map(norm);
+  // Robust header normalization: trims + collapses spaces + lowercases
+  const normH = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const H = headers.map(normH);
 
   const iTarget = H.indexOf("target");
   const iCurrent = H.indexOf("current");
   const iExpected = H.indexOf("expected");
 
-  // Only fallback if those exact columns don't exist
+  // ONLY fallback to first 3 columns if the exact header is missing.
   const tVal = (iTarget >= 0 ? dataRow[iTarget] : dataRow[0]) ?? "";
   const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
   const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
