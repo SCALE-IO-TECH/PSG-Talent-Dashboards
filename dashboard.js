@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (SINGLE COLUMN "pipeline_health" — FIXED)
+   PIPELINE HEALTH (single column: pipeline_health)
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -341,7 +341,6 @@ async function loadPipelineHealth() {
 
   const headers = rows.shift().map(h => String(h).trim());
 
-  // find the pipeline_health column
   const iPH = pickIndex(headers, [
     "pipeline_health",
     "pipeline health",
@@ -350,7 +349,7 @@ async function loadPipelineHealth() {
   ]);
   if (iPH < 0) return;
 
-  // ✅ IMPORTANT: find the FIRST non-empty value anywhere in the sheet (not just first row)
+  // ✅ find first non-empty pipeline_health value anywhere in the rows
   let chosen = "";
   for (const r of rows) {
     const v = String(r[iPH] ?? "").trim();
@@ -361,7 +360,7 @@ async function loadPipelineHealth() {
   const normalise = (v) => String(v || "")
     .toLowerCase()
     .replace(/[_\-]+/g, " ")
-    .replace(/[^\w\s]/g, "")   // strip punctuation/emojis
+    .replace(/[^\w\s]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -389,6 +388,23 @@ function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
 
   el.addEventListener("focus", () => { t = setTimeout(show, delayMs); });
   el.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
+}
+
+/* ✅ NEW: formats "35" or "35 days" as: 35 <small>days</small> */
+function setDaysValue(el, v) {
+  if (!el) return;
+  const raw = String(v ?? "").trim();
+  if (!raw) { el.textContent = "—"; return; }
+
+  // Accept: "35", "35 days", "35 day", "35d"
+  const m = raw.match(/^(\d+(?:\.\d+)?)\s*(days?|d)?$/i);
+  if (m) {
+    el.innerHTML = `${esc(m[1])} <span class="unit">days</span>`;
+    return;
+  }
+
+  // Otherwise, leave as-is (escaped)
+  el.textContent = raw;
 }
 
 async function loadTimeToOffer() {
@@ -426,9 +442,10 @@ async function loadTimeToOffer() {
   const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
   const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
 
-  elTarget.textContent = String(tVal || "").trim() || "—";
-  elCurrent.textContent = String(cVal || "").trim() || "—";
-  elExpected.textContent = String(eVal || "").trim() || "—";
+  // ✅ changed: render number + small "days"
+  setDaysValue(elTarget, tVal);
+  setDaysValue(elCurrent, cVal);
+  setDaysValue(elExpected, eVal);
 }
 
 // ===== INIT =====
