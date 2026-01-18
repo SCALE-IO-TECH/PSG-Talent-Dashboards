@@ -127,7 +127,7 @@
     .row{
       display:flex;
       justify-content:space-between;
-      align-items:center;              /* <— center vertically */
+      align-items:center;
       padding:12px 0;
       border-bottom:1px solid var(--stroke);
       gap:14px;
@@ -160,7 +160,7 @@
       background:rgba(255,255,255,.12);
       white-space:nowrap;
       color:rgba(255,255,255,.92);
-      line-height:1;                  /* <— prevents “taller pill” */
+      line-height:1;
     }
 
     .stage.offer{ background:rgba(247,142,98,.18); color:var(--accent); border:1px solid rgba(247,142,98,.35); }
@@ -327,6 +327,113 @@
       will-change: transform, opacity;
     }
 
+    /* ===== ADDED: Pipeline Health + Time to Offer styles (new only) ===== */
+    .pipeline-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      width:fit-content;
+      max-width:100%;
+    }
+    .pipeline-pill.good{
+      border-color: rgba(247,142,98,.35);
+      background: rgba(247,142,98,.12);
+      color: rgba(255,255,255,.95);
+    }
+
+    .metric-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:14px;
+      align-items:stretch;
+    }
+    .metric{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+      border-radius:14px;
+      padding:12px 12px;
+      min-height:76px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:8px;
+    }
+    .metric .k{
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.65);
+    }
+    .metric .v{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.02em;
+      line-height:1.05;
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .tooltip-anchor{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:default;
+    }
+    .info-dot{
+      width:18px;
+      height:18px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:900;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.85);
+      flex:0 0 auto;
+    }
+    .tooltip{
+      position:absolute;
+      left:0;
+      top:calc(100% + 10px);
+      min-width:260px;
+      max-width:340px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.55);
+      color: rgba(255,255,255,.90);
+      font-size:12px;
+      letter-spacing:.02em;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      opacity:0;
+      transform: translateY(-6px);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index:20;
+      backdrop-filter: blur(6px);
+    }
+    .tooltip.show{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    @media (max-width:900px){
+      .metric-grid{ grid-template-columns:1fr; }
+    }
+
     @media (prefers-reduced-motion: reduce){
       .boatLayer{ display:none !important; }
       .legend-item{ animation:none !important; }
@@ -428,6 +535,48 @@
     <div class="card">
       <h2>Key Focus</h2>
       <div id="keyFocusList"><div class="list-item">—</div></div>
+    </div>
+
+    <!-- ===== ADDED: Pipeline Health + Time to Offer (new sections only) ===== -->
+    <div class="equal-two">
+      <div class="card">
+        <h2>Pipeline Health</h2>
+        <div id="pipelineHealthWrap">
+          <div class="list-item">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Time to Offer</h2>
+        <div class="metric-grid" id="timeToOfferGrid" aria-label="Time to offer metrics">
+          <div class="metric">
+            <div class="k">Target</div>
+            <div class="v" id="ttoTarget">—</div>
+          </div>
+
+          <div class="metric">
+            <div class="k">Current</div>
+            <div class="v">
+              <span class="tooltip-anchor" id="ttoCurrentAnchor">
+                <span id="ttoCurrent">—</span>
+                <span class="info-dot" aria-hidden="true">i</span>
+                <span class="tooltip" id="ttoCurrentTip">based on our last 5 offers</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="metric">
+            <div class="k">Expected</div>
+            <div class="v">
+              <span class="tooltip-anchor" id="ttoExpectedAnchor">
+                <span id="ttoExpected">—</span>
+                <span class="info-dot" aria-hidden="true">i</span>
+                <span class="tooltip" id="ttoExpectedTip">estimated time from sign off to offer extended for the next approved role</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Links -->
@@ -535,7 +684,7 @@
     });
   </script>
 
-  <!-- ✅ ONE BOAT ONLY: hidden off-screen, then starts moving (same speed) after 1s -->
+  <!-- ✅ BOAT: hidden off-screen, constant speed, starts after 1s -->
   <script>
     (function(){
       const layer = document.getElementById("boatLayer");
@@ -551,7 +700,6 @@
         imgA.src=fallback[0];
       }
 
-      // If Boat B / B dashes exist in markup (older file), hide them safely
       const bBoat = document.getElementById("boatB");
       if (bBoat) bBoat.style.display = "none";
       layer.querySelectorAll(".wakeDash.b").forEach(el => el.style.display = "none");
@@ -561,14 +709,13 @@
 
       const lineA = { x1: -380, y1: 148, x2: 1580, y2: 56 };
 
-      const DURATION = 160000;     // keep your slow constant speed
+      const DURATION = 160000;
       const back = 110;
       const dashStep = 22;
 
-      const START_DELAY = 1000;    // ✅ 1 second after page load
+      const START_DELAY = 1000;
 
-      // ✅ Start just off the left edge so it begins entering shortly after start,
-      // while still being NOT visible at t=0.
+      /* Off-screen left enough not to show on load */
       const OFFSCREEN_P = 0.135;
 
       function lerp(a,b,t){ return a + (b-a)*t; }
@@ -611,7 +758,6 @@
         }
       }
 
-      // ✅ On initial load: keep boat truly invisible and off-screen (no jump)
       aBoat.style.opacity = "0";
       setBoat(aBoat, lineA, OFFSCREEN_P);
       setDashes(aDashes, lineA, OFFSCREEN_P, true);
@@ -630,17 +776,16 @@
         requestAnimationFrame(loop);
       }
 
-      // ✅ Start the *normal* constant-speed motion after 1s
       window.addEventListener("load", () => {
         setTimeout(() => {
-          aBoat.style.opacity = ""; // returns to CSS opacity (.95)
+          aBoat.style.opacity = "";
           loopFactory(OFFSCREEN_P);
         }, START_DELAY);
       }, { once:true });
     })();
   </script>
 
-  <!-- Your existing dashboard logic (data pulling/rendering) -->
+  <!-- Your dashboard logic -->
   <script src="dashboard.js"></script>
 
   <!-- Splash animation -->
