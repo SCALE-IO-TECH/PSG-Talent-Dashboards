@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (CENTRED, LABELS, ONLY ACTIVE HIGHLIGHTED)
+   PIPELINE HEALTH (SLICK CENTRED BAR) — FIXED HIGHLIGHTING
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -347,18 +347,37 @@ async function loadPipelineHealth() {
   if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
   if (!chosen) return;
 
-  const matchKey = (k) => String(k || "").trim().toLowerCase().replace(/\s+/g, " ");
-  const norm = matchKey(chosen);
+  // ✅ robust normaliser (handles extra spaces/punctuation/case)
+  const normalise = (v) => String(v || "")
+    .toLowerCase()
+    .replace(/[_\-]+/g, " ")
+    .replace(/[^\w\s]/g, "")   // strip punctuation/emojis
+    .replace(/\s+/g, " ")
+    .trim();
 
+  const norm = normalise(chosen);
+
+  // ✅ IMPORTANT: your HTML uses .pipeline-step
   const steps = Array.from(wrap.querySelectorAll(".pipeline-step"));
   steps.forEach(s => s.classList.remove("active"));
 
-  const target = steps.find(s => matchKey(s.getAttribute("data-key")) === norm);
+  const target = steps.find(s => normalise(s.getAttribute("data-key")) === norm);
   if (target) target.classList.add("active");
+
+  // Update status text (your HTML currently includes this pill)
+  const statusEl = document.getElementById("pipelineHealthStatus");
+  if (statusEl) {
+    // Keep "OK" uppercase, "Needs work" formatted, otherwise title case
+    const pretty =
+      norm === "ok" ? "OK" :
+      norm === "needs work" ? "Needs work" :
+      norm ? norm.charAt(0).toUpperCase() + norm.slice(1) : "—";
+    statusEl.textContent = pretty;
+  }
 }
 
 /* ===========================
-   TIME TO OFFER (STRICT HEADER MAP)
+   TIME TO OFFER (exact headers)
    =========================== */
 function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   if (!el || !tipEl) return;
@@ -401,14 +420,13 @@ async function loadTimeToOffer() {
   const normH = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
   const H = headers.map(normH);
 
-  // Strict by header name to prevent Current/Expected swapping
   const iTarget = H.indexOf("target");
   const iCurrent = H.indexOf("current");
   const iExpected = H.indexOf("expected");
 
-  const tVal = (iTarget >= 0 ? dataRow[iTarget] : "") ?? "";
-  const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : "") ?? "";
-  const eVal = (iExpected >= 0 ? dataRow[iExpected] : "") ?? "";
+  const tVal = (iTarget >= 0 ? dataRow[iTarget] : dataRow[0]) ?? "";
+  const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
+  const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
 
   elTarget.textContent = String(tVal || "").trim() || "—";
   elCurrent.textContent = String(cVal || "").trim() || "—";
