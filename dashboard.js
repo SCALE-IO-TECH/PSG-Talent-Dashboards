@@ -16,7 +16,184 @@ const TIME_TO_OFFER_GID   = "300572217";  // Time_To
 const PUB_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&gid=";
 
-// ===== CSV PARSER =====
+/* ===========================
+   i18n (ENG / ESP / FRA)
+   =========================== */
+const I18N = {
+  en: {
+    hiring_dashboard: "Hiring Dashboard",
+    live_roles: "Live Roles",
+    on_hold: "On Hold",
+    offers: "Offers",
+    hires: "Hires",
+    candidate_sources: "Candidate Sources",
+    new_starters: "New Starters",
+    progress: "Progress",
+    challenges: "Challenges",
+    key_focus: "Key Focus",
+    pipeline_health: "Pipeline Health",
+    time_to_offer: "Time to Offer",
+    target: "Target",
+    current: "Current",
+    expected: "Expected",
+    loading: "Loading…",
+    no_data: "No data",
+    check_headers: "Check headers",
+    applicants: "applicants",
+    based_on_last_five_offers: "Based on our last five offers.",
+    estimated_next_role: "Estimated time from sign-off to offer extended for the next approved role.",
+    management_handbook: "Management Handbook",
+    manager_guidelines: "Manager Guidelines",
+    powered_by: "Powered by",
+    poor: "Poor",
+    needs_work: "Needs work",
+    ok: "OK",
+    good: "Good",
+    excellent: "Excellent",
+    days: "days"
+  },
+  es: {
+    hiring_dashboard: "Panel de Contratación",
+    live_roles: "Vacantes Activas",
+    on_hold: "En Pausa",
+    offers: "Ofertas",
+    hires: "Contrataciones",
+    candidate_sources: "Fuentes de Candidatos",
+    new_starters: "Nuevas Incorporaciones",
+    progress: "Progreso",
+    challenges: "Desafíos",
+    key_focus: "Enfoque Clave",
+    pipeline_health: "Salud del Pipeline",
+    time_to_offer: "Tiempo hasta Oferta",
+    target: "Objetivo",
+    current: "Actual",
+    expected: "Previsto",
+    loading: "Cargando…",
+    no_data: "Sin datos",
+    check_headers: "Revisa los encabezados",
+    applicants: "candidatos",
+    based_on_last_five_offers: "Basado en nuestras últimas cinco ofertas.",
+    estimated_next_role: "Tiempo estimado desde aprobación hasta oferta para el próximo puesto aprobado.",
+    management_handbook: "Manual de Gestión",
+    manager_guidelines: "Guía para Managers",
+    powered_by: "Con tecnología de",
+    poor: "Malo",
+    needs_work: "Mejorable",
+    ok: "Aceptable",
+    good: "Bueno",
+    excellent: "Excelente",
+    days: "días"
+  },
+  fr: {
+    hiring_dashboard: "Tableau de Recrutement",
+    live_roles: "Postes Ouverts",
+    on_hold: "En Pause",
+    offers: "Offres",
+    hires: "Embauches",
+    candidate_sources: "Sources de Candidats",
+    new_starters: "Nouvelles Arrivées",
+    progress: "Progrès",
+    challenges: "Défis",
+    key_focus: "Priorité Clé",
+    pipeline_health: "Santé du Pipeline",
+    time_to_offer: "Délai jusqu’à l’Offre",
+    target: "Cible",
+    current: "Actuel",
+    expected: "Prévu",
+    loading: "Chargement…",
+    no_data: "Aucune donnée",
+    check_headers: "Vérifie les en-têtes",
+    applicants: "candidats",
+    based_on_last_five_offers: "Basé sur nos cinq dernières offres.",
+    estimated_next_role: "Délai estimé entre validation et offre pour le prochain poste approuvé.",
+    management_handbook: "Manuel de Management",
+    manager_guidelines: "Directives Managers",
+    powered_by: "Propulsé par",
+    poor: "Faible",
+    needs_work: "À améliorer",
+    ok: "Correct",
+    good: "Bon",
+    excellent: "Excellent",
+    days: "jours"
+  }
+};
+
+const LANG_META = {
+  en: { code: "ENG", flag: "🇬🇧", htmlLang: "en" },
+  es: { code: "ESP", flag: "🇪🇸", htmlLang: "es" },
+  fr: { code: "FRA", flag: "🇫🇷", htmlLang: "fr" }
+};
+
+let currentLang = "en";
+
+function t(key) {
+  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key;
+}
+
+function applyI18n() {
+  // Set document lang
+  if (document && document.documentElement) {
+    document.documentElement.lang = LANG_META[currentLang]?.htmlLang || "en";
+  }
+
+  // Translate all nodes with data-i18n
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    if (!key) return;
+    el.textContent = t(key);
+  });
+
+  // Also update language button active state
+  document.querySelectorAll("[data-lang]").forEach((btn) => {
+    btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
+    btn.setAttribute("aria-pressed", btn.getAttribute("data-lang") === currentLang ? "true" : "false");
+  });
+
+  // If the Candidate Sources empty text is visible, keep it translated
+  const empty = document.getElementById("candidateSourcesEmpty");
+  if (empty && empty.style.display !== "none") {
+    // only replace if it matches known english placeholders or is empty
+    const raw = (empty.textContent || "").trim();
+    const known = ["Loading…", "No data", "Check headers", "Cargando…", "Sin datos", "Revisa los encabezados", "Chargement…", "Aucune donnée", "Vérifie les en-têtes"];
+    if (!raw || known.includes(raw)) empty.textContent = t("loading");
+  }
+}
+
+function setLanguage(lang) {
+  if (!I18N[lang]) return;
+  currentLang = lang;
+  try { localStorage.setItem("ps_lang", lang); } catch(e) {}
+  applyI18n();
+
+  // Re-render any strings created by JS using translations
+  // (applicants label, "No data" etc will update next fetch; we can refresh the live roles list now)
+  loadLiveRoles().catch(()=>{});
+  loadCandidateSourcesChart().catch(()=>{});
+  loadTimeToOffer().catch(()=>{});
+}
+
+function initLanguageSwitcher() {
+  try {
+    const saved = localStorage.getItem("ps_lang");
+    if (saved && I18N[saved]) currentLang = saved;
+  } catch(e) {}
+
+  // Hydrate labels on the buttons if present
+  document.querySelectorAll("[data-lang]").forEach((btn) => {
+    const lang = btn.getAttribute("data-lang");
+    const meta = LANG_META[lang];
+    if (!meta) return;
+    const label = `${meta.flag} ${meta.code}`;
+    btn.textContent = label;
+    btn.addEventListener("click", () => setLanguage(lang));
+  });
+
+  applyI18n();
+}
+
+/* ===========================
+   CSV PARSER
+   =========================== */
 function csvToRows(text) {
   const rows = [];
   let row = [];
@@ -133,7 +310,7 @@ async function loadLiveRoles() {
         <div class="meta">
           ${team ? `<span class="team">${esc(team)}</span>` : ``}
           ${location ? `<span class="pill">${esc(location)}</span>` : ``}
-          <span>${applicants} applicants</span>
+          <span>${applicants} ${esc(t("applicants"))}</span>
         </div>
       </div>
       <span class="stage ${stageClass(stage)}">${esc(stage || "—")}</span>
@@ -220,10 +397,12 @@ async function loadCandidateSourcesChart() {
   const canvas = document.getElementById("candidateSourcesChart");
   if (!canvas) return;
 
+  if (empty) empty.textContent = t("loading");
+
   const text = await fetchCsvByGid(CANDIDATE_SOURCES_GID);
   const rows = csvToRows(text.trim());
   if (rows.length < 2) {
-    if (empty) empty.textContent = "No data";
+    if (empty) empty.textContent = t("no_data");
     return;
   }
 
@@ -232,7 +411,7 @@ async function loadCandidateSourcesChart() {
   const iAmount = pickIndex(headers, ["amount"]);
 
   if (iSource < 0 || iAmount < 0) {
-    if (empty) empty.textContent = "Check headers";
+    if (empty) empty.textContent = t("check_headers");
     return;
   }
 
@@ -246,7 +425,7 @@ async function loadCandidateSourcesChart() {
 
   const total = raw.reduce((s, x) => s + x.amount, 0);
   if (!total) {
-    if (empty) empty.textContent = "No data";
+    if (empty) empty.textContent = t("no_data");
     return;
   }
 
@@ -349,7 +528,6 @@ async function loadPipelineHealth() {
   ]);
   if (iPH < 0) return;
 
-  // ✅ find first non-empty pipeline_health value anywhere in the rows
   let chosen = "";
   for (const r of rows) {
     const v = String(r[iPH] ?? "").trim();
@@ -374,36 +552,34 @@ async function loadPipelineHealth() {
 }
 
 /* ===========================
-   TIME TO OFFER (exact headers)
+   TIME TO OFFER
    =========================== */
 function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   if (!el || !tipEl) return;
-  let t = null;
+  let tmr = null;
 
   const show = () => tipEl.classList.add("show");
   const hide = () => tipEl.classList.remove("show");
 
-  el.addEventListener("mouseenter", () => { t = setTimeout(show, delayMs); });
-  el.addEventListener("mouseleave", () => { if (t) clearTimeout(t); t = null; hide(); });
+  el.addEventListener("mouseenter", () => { tmr = setTimeout(show, delayMs); });
+  el.addEventListener("mouseleave", () => { if (tmr) clearTimeout(tmr); tmr = null; hide(); });
 
-  el.addEventListener("focus", () => { t = setTimeout(show, delayMs); });
-  el.addEventListener("blur", () => { if (t) clearTimeout(t); t = null; hide(); });
+  el.addEventListener("focus", () => { tmr = setTimeout(show, delayMs); });
+  el.addEventListener("blur", () => { if (tmr) clearTimeout(tmr); tmr = null; hide(); });
 }
 
-/* ✅ NEW: format value as "35 <small>days</small>" so unit can be styled smaller */
-function renderDaysValue(el, v) {
+/* formats "35" or "35 days" as: 35 <span class="unit">days</span> (translated) */
+function setDaysMetric(el, rawVal) {
   if (!el) return;
-  const raw = String(v ?? "").trim();
+  const raw = String(rawVal ?? "").trim();
   if (!raw) { el.textContent = "—"; return; }
 
-  // If the sheet contains "35", "35 days", "35d", "35.5 days" etc.
-  const m = raw.match(/^(\d+(?:\.\d+)?)\s*(d|day|days)?$/i);
+  const m = raw.match(/^(\d+(?:\.\d+)?)\s*(days?|d)?$/i);
   if (m) {
-    el.innerHTML = `${esc(m[1])} <span class="unit">days</span>`;
+    el.innerHTML = `${esc(m[1])} <span class="unit">${esc(t("days"))}</span>`;
     return;
   }
 
-  // fallback: leave as-is
   el.textContent = raw;
 }
 
@@ -442,23 +618,24 @@ async function loadTimeToOffer() {
   const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
   const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
 
-  // ✅ CHANGED: render "days" in a span so CSS can make it smaller
-  renderDaysValue(elTarget, tVal);
-  renderDaysValue(elCurrent, cVal);
-  renderDaysValue(elExpected, eVal);
+  setDaysMetric(elTarget, tVal);
+  setDaysMetric(elCurrent, cVal);
+  setDaysMetric(elExpected, eVal);
 }
 
 // ===== INIT =====
-Promise.all([
-  loadStatusKpis(),
-  loadLiveRoles(),
-  loadNewStarters(),
-  loadCandidateSourcesChart(),
-  loadTextListFromSheet(PROGRESS_GID, "progressList"),
-  loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
-  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
+window.addEventListener("DOMContentLoaded", () => {
+  initLanguageSwitcher();
 
-  // ✅ NEW
-  loadPipelineHealth(),
-  loadTimeToOffer()
-]).catch(err => console.error(err));
+  Promise.all([
+    loadStatusKpis(),
+    loadLiveRoles(),
+    loadNewStarters(),
+    loadCandidateSourcesChart(),
+    loadTextListFromSheet(PROGRESS_GID, "progressList"),
+    loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
+    loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
+    loadPipelineHealth(),
+    loadTimeToOffer()
+  ]).catch(err => console.error(err));
+});
