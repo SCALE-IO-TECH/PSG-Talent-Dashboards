@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (UPDATED FOR SINGLE COLUMN "pipeline_health")
+   PIPELINE HEALTH (SINGLE COLUMN "pipeline_health" — FIXED)
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -340,18 +340,22 @@ async function loadPipelineHealth() {
   if (rows.length < 2) return;
 
   const headers = rows.shift().map(h => String(h).trim());
-  const dataRow = rows.find(r => r.some(v => String(v).trim() !== "")) || [];
 
-  // ✅ Your sheet now: header = pipeline_health, value underneath is one of the 5 options
-  const iSel = pickIndex(headers, [
+  // find the pipeline_health column
+  const iPH = pickIndex(headers, [
     "pipeline_health",
     "pipeline health",
     "Pipeline_Health",
     "Pipeline Health"
   ]);
+  if (iPH < 0) return;
 
-  let chosen = (iSel >= 0 ? String(dataRow[iSel] ?? "").trim() : "");
-  if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
+  // ✅ IMPORTANT: find the FIRST non-empty value anywhere in the sheet (not just first row)
+  let chosen = "";
+  for (const r of rows) {
+    const v = String(r[iPH] ?? "").trim();
+    if (v) { chosen = v; break; }
+  }
   if (!chosen) return;
 
   const normalise = (v) => String(v || "")
@@ -368,16 +372,6 @@ async function loadPipelineHealth() {
 
   const target = steps.find(s => normalise(s.getAttribute("data-key")) === norm);
   if (target) target.classList.add("active");
-
-  // If your HTML still has this element, keep it updated (no harm)
-  const statusEl = document.getElementById("pipelineHealthStatus");
-  if (statusEl) {
-    const pretty =
-      norm === "ok" ? "OK" :
-      norm === "needs work" ? "Needs work" :
-      norm ? norm.charAt(0).toUpperCase() + norm.slice(1) : "—";
-    statusEl.textContent = pretty;
-  }
 }
 
 /* ===========================
