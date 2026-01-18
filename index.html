@@ -324,7 +324,7 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      padding:18px 0 6px; /* ✅ CHANGED: bar sits a bit lower / more central */
+      padding:18px 0 6px; /* CHANGED: dropped down a bit */
     }
 
     .pipeline-bar{
@@ -388,7 +388,7 @@
       box-shadow:
         0 0 0 2px rgba(255,255,255,.10),
         0 18px 40px rgba(0,0,0,.25);
-      transform: translateY(-3px); /* ✅ CHANGED: active sits a touch higher */
+      transform: translateY(-3px); /* CHANGED: stand out a touch more */
     }
     .pipeline-step.active .pipeline-label{
       color: rgba(255,255,255,.92);
@@ -402,11 +402,9 @@
       gap:16px;
       align-items:stretch;
     }
-
-    /* ✅ CHANGED: make the 3 mini cards orange */
     .metric{
-      border:1px solid rgba(247,142,98,.35);
-      background:rgba(247,142,98,.18);
+      border:1px solid rgba(247,142,98,.35);      /* CHANGED: orange border */
+      background:rgba(247,142,98,.18);            /* CHANGED: orange fill */
       border-radius:14px;
       padding:12px 12px;
       display:flex;
@@ -416,26 +414,21 @@
       min-height:78px;
       position:relative;
     }
-
     .metric .k{
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color:rgba(255,255,255,.75);
+      color:rgba(255,255,255,.65);
     }
-
-    /* ✅ CHANGED: align baseline so unit sits nicely */
     .metric .v{
       font-size:22px;
       font-weight:900;
       line-height:1.05;
       display:flex;
-      align-items:baseline;
+      align-items:baseline; /* CHANGED: helps number + unit align */
       gap:10px;
     }
-
-    /* ✅ NEW: smaller "days" unit */
-    .metric .v .unit{
+    .metric .v .unit{            /* NEW: smaller unit text */
       font-size:12px;
       font-weight:800;
       letter-spacing:.12em;
