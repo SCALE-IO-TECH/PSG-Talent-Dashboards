@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (no pill, labels under, only active highlighted)
+   PIPELINE HEALTH (labels under each step, only active highlighted)
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -347,21 +347,18 @@ async function loadPipelineHealth() {
   if (!chosen) chosen = String(dataRow.find(v => String(v).trim() !== "") ?? "").trim();
   if (!chosen) return;
 
-  const norm = chosen.trim().toLowerCase().replace(/\s+/g, " ");
+  const matchKey = (k) => String(k || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const norm = matchKey(chosen);
 
   const steps = Array.from(wrap.querySelectorAll(".pipeline-step"));
   steps.forEach(s => s.classList.remove("active"));
 
-  const target = steps.find(s => {
-    const k = String(s.getAttribute("data-key") || "").trim().toLowerCase().replace(/\s+/g, " ");
-    return k === norm;
-  });
-
+  const target = steps.find(s => matchKey(s.getAttribute("data-key")) === norm);
   if (target) target.classList.add("active");
 }
 
 /* ===========================
-   TIME TO OFFER (unchanged)
+   TIME TO OFFER (exact headers)
    =========================== */
 function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   if (!el || !tipEl) return;
@@ -426,6 +423,8 @@ Promise.all([
   loadTextListFromSheet(PROGRESS_GID, "progressList"),
   loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
   loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
+
+  // ✅ NEW
   loadPipelineHealth(),
   loadTimeToOffer()
 ]).catch(err => console.error(err));
