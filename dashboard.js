@@ -329,7 +329,7 @@ async function loadTextListFromSheet(gid, containerId) {
 }
 
 /* ===========================
-   PIPELINE HEALTH (labels under each step, only active highlighted)
+   PIPELINE HEALTH (CENTRED, LABELS, ONLY ACTIVE HIGHLIGHTED)
    =========================== */
 async function loadPipelineHealth() {
   const wrap = document.getElementById("pipelineHealthWrap");
@@ -358,7 +358,7 @@ async function loadPipelineHealth() {
 }
 
 /* ===========================
-   TIME TO OFFER (exact headers)
+   TIME TO OFFER (STRICT HEADER MAP)
    =========================== */
 function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   if (!el || !tipEl) return;
@@ -401,13 +401,14 @@ async function loadTimeToOffer() {
   const normH = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
   const H = headers.map(normH);
 
+  // Strict by header name to prevent Current/Expected swapping
   const iTarget = H.indexOf("target");
   const iCurrent = H.indexOf("current");
   const iExpected = H.indexOf("expected");
 
-  const tVal = (iTarget >= 0 ? dataRow[iTarget] : dataRow[0]) ?? "";
-  const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : dataRow[1]) ?? "";
-  const eVal = (iExpected >= 0 ? dataRow[iExpected] : dataRow[2]) ?? "";
+  const tVal = (iTarget >= 0 ? dataRow[iTarget] : "") ?? "";
+  const cVal = (iCurrent >= 0 ? dataRow[iCurrent] : "") ?? "";
+  const eVal = (iExpected >= 0 ? dataRow[iExpected] : "") ?? "";
 
   elTarget.textContent = String(tVal || "").trim() || "—";
   elCurrent.textContent = String(cVal || "").trim() || "—";
