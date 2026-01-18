@@ -288,13 +288,43 @@
 
     /* BOAT layer */
     .topScene{ position: relative; }
+    .boatLayer{
+      position:absolute;
+      left:0; right:0; top:0;
+      height:190px;
+      pointer-events:none;
+      z-index:1;
+      overflow:hidden;
+      opacity:.22;
+    }
+    #headerLogo, .accent-line, h1{ position:relative; z-index:2; }
 
-    /* ✅ NEW: language switcher (top right) */
+    .boatA{
+      position:absolute;
+      width:220px;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
+      will-change: transform, opacity;
+      opacity:.95;
+    }
+    .boatA img{ width:220px; height:auto; display:block; }
+
+    .wakeDash{
+      position:absolute;
+      width:12px;
+      height:3px;
+      border-radius:999px;
+      background: rgba(247,142,98,.95);
+      opacity:0;
+      transform: translate(-50%,-50%);
+      will-change: transform, opacity;
+    }
+
+    /* ✅ Language switcher (top right) */
     .lang-switch{
       position:absolute;
       right:14px;
       top:14px;
-      z-index:3;
+      z-index:4;
       display:flex;
       gap:10px;
       align-items:center;
@@ -328,43 +358,12 @@
       box-shadow: 0 14px 30px rgba(0,0,0,.22);
     }
 
-    .boatLayer{
-      position:absolute;
-      left:0; right:0; top:0;
-      height:190px;
-      pointer-events:none;
-      z-index:1;
-      overflow:hidden;
-      opacity:.22;
-    }
-    #headerLogo, .accent-line, h1{ position:relative; z-index:2; }
-
-    .boatA{
-      position:absolute;
-      width:220px;
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,.22));
-      will-change: transform, opacity;
-      opacity:.95;
-    }
-    .boatA img{ width:220px; height:auto; display:block; }
-
-    .wakeDash{
-      position:absolute;
-      width:12px;
-      height:3px;
-      border-radius:999px;
-      background: rgba(247,142,98,.95);
-      opacity:0;
-      transform: translate(-50%,-50%);
-      will-change: transform, opacity;
-    }
-
-    /* ✅ Pipeline (centered bar with labels; dim non-active; highlight active) */
+    /* ✅ Pipeline health spacing */
     #pipelineHealthWrap{
       display:flex;
       justify-content:center;
       align-items:center;
-      padding:18px 0 6px; /* dropped a bit */
+      padding:18px 0 6px;
     }
 
     .pipeline-bar{
@@ -435,7 +434,7 @@
       font-weight:800;
     }
 
-    /* Time-to-offer */
+    /* ✅ Time-to-offer premium gradient cards + unit spacing */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -473,7 +472,7 @@
       line-height:1.05;
       display:flex;
       align-items:baseline;
-      gap:4px; /* closer */
+      gap:4px;
     }
     .metric .v .unit{
       font-size:12px;
@@ -539,7 +538,7 @@
     <!-- Header + boat -->
     <div class="topScene">
 
-      <!-- ✅ NEW: Translator top-right -->
+      <!-- ✅ Language switcher -->
       <div class="lang-switch" aria-label="Language Switcher">
         <button class="lang-btn" type="button" data-lang="en" aria-pressed="true">🇬🇧 ENG</button>
         <button class="lang-btn" type="button" data-lang="es" aria-pressed="false">🇪🇸 ESP</button>
@@ -654,7 +653,6 @@
       <div class="card">
         <h2 data-i18n="time_to_offer">Time to Offer</h2>
         <div class="metric-grid" aria-label="Time to offer metrics">
-
           <div class="metric">
             <div class="k" data-i18n="target">Target</div>
             <div class="v" id="ttoTarget">—</div>
@@ -671,7 +669,6 @@
             <div class="v" id="ttoExpected">—</div>
             <div class="tooltip" id="ttoExpectedTip" data-i18n="estimated_next_role">Estimated time from sign-off to offer extended for the next approved role.</div>
           </div>
-
         </div>
       </div>
     </div>
@@ -877,7 +874,7 @@
     })();
   </script>
 
-  <!-- Your existing dashboard logic -->
+  <!-- Your dashboard logic -->
   <script src="dashboard.js"></script>
 
   <!-- Splash animation -->
