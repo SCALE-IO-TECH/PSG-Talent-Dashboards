@@ -327,44 +327,23 @@
       will-change: transform, opacity;
     }
 
-    /* ===== ADDED: Pipeline Health + Time to Offer styles (new only) ===== */
-    .pipeline-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 14px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-      width:fit-content;
-      max-width:100%;
-    }
-    .pipeline-pill.good{
-      border-color: rgba(247,142,98,.35);
-      background: rgba(247,142,98,.12);
-      color: rgba(255,255,255,.95);
-    }
-
+    /* ✅ NEW (only styling for the added sections) */
     .metric-grid{
       display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:14px;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
       align-items:stretch;
     }
     .metric{
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.10);
+      background:rgba(0,0,0,.10);
       border-radius:14px;
       padding:12px 12px;
-      min-height:76px;
       display:flex;
       flex-direction:column;
       justify-content:center;
       gap:8px;
+      min-height:78px;
     }
     .metric .k{
       font-size:11px;
@@ -375,10 +354,8 @@
     .metric .v{
       font-size:22px;
       font-weight:900;
-      letter-spacing:.02em;
       line-height:1.05;
-      color:#fff;
-      display:inline-flex;
+      display:flex;
       align-items:center;
       gap:10px;
     }
@@ -388,11 +365,9 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
-      cursor:default;
     }
     .info-dot{
-      width:18px;
-      height:18px;
+      width:18px; height:18px;
       border-radius:999px;
       display:inline-flex;
       align-items:center;
@@ -409,25 +384,45 @@
       left:0;
       top:calc(100% + 10px);
       min-width:260px;
-      max-width:340px;
+      max-width:360px;
       padding:10px 12px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.55);
       color: rgba(255,255,255,.90);
       font-size:12px;
-      letter-spacing:.02em;
       box-shadow: 0 18px 50px rgba(0,0,0,.45);
       opacity:0;
       transform: translateY(-6px);
       pointer-events:none;
       transition: opacity .18s ease, transform .18s ease;
-      z-index:20;
+      z-index:30;
       backdrop-filter: blur(6px);
     }
     .tooltip.show{
       opacity:1;
       transform: translateY(0);
+    }
+
+    .pipeline-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      width:fit-content;
+      max-width:100%;
+      color:rgba(255,255,255,.95);
+    }
+    .pipeline-pill.good{
+      border-color: rgba(247,142,98,.35);
+      background: rgba(247,142,98,.12);
     }
 
     @media (max-width:900px){
@@ -537,25 +532,23 @@
       <div id="keyFocusList"><div class="list-item">—</div></div>
     </div>
 
-    <!-- ===== ADDED: Pipeline Health + Time to Offer (new sections only) ===== -->
+    <!-- ✅ NEW: Pipeline Health + Time to Offer (added only) -->
     <div class="equal-two">
       <div class="card">
         <h2>Pipeline Health</h2>
-        <div id="pipelineHealthWrap">
-          <div class="list-item">—</div>
-        </div>
+        <div id="pipelineHealthWrap"><div class="list-item">—</div></div>
       </div>
 
       <div class="card">
         <h2>Time to Offer</h2>
-        <div class="metric-grid" id="timeToOfferGrid" aria-label="Time to offer metrics">
+        <div class="metric-grid" aria-label="Time to offer metrics">
           <div class="metric">
-            <div class="k">Target</div>
+            <div class="k">Target time to offer</div>
             <div class="v" id="ttoTarget">—</div>
           </div>
 
           <div class="metric">
-            <div class="k">Current</div>
+            <div class="k">Current time to offer</div>
             <div class="v">
               <span class="tooltip-anchor" id="ttoCurrentAnchor">
                 <span id="ttoCurrent">—</span>
@@ -566,7 +559,7 @@
           </div>
 
           <div class="metric">
-            <div class="k">Expected</div>
+            <div class="k">Expected time to offer</div>
             <div class="v">
               <span class="tooltip-anchor" id="ttoExpectedAnchor">
                 <span id="ttoExpected">—</span>
@@ -715,7 +708,7 @@
 
       const START_DELAY = 1000;
 
-      /* Off-screen left enough not to show on load */
+      /* Off-screen */
       const OFFSCREEN_P = 0.135;
 
       function lerp(a,b,t){ return a + (b-a)*t; }
@@ -785,7 +778,7 @@
     })();
   </script>
 
-  <!-- Your dashboard logic -->
+  <!-- Your existing dashboard logic -->
   <script src="dashboard.js"></script>
 
   <!-- Splash animation -->
