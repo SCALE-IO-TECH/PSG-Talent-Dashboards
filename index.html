@@ -319,12 +319,12 @@
       will-change: transform, opacity;
     }
 
-    /* ✅ Pipeline (centered bar with labels; dim non-active; highlight active) */
+    /* ✅ Pipeline positioning (as you asked previously) */
     #pipelineHealthWrap{
       display:flex;
       justify-content:center;
       align-items:center;
-      padding:18px 0 6px; /* dropped down slightly */
+      padding:18px 0 6px;
     }
 
     .pipeline-bar{
@@ -388,14 +388,14 @@
       box-shadow:
         0 0 0 2px rgba(255,255,255,.10),
         0 18px 40px rgba(0,0,0,.25);
-      transform: translateY(-3px); /* highlighted a tiny bit higher */
+      transform: translateY(-3px);
     }
     .pipeline-step.active .pipeline-label{
       color: rgba(255,255,255,.92);
       font-weight:800;
     }
 
-    /* ✅ Time-to-offer (premium gradient orange cards + unit styling) */
+    /* ✅ Time-to-offer (gradient orange + small days close to number) */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -433,7 +433,7 @@
       line-height:1.05;
       display:flex;
       align-items:baseline;
-      gap:4px; /* days closer to the number */
+      gap:4px;
     }
     .metric .v .unit{
       font-size:12px;
@@ -473,41 +473,48 @@
       .metric-grid{ grid-template-columns:1fr; }
     }
 
-    /* ✅ Google Translate (top right, styled) */
-    .translate-wrap{
+    /* ✅ Custom language buttons (top right) */
+    .lang-switch{
       position:absolute;
-      right:14px;
-      top:14px;
-      z-index:5;
+      top:16px;
+      right:16px;
+      z-index:6;
       display:flex;
+      gap:8px;
       align-items:center;
-      gap:10px;
     }
-    #google_translate_element{
-      background: rgba(0,0,0,.14);
-      border:1px solid rgba(255,255,255,.14);
+    .lang-btn{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.18);
       border-radius:999px;
-      padding:6px 10px;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 14px 30px rgba(0,0,0,.18);
-    }
-    .goog-te-gadget{
-      font-family: "Inter Tight", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
-      color: rgba(255,255,255,.85) !important;
-      font-size: 12px !important;
-    }
-    .goog-te-gadget span{ display:none !important; }
-    .goog-te-gadget select{
-      background: transparent !important;
-      color: rgba(255,255,255,.92) !important;
-      border: none !important;
-      outline: none !important;
-      font-weight: 900 !important;
-      letter-spacing: .12em !important;
-      text-transform: uppercase !important;
+      padding:6px 12px;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.14em;
+      color:#fff;
       cursor:pointer;
+      transition: all .2s ease;
+      line-height:1;
+      user-select:none;
     }
-    .goog-logo-link, .goog-te-banner-frame{ display:none !important; }
+    .lang-btn:hover{
+      border-color: rgba(247,142,98,.45);
+      background: rgba(247,142,98,.18);
+    }
+    .lang-btn.active{
+      background: linear-gradient(135deg, #f78e62, #ffb08f);
+      color:#0c2f33;
+      border-color: transparent;
+    }
+
+    /* ✅ Hide Google Translate UI/banner completely */
+    #google_translate_element{ display:none !important; }
+    .goog-te-banner-frame,
+    .goog-te-gadget,
+    .goog-logo-link,
+    .goog-te-gadget span{
+      display:none !important;
+    }
     body{ top:0 !important; }
 
     @media (prefers-reduced-motion: reduce){
@@ -536,9 +543,11 @@
     <!-- Header + boat -->
     <div class="topScene">
 
-      <!-- ✅ Google Translate widget (top right) -->
-      <div class="translate-wrap" aria-label="Translate">
-        <div id="google_translate_element"></div>
+      <!-- ✅ Custom Language Buttons -->
+      <div class="lang-switch" aria-label="Language switcher">
+        <button class="lang-btn" data-lang="en" type="button">🇬🇧 ENG</button>
+        <button class="lang-btn" data-lang="es" type="button">🇪🇸 ESP</button>
+        <button class="lang-btn" data-lang="fr" type="button">🇫🇷 FRA</button>
       </div>
 
       <div class="boatLayer" aria-hidden="true" id="boatLayer">
@@ -915,7 +924,9 @@
     });
   </script>
 
-  <!-- ✅ Google Translate init -->
+  <!-- ✅ Hidden Google Translate engine -->
+  <div id="google_translate_element"></div>
+
   <script>
     function googleTranslateElementInit() {
       new google.translate.TranslateElement(
@@ -929,6 +940,52 @@
     }
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <!-- ✅ Custom buttons drive Google Translate (no dropdown) -->
+  <script>
+    function setGoogleLanguage(lang){
+      const select = document.querySelector('select.goog-te-combo');
+      if (!select) return false;
+      select.value = lang;
+      select.dispatchEvent(new Event('change'));
+      return true;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const buttons = document.querySelectorAll(".lang-btn");
+
+      const activate = (lang) => {
+        buttons.forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
+      };
+
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lang = btn.getAttribute("data-lang") || "en";
+          activate(lang);
+          try { localStorage.setItem("ps_lang", lang); } catch(e) {}
+
+          // If translate hasn't injected the select yet, retry a few times quickly
+          let tries = 0;
+          const timer = setInterval(() => {
+            tries++;
+            if (setGoogleLanguage(lang) || tries > 20) clearInterval(timer);
+          }, 120);
+        });
+      });
+
+      const saved = (() => {
+        try { return localStorage.getItem("ps_lang") || "en"; } catch(e) { return "en"; }
+      })();
+      activate(saved);
+
+      // apply saved language after translate loads
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        if (setGoogleLanguage(saved) || tries > 30) clearInterval(timer);
+      }, 150);
+    });
+  </script>
 
 </body>
 </html>
