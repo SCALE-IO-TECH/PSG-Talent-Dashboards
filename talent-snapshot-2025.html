@@ -20,23 +20,22 @@
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:18px;
 
-      /* Header sizing */
-      --logoW: 170px;
+      /* ✅ Keep header spacing EXACTLY as it was when you said padding worked */
+      --logoW: 170px;   /* line width */
       --logoH: 42px;
 
-      /* ✅ Spacing */
+      /* these values were the “worked” spacing set */
       --spaceLogoToLine: 18px;
       --spaceLineToTitle: 14px;
       --spaceTitleToCards: 16px;
       --spaceH2ToBody: 18px;
 
-      /* ✅ ACTUAL visual tweaks you asked for */
-      --orangeSolid: rgba(247,142,98,.48);   /* more solid orange fill */
+      /* ✅ Colours (unchanged) */
+      --orangeSolid: rgba(247,142,98,.48);
       --orangeBorder: rgba(247,142,98,.78);
 
-      /* Teamtailor mini-cards should be MORE transparent */
-      --ttOverlay: rgba(0,0,0,.06);          /* lighter overlay = more transparent */
-      --ttCardTint: rgba(255,255,255,.03);   /* tiny tint so they read as cards */
+      --ttOverlay: rgba(0,0,0,.06);     /* more transparent */
+      --ttCardTint: rgba(255,255,255,.03);
       --ttBorder: rgba(255,255,255,.12);
     }
 
@@ -112,11 +111,13 @@
       padding-top:6px;
     }
 
+    /* ✅ Revert to previous padding approach (was working) */
     .logo-wrap{
       width: var(--logoW);
       display:flex;
       justify-content:center;
-      padding:14px 0 0;
+      padding-top:14px;
+      padding-bottom:10px; /* restore bottom padding */
     }
     .logo-wrap img{
       height: var(--logoH);
@@ -124,6 +125,7 @@
       display:block;
     }
 
+    /* ✅ Revert margin model: keep the original “worked” gap between logo and line */
     .accent-line{
       height:3px;
       width: var(--logoW);
@@ -140,7 +142,7 @@
       letter-spacing:.14em;
       text-transform:uppercase;
       margin:0;
-      line-height:11.15;
+      line-height:1.15;
     }
 
     /* Cards */
@@ -223,7 +225,7 @@
       flex-wrap:wrap;
     }
 
-    /* ✅ FORCE the orange cards to be more solid */
+    /* ✅ More solid orange (kept) */
     .big-metric.orange{
       border: 1px solid var(--orangeBorder) !important;
       background: var(--orangeSolid) !important;
@@ -281,9 +283,9 @@
     .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    /* ✅ FORCE the Teamtailor mini-cards to be MORE transparent */
+    /* ✅ Teamtailor mini-cards more transparent (kept) */
     .big-metric.green{
-      background: rgba(12,47,51,1) !important; /* same page green */
+      background: rgba(12,47,51,1) !important;
       border: 1px solid var(--ttBorder) !important;
       position:relative;
       overflow:hidden;
@@ -293,7 +295,6 @@
       content:"";
       position:absolute;
       inset:0;
-      /* lighter overlay + slight card tint = more transparent, still readable */
       background: linear-gradient(0deg, var(--ttOverlay), var(--ttOverlay)), var(--ttCardTint);
       pointer-events:none;
     }
@@ -574,4 +575,3 @@
   </script>
 </body>
 </html>
-
