@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900;1,200..900&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -20,12 +20,12 @@
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:18px;
 
-      /* Header sizing */
-      --logoW: 160px;  /* used to match the orange line width */
+      --logoW: 160px;
       --logoH: 42px;
 
-      /* Polestar green tone */
-      --psgGreen: 34,197,94; /* rgb */
+      /* ✅ Pole Star Green (darker, in-line with the page) */
+      --psgGreenBg: rgba(18, 92, 75, .55);     /* deep green wash */
+      --psgGreenBorder: rgba(255,255,255,.14); /* soft white-ish border */
     }
 
     *{ box-sizing:border-box; }
@@ -56,7 +56,7 @@
       padding-bottom:40px;
     }
 
-    /* ===== Header (updated) ===== */
+    /* Header */
     .topbar{
       position:relative;
       display:flex;
@@ -65,8 +65,6 @@
       margin-top:6px;
       padding-top:2px;
     }
-
-    /* Back to Dashboard stays top-right */
     .top-actions{
       position:absolute;
       top:0;
@@ -75,7 +73,6 @@
       gap:10px;
       align-items:center;
     }
-
     .pill-link{
       display:inline-flex; align-items:center; justify-content:center;
       padding:8px 12px; border-radius:999px;
@@ -106,7 +103,7 @@
       width: var(--logoW);
       display:flex;
       justify-content:center;
-      padding:14px 0 10px; /* padding so it never overlaps title */
+      padding:14px 0 10px;
     }
     .logo-wrap img{
       height: var(--logoH);
@@ -114,12 +111,11 @@
       display:block;
     }
 
-    /* orange line BETWEEN logo and title */
     .accent-line{
       height:3px;
-      width: var(--logoW); /* match logo width */
+      width: var(--logoW);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:0 auto 14px; /* sits between logo and title */
+      margin:0 auto 14px;
       border-radius:999px;
       opacity:.95;
     }
@@ -134,7 +130,7 @@
       line-height:1.15;
     }
 
-    /* ===== Cards / headings ===== */
+    /* Cards */
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
@@ -159,7 +155,9 @@
       text-transform:uppercase;
     }
 
-    /* ===== Snapshot layout ===== */
+    .card-body{ margin-top:16px; }
+
+    /* Snapshot section */
     .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
     .kpi{ text-align:center; }
     .kpi .label{
@@ -212,7 +210,6 @@
       flex-wrap:wrap;
     }
 
-    /* Orange (slightly more solid, still classy) */
     .big-metric.orange{
       border: 1px solid rgba(247,142,98,.62);
       background: rgba(247,142,98,.28);
@@ -238,7 +235,7 @@
       margin-right:6px;
     }
 
-    /* ===== Split / charts ===== */
+    /* Split */
     .split{
       display:grid;
       grid-template-columns:1.2fr .8fr;
@@ -270,20 +267,14 @@
     .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    .card-body{ margin-top:16px; }
-
-    /* ===== Teamtailor green cards (true PSG green, not too solid, whitish borders) ===== */
+    /* ✅ Teamtailor cards: remove gradient, darker PSG green, white-ish border */
     .big-metric.green{
-      border: 1px solid rgba(255,255,255,.14);               /* whitish border */
-      background:
-        linear-gradient(135deg,
-          rgba(var(--psgGreen), .22) 0%,
-          rgba(var(--psgGreen), .14) 60%,
-          rgba(0,0,0,.10) 100%);
+      background: var(--psgGreenBg);
+      border: 1px solid var(--psgGreenBorder);
       box-shadow: 0 18px 40px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
     }
 
-    /* ===== Top performing jobs ===== */
+    /* Jobs */
     .jobs{
       display:grid;
       gap:10px;
@@ -323,7 +314,7 @@
       color:rgba(255,255,255,.92);
     }
 
-    /* ===== Powered by ===== */
+    /* Powered by */
     .powered-by{
       display:flex;
       justify-content:center;
@@ -351,7 +342,6 @@
 
 <body>
   <div class="wrap">
-
     <!-- Header -->
     <div class="topbar">
       <div class="top-actions">
@@ -369,7 +359,7 @@
       </div>
     </div>
 
-    <!-- KPI: Snapshot in numbers -->
+    <!-- Snapshot in numbers -->
     <div class="card">
       <h2>Snapshot in numbers</h2>
 
@@ -410,7 +400,7 @@
         </div>
       </div>
 
-      <!-- Teamtailor impact -->
+      <!-- Since implementing Teamtailor -->
       <div class="card">
         <h2>Since implementing Teamtailor</h2>
         <div class="card-body">
@@ -474,8 +464,8 @@
       { name: "Sourced", pct: 9 },
       { name: "Glassdoor", pct: 8 },
       { name: "Google", pct: 1 },
-      { name: "Referrals", pct: 0.9 },  // "<1%"
-      { name: "Other", pct: 16 }        // "<16%" shown as 16 for charting
+      { name: "Referrals", pct: 0.9 },
+      { name: "Other", pct: 16 }
     ];
 
     function modernPalette(n) {
@@ -544,7 +534,10 @@
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.label}: ${legendItems[ctx.dataIndex].label}`
+              label: (ctx) => {
+                const li = legendItems[ctx.dataIndex];
+                return `${ctx.label}: ${li ? li.label : ctx.raw + "%"}`;
+              }
             }
           }
         }
