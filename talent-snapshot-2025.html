@@ -20,19 +20,24 @@
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:18px;
 
-      /* ✅ Header sizing */
-      --logoW: 170px; /* wider line (used by accent-line) */
+      /* Header sizing */
+      --logoW: 170px;
       --logoH: 42px;
 
-      /* ✅ Teamtailor mini-cards: same bg green, slightly darker overlay (now MORE transparent) */
-      --ttBgOverlay: rgba(0, 0, 0, .12); /* was .18, now lighter = more transparent */
-      --ttBorder: rgba(255,255,255,.14);
-
-      /* ✅ Spacing controls */
-      --spaceLogoToLine: 18px;   /* more space between logo and orange line */
+      /* ✅ Spacing */
+      --spaceLogoToLine: 18px;
       --spaceLineToTitle: 14px;
       --spaceTitleToCards: 16px;
       --spaceH2ToBody: 18px;
+
+      /* ✅ ACTUAL visual tweaks you asked for */
+      --orangeSolid: rgba(247,142,98,.48);   /* more solid orange fill */
+      --orangeBorder: rgba(247,142,98,.78);
+
+      /* Teamtailor mini-cards should be MORE transparent */
+      --ttOverlay: rgba(0,0,0,.06);          /* lighter overlay = more transparent */
+      --ttCardTint: rgba(255,255,255,.03);   /* tiny tint so they read as cards */
+      --ttBorder: rgba(255,255,255,.12);
     }
 
     *{ box-sizing:border-box; }
@@ -119,7 +124,6 @@
       display:block;
     }
 
-    /* ✅ Orange line wider + more padding from logo */
     .accent-line{
       height:3px;
       width: var(--logoW);
@@ -136,7 +140,7 @@
       letter-spacing:.14em;
       text-transform:uppercase;
       margin:0;
-      line-height:1.15;
+      line-height:11.15;
     }
 
     /* Cards */
@@ -219,10 +223,10 @@
       flex-wrap:wrap;
     }
 
-    /* ✅ Slightly more solid orange */
+    /* ✅ FORCE the orange cards to be more solid */
     .big-metric.orange{
-      border: 1px solid rgba(247,142,98,.72);
-      background: rgba(247,142,98,.34);
+      border: 1px solid var(--orangeBorder) !important;
+      background: var(--orangeSolid) !important;
     }
 
     .gender-line{
@@ -277,18 +281,20 @@
     .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    /* ✅ Teamtailor mini-cards: more transparent overlay */
+    /* ✅ FORCE the Teamtailor mini-cards to be MORE transparent */
     .big-metric.green{
-      background: rgba(12,47,51,1);
-      border: 1px solid var(--ttBorder);
+      background: rgba(12,47,51,1) !important; /* same page green */
+      border: 1px solid var(--ttBorder) !important;
       position:relative;
       overflow:hidden;
+      box-shadow: 0 18px 40px rgba(0,0,0,.18), 0 0 0 1px rgba(255,255,255,.05) inset;
     }
     .big-metric.green::before{
       content:"";
       position:absolute;
       inset:0;
-      background: var(--ttBgOverlay);
+      /* lighter overlay + slight card tint = more transparent, still readable */
+      background: linear-gradient(0deg, var(--ttOverlay), var(--ttOverlay)), var(--ttCardTint);
       pointer-events:none;
     }
     .big-metric.green > *{
@@ -568,3 +574,4 @@
   </script>
 </body>
 </html>
+
