@@ -319,7 +319,7 @@
       will-change: transform, opacity;
     }
 
-    /* ✅ Pipeline positioning (as you asked previously) */
+    /* ✅ Pipeline positioning */
     #pipelineHealthWrap{
       display:flex;
       justify-content:center;
@@ -395,7 +395,7 @@
       font-weight:800;
     }
 
-    /* ✅ Time-to-offer (gradient orange + small days close to number) */
+    /* ✅ Time-to-offer */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -481,7 +481,7 @@
       .card:hover{ transform:none !important; }
     }
 
-    /* === Talent Snapshot Link Card (NEW) === */
+    /* ===== Talent Snapshot Link Card (UPDATED TITLE) ===== */
     .snapshot-link{
       position:fixed;
       top:96px;              /* not hugging the top */
@@ -495,7 +495,7 @@
       gap:6px;
       padding:12px 14px;
       min-width:190px;
-      max-width:220px;
+      max-width:230px;
       text-decoration:none;
       background: rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.14);
@@ -516,26 +516,20 @@
       background: rgba(255,255,255,.08);
     }
 
-    .snapshot-card .eyebrow{
-      font-size:10px;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,.55);
-    }
-
-    .snapshot-card .title{
+    .snapshot-title{
       font-size:13px;
       font-weight:800;
       letter-spacing:.12em;
       text-transform:uppercase;
       color:#fff;
-      margin:0;
+      line-height:1.15;
     }
+    .snapshot-year{ color:var(--accent); }
 
-    .snapshot-card .meta{
+    .snapshot-sub{
       font-size:11px;
       color:rgba(255,255,255,.65);
-      margin:0;
+      letter-spacing:.02em;
     }
 
     /* Mobile: drop it into flow so it doesn't crowd */
@@ -561,12 +555,11 @@
     />
   </div>
 
-  <!-- ✅ NEW: Talent Snapshot linked card (top-right) -->
+  <!-- Talent Snapshot linked card (top-right) -->
   <div class="snapshot-link" aria-label="Talent Snapshot link">
     <a href="talent-snapshot-2025.html" class="snapshot-card">
-      <div class="eyebrow">Talent</div>
-      <div class="title">Snapshot 2025</div>
-      <div class="meta">Hiring outcomes &amp; impact</div>
+      <div class="snapshot-title">Talent Snapshot <span class="snapshot-year">2025</span></div>
+      <div class="snapshot-sub">Hiring outcomes &amp; impact</div>
     </a>
   </div>
 
