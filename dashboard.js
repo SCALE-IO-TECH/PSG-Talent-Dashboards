@@ -103,7 +103,7 @@ async function loadStatusKpis() {
   document.getElementById("kpiHires").textContent   = String(toNumber(dataRow[idx("Hires")]));
 }
 
-// ===== LIVE ROLES LIST =====
+// ===== LIVE ROLES LIST + FILTERS (Location + Stage only) =====
 async function loadLiveRoles() {
   const text = await fetchCsvByGid(LIVE_ROLES_GID);
   const rows = csvToRows(text.trim());
@@ -114,32 +114,79 @@ async function loadLiveRoles() {
 
   const list = document.getElementById("liveRolesList");
   if (!list) return;
-  list.innerHTML = "";
 
+  // Filter elements
+  const selLoc = document.getElementById("liveFilterLocation");
+  const selStage = document.getElementById("liveFilterStage");
+
+  // Build data model once
+  const data = [];
   rows.forEach(r => {
     const title = (r[idx("Job_Title")] ?? "").trim();
     if (!title) return;
 
-    const team = (r[idx("Team")] ?? "").trim();
-    const location = (r[idx("Location")] ?? "").trim();
-    const applicants = toNumber(r[idx("Applicants")]);
-    const stage = (r[idx("Current_Stage")] ?? "").trim();
-
-    const el = document.createElement("div");
-    el.className = "row";
-    el.innerHTML = `
-      <div style="min-width:0;">
-        <div class="title">${esc(title)}</div>
-        <div class="meta">
-          ${team ? `<span class="team">${esc(team)}</span>` : ``}
-          ${location ? `<span class="pill">${esc(location)}</span>` : ``}
-          <span>${applicants} applicants</span>
-        </div>
-      </div>
-      <span class="stage ${stageClass(stage)}">${esc(stage || "—")}</span>
-    `;
-    list.appendChild(el);
+    data.push({
+      title,
+      team: (r[idx("Team")] ?? "").trim(),
+      location: (r[idx("Location")] ?? "").trim(),
+      applicants: toNumber(r[idx("Applicants")]),
+      stage: (r[idx("Current_Stage")] ?? "").trim()
+    });
   });
+
+  const uniqSorted = (arr) =>
+    Array.from(new Set(arr.map(x => (x || "").trim()).filter(Boolean)))
+      .sort((a,b) => a.localeCompare(b));
+
+  // Populate dropdowns
+  if (selLoc) {
+    const locations = uniqSorted(data.map(d => d.location));
+    selLoc.innerHTML = `<option value="">All</option>` + locations
+      .map(v => `<option value="${esc(v)}">${esc(v)}</option>`)
+      .join("");
+  }
+
+  if (selStage) {
+    const stages = uniqSorted(data.map(d => d.stage));
+    selStage.innerHTML = `<option value="">All</option>` + stages
+      .map(v => `<option value="${esc(v)}">${esc(v)}</option>`)
+      .join("");
+  }
+
+  function render() {
+    const chosenLoc = (selLoc?.value || "").trim();
+    const chosenStage = (selStage?.value || "").trim();
+
+    const filtered = data.filter(d => {
+      if (chosenLoc && d.location !== chosenLoc) return false;
+      if (chosenStage && d.stage !== chosenStage) return false;
+      return true;
+    });
+
+    list.innerHTML = "";
+
+    filtered.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "row";
+      el.innerHTML = `
+        <div style="min-width:0;">
+          <div class="title">${esc(d.title)}</div>
+          <div class="meta">
+            ${d.team ? `<span class="team">${esc(d.team)}</span>` : ``}
+            ${d.location ? `<span class="pill">${esc(d.location)}</span>` : ``}
+            <span>${d.applicants} applicants</span>
+          </div>
+        </div>
+        <span class="stage ${stageClass(d.stage)}">${esc(d.stage || "—")}</span>
+      `;
+      list.appendChild(el);
+    });
+  }
+
+  if (selLoc) selLoc.onchange = render;
+  if (selStage) selStage.onchange = render;
+
+  render();
 }
 
 // ===== NEW STARTERS (TEAM UNDER JOB TITLE) =====
