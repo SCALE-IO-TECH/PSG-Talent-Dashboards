@@ -480,6 +480,73 @@
       .card{ transition:none !important; }
       .card:hover{ transform:none !important; }
     }
+
+    /* === Talent Snapshot Link Card (NEW) === */
+    .snapshot-link{
+      position:fixed;
+      top:96px;              /* not hugging the top */
+      right:28px;
+      z-index:20;
+    }
+
+    .snapshot-card{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding:12px 14px;
+      min-width:190px;
+      max-width:220px;
+      text-decoration:none;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.28);
+      backdrop-filter: blur(6px);
+      transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease,
+        background .18s ease;
+    }
+
+    .snapshot-card:hover{
+      transform: translateY(-3px);
+      border-color: rgba(247,142,98,.45);
+      box-shadow: 0 22px 52px rgba(0,0,0,.38);
+      background: rgba(255,255,255,.08);
+    }
+
+    .snapshot-card .eyebrow{
+      font-size:10px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+    }
+
+    .snapshot-card .title{
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#fff;
+      margin:0;
+    }
+
+    .snapshot-card .meta{
+      font-size:11px;
+      color:rgba(255,255,255,.65);
+      margin:0;
+    }
+
+    /* Mobile: drop it into flow so it doesn't crowd */
+    @media (max-width:900px){
+      .snapshot-link{
+        position:static;
+        margin:14px auto 0;
+        display:flex;
+        justify-content:center;
+      }
+    }
   </style>
 </head>
 
@@ -492,6 +559,15 @@
       class="splash-logo"
       id="splashLogo"
     />
+  </div>
+
+  <!-- ✅ NEW: Talent Snapshot linked card (top-right) -->
+  <div class="snapshot-link" aria-label="Talent Snapshot link">
+    <a href="talent-snapshot-2025.html" class="snapshot-card">
+      <div class="eyebrow">Talent</div>
+      <div class="title">Snapshot 2025</div>
+      <div class="meta">Hiring outcomes &amp; impact</div>
+    </a>
   </div>
 
   <div class="dashboard">
