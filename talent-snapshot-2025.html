@@ -19,7 +19,13 @@
       --stroke:rgba(255,255,255,.12);
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:18px;
+
+      /* Page sizing */
+      --logoW: 168px;     /* used to match the orange line width */
+      --logoH: 42px;
+      --green: rgba(34,197,94,1); /* slick PSG-green vibe */
     }
+
     *{ box-sizing:border-box; }
     html,body{ height:100%; background:var(--bg); }
     body{
@@ -29,6 +35,7 @@
       overflow-x:hidden;
       position:relative;
     }
+
     body::before{
       content:"";
       position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -37,13 +44,43 @@
         radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%);
     }
-    .wrap{ position:relative; z-index:1; max-width:1200px; margin:0 auto; display:grid; gap:20px; padding-bottom:40px; }
 
-    .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .brand{
-      display:flex; align-items:center; gap:12px;
+    .wrap{
+      position:relative; z-index:1;
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      gap:20px;
+      padding-bottom:40px;
     }
-    .brand img{ height:46px; width:auto; display:block; }
+
+    /* ===== Header (updated) ===== */
+    .topbar{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      margin-top:6px;
+    }
+
+    .logo-stack{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+    }
+
+    .logo-wrap{
+      width: var(--logoW);
+      display:flex;
+      justify-content:center;
+      padding:14px 0 14px; /* extra breathing room so it doesn't clash with title */
+    }
+    .logo-wrap img{
+      height: var(--logoH);
+      width:auto;
+      display:block;
+    }
+
     h1{
       font-family:"Unbounded", sans-serif;
       font-weight:600;
@@ -51,8 +88,23 @@
       letter-spacing:.14em;
       text-transform:uppercase;
       margin:0;
+      line-height:1.15;
     }
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+    .accent-line{
+      height:3px;
+      width: var(--logoW); /* match logo width */
+      background:linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin:14px auto 0;
+      border-radius:999px;
+      opacity:.95;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:center;
+      margin-top:14px;
+    }
     .pill-link{
       display:inline-flex; align-items:center; justify-content:center;
       padding:8px 12px; border-radius:999px;
@@ -65,15 +117,13 @@
       opacity:.9;
       white-space:nowrap;
     }
-    .pill-link:hover{ opacity:1; transform: translateY(-1px); border-color: rgba(247,142,98,.35); color:#fff; }
-
-    .accent-line{
-      height:3px; width:min(520px, 78vw);
-      background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:6px auto 0;
-      border-radius:999px; opacity:.95;
+    .pill-link:hover{
+      opacity:1; transform: translateY(-1px);
+      border-color: rgba(247,142,98,.35);
+      color:#fff;
     }
 
+    /* ===== Cards / headings ===== */
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
@@ -92,34 +142,103 @@
     h2{
       font-size:13px;
       color:var(--muted);
-      margin:0 0 12px 0;
+      margin:0;
       font-weight:800;
       letter-spacing:.14em;
       text-transform:uppercase;
     }
 
+    /* ===== Snapshot layout (updated spacing) ===== */
     .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
     .kpi{ text-align:center; }
-    .kpi .label{ font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
-    .kpi .value{ margin-top:10px; font-size:clamp(28px,4vw,36px); font-weight:900; }
+    .kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+    .kpi .value{
+      margin-top:10px;
+      font-size:clamp(28px,4vw,36px);
+      font-weight:900;
+    }
 
+    .snapshot-body{ margin-top:16px; } /* drop stats down from heading */
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:18px; /* more air */
+    }
+
+    .big-metric{
+      border-radius:14px;
+      padding:18px 16px; /* more padding than before */
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:10px;
+      min-height:96px;
+      position:relative;
+      box-shadow: 0 18px 40px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+    }
+    .big-metric .k{
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.72);
+    }
+    .big-metric .v{
+      font-size:28px;
+      font-weight:900;
+      line-height:1.05;
+      display:flex;
+      align-items:baseline;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    /* Orange (solid, toned down) */
+    .big-metric.orange{
+      border: 1px solid rgba(247,142,98,.55);
+      background: rgba(247,142,98,.22);
+    }
+
+    /* Green (slick Teamtailor) */
+    .big-metric.green{
+      border: 1px solid rgba(34,197,94,.55);
+      background: rgba(34,197,94,.18);
+    }
+
+    .gender-line{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .gender-line .pct{
+      font-size:28px;
+      font-weight:900;
+      color:#fff;
+    }
+    .gender-line .lbl{
+      font-size:12px;          /* smaller */
+      font-weight:600;         /* not as bold */
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      opacity:.78;
+    }
+
+    /* ===== Split / charts ===== */
     .split{
-      display:grid; grid-template-columns:1.2fr .8fr; gap:16px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:16px;
       align-items:stretch;
     }
-    .mini-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .big-metric{
-      border:1px solid rgba(247,142,98,.55);
-      background: linear-gradient(135deg, rgba(247,142,98,.42) 0%, rgba(247,142,98,.20) 55%, rgba(0,0,0,.12) 100%);
-      border-radius:14px;
-      padding:14px;
-      display:flex; flex-direction:column; justify-content:center; gap:6px;
-      min-height:92px;
-      box-shadow: 0 18px 40px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
-    }
-    .big-metric .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.70); }
-    .big-metric .v{ font-size:26px; font-weight:900; line-height:1.05; }
-    .big-metric .s{ font-size:12px; color:rgba(255,255,255,.72); letter-spacing:.02em; }
 
     .chart-wrap{
       height:240px;
@@ -134,80 +253,129 @@
     .legend{ margin-top:10px; display:grid; gap:8px; }
     .legend-item{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.10); font-size:12px; color:rgba(255,255,255,.88);
+      padding:6px 10px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.10);
+      font-size:12px;
+      color:rgba(255,255,255,.88);
     }
     .legend-left{ display:flex; align-items:center; gap:10px; min-width:0; }
     .legend-dot{ width:10px; height:10px; border-radius:999px; box-shadow:0 0 0 4px rgba(255,255,255,.05); flex:0 0 auto; }
     .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    .table{
+    /* ===== Teamtailor block spacing ===== */
+    .card-body{ margin-top:16px; } /* used to drop content down from heading */
+
+    /* ===== Top performing jobs (updated columns) ===== */
+    .jobs{
       display:grid;
       gap:10px;
+      margin-top:12px;
     }
-    .row{
-      display:flex; justify-content:space-between; align-items:center;
+    .jobs-head{
+      display:grid;
+      grid-template-columns: 1fr 110px 110px;
       gap:14px;
-      padding:12px 0;
-      border-bottom:1px solid var(--stroke);
+      padding:10px 0 12px;
+      border-bottom:1px solid rgba(255,255,255,.14);
+      color:rgba(255,255,255,.68);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:800;
     }
-    .row:last-child{ border-bottom:none; }
-    .job{ font-weight:800; }
-    .nums{ display:flex; gap:12px; align-items:center; color:rgba(255,255,255,.88); font-size:12px; }
-    .badge{
-      padding:6px 10px; border-radius:999px;
-      font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.12);
-      white-space:nowrap;
+    .jobs-head .h-right{ text-align:right; }
+    .jobs-row{
+      display:grid;
+      grid-template-columns: 1fr 110px 110px;
+      gap:14px;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .jobs-row:last-child{ border-bottom:none; }
+    .job-title{
+      font-weight:800;
+      letter-spacing:.02em;
+      min-width:0;
+    }
+    .num{
+      text-align:right;
+      font-weight:900;
+      letter-spacing:.02em;
+      color:rgba(255,255,255,.92);
     }
 
+    /* ===== Powered by (new) ===== */
+    .powered-by{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      margin-top:12px;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+      padding: 10px 0 6px;
+    }
+    .powered-by img{ height:22px; opacity:.9; }
+
     @media (max-width:900px){
-      .kpi-grid{ grid-template-columns:1fr 1fr; }
       .split{ grid-template-columns:1fr; }
+      .kpi-grid{ grid-template-columns:1fr 1fr; }
       .mini-grid{ grid-template-columns:1fr; }
       .chart-wrap{ height:260px; }
+      .jobs-head, .jobs-row{ grid-template-columns: 1fr 92px 92px; }
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
+
+    <!-- Header (updated: centered logo + centered title + line matches logo width, PDF link removed) -->
     <div class="topbar">
-      <div class="brand">
-        <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" />
+      <div class="logo-stack">
+        <div class="logo-wrap">
+          <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" />
+        </div>
         <h1>Talent Snapshot 2025</h1>
-      </div>
-      <div class="actions">
-        <a class="pill-link" href="index.html">Back to Dashboard</a>
-        <a class="pill-link" href="2025%20TALENT%20SNAPSHOT%20.pdf" target="_blank" rel="noopener">Open PDF</a>
+        <div class="accent-line"></div>
+
+        <div class="actions">
+          <a class="pill-link" href="index.html">Back to Dashboard</a>
+        </div>
       </div>
     </div>
-
-    <div class="accent-line"></div>
 
     <!-- KPI: Snapshot in numbers -->
     <div class="card">
       <h2>Snapshot in numbers</h2>
-      <div class="kpi-grid">
-        <div class="kpi"><div class="label">External hires</div><div class="value" id="kpiExternal">44</div></div>
-        <div class="kpi"><div class="label">Interns hired</div><div class="value" id="kpiInterns">4</div></div>
-        <div class="kpi"><div class="label">Internal hires</div><div class="value" id="kpiInternal">3</div></div>
-        <div class="kpi"><div class="label">Countries</div><div class="value" id="kpiCountries">5</div></div>
-      </div>
 
-      <div style="margin-top:16px;" class="mini-grid">
-        <div class="big-metric">
-          <div class="k">Net saving vs agency hiring</div>
-          <div class="v" id="kpiSavings">$428,000</div>
-          <div class="s">Estimated net saving reported in snapshot</div>
+      <div class="snapshot-body">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="label">External hires</div><div class="value" id="kpiExternal">44</div></div>
+          <div class="kpi"><div class="label">Interns hired</div><div class="value" id="kpiInterns">4</div></div>
+          <div class="kpi"><div class="label">Internal hires</div><div class="value" id="kpiInternal">3</div></div>
+          <div class="kpi"><div class="label">Countries</div><div class="value" id="kpiCountries">5</div></div>
         </div>
 
-        <div class="big-metric">
-          <div class="k">Gender split (hires)</div>
-          <div class="v"><span style="color:#fff;font-weight:900;">58%</span> <span style="opacity:.7;">Male</span> &nbsp;•&nbsp; <span style="color:#fff;font-weight:900;">42%</span> <span style="opacity:.7;">Female</span></div>
-          <div class="s">Share of hires by gender</div>
+        <div class="mini-grid">
+          <div class="big-metric orange">
+            <div class="k">Net saving vs agency hiring</div>
+            <div class="v" id="kpiSavings">$428,000</div>
+          </div>
+
+          <div class="big-metric orange">
+            <div class="k">Gender split (hires)</div>
+            <div class="v gender-line" aria-label="Gender split">
+              <span class="pct">58%</span><span class="lbl">Male</span>
+              <span style="opacity:.55;">•</span>
+              <span class="pct">42%</span><span class="lbl">Female</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -216,62 +384,67 @@
       <!-- Candidate sources -->
       <div class="card">
         <h2>Candidate sources</h2>
-        <div class="chart-wrap">
-          <canvas id="sourcesChart" aria-label="Candidate sources chart"></canvas>
+        <div class="card-body">
+          <div class="chart-wrap">
+            <canvas id="sourcesChart" aria-label="Candidate sources chart"></canvas>
+          </div>
+          <div id="sourcesLegend" class="legend"></div>
         </div>
-        <div id="sourcesLegend" class="legend"></div>
       </div>
 
-      <!-- Teamtailor impact -->
+      <!-- Teamtailor impact (updated: more spacing, green styling, no orange gradient) -->
       <div class="card">
         <h2>Since implementing Teamtailor</h2>
-        <div class="mini-grid">
-          <div class="big-metric"><div class="k">Career site views</div><div class="v">19k</div></div>
-          <div class="big-metric"><div class="k">Applicants</div><div class="v">1.4k</div></div>
-          <div class="big-metric"><div class="k">Job ad conversion</div><div class="v">21%</div><div class="s">to applications</div></div>
-          <div class="big-metric"><div class="k">Interviews</div><div class="v">266</div></div>
-          <div class="big-metric"><div class="k">Time to offer</div><div class="v">32 <span style="font-size:12px;letter-spacing:.10em;text-transform:uppercase;opacity:.78;">days</span></div></div>
-          <div class="big-metric"><div class="k">Activities performed</div><div class="v">3.8k</div></div>
+        <div class="card-body">
+          <div class="mini-grid">
+            <div class="big-metric green"><div class="k">Career site views</div><div class="v">19k</div></div>
+            <div class="big-metric green"><div class="k">Applicants</div><div class="v">1.4k</div></div>
+            <div class="big-metric green"><div class="k">Job ad conversion</div><div class="v">21%</div></div>
+            <div class="big-metric green"><div class="k">Interviews</div><div class="v">266</div></div>
+            <div class="big-metric green"><div class="k">Time to offer</div><div class="v">32 <span style="font-size:12px;letter-spacing:.10em;text-transform:uppercase;opacity:.78;">days</span></div></div>
+            <div class="big-metric green"><div class="k">Activities performed</div><div class="v">3.8k</div></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Top performing jobs -->
+    <!-- Top performing jobs (updated: Views / Applicants headings) -->
     <div class="card">
       <h2>Top performing jobs</h2>
-      <div class="table" aria-label="Top performing jobs list">
-        <div class="row">
-          <div style="min-width:0;">
-            <div class="job">Data Engineer</div>
-            <div style="color:rgba(255,255,255,.65);font-size:12px;margin-top:6px;">Highest interest role last year</div>
-          </div>
-          <div class="nums">
-            <span class="badge">Views 3008</span>
-            <span class="badge">Apps 454</span>
-          </div>
+
+      <div class="jobs" aria-label="Top performing jobs list">
+        <div class="jobs-head">
+          <div></div>
+          <div class="h-right">Views</div>
+          <div class="h-right">Applicants</div>
         </div>
 
-        <div class="row">
-          <div style="min-width:0;">
-            <div class="job">Customer Support – Panama</div>
-          </div>
-          <div class="nums">
-            <span class="badge">Views 1227</span>
-            <span class="badge">Apps 176</span>
-          </div>
+        <div class="jobs-row">
+          <div class="job-title">Data Engineer</div>
+          <div class="num">3008</div>
+          <div class="num">454</div>
         </div>
 
-        <div class="row">
-          <div style="min-width:0;">
-            <div class="job">RevOps Analyst</div>
-          </div>
-          <div class="nums">
-            <span class="badge">Views 708</span>
-            <span class="badge">Apps 62</span>
-          </div>
+        <div class="jobs-row">
+          <div class="job-title">Customer Support – Panama</div>
+          <div class="num">1227</div>
+          <div class="num">176</div>
+        </div>
+
+        <div class="jobs-row">
+          <div class="job-title">RevOps Analyst</div>
+          <div class="num">708</div>
+          <div class="num">62</div>
         </div>
       </div>
     </div>
+
+    <!-- Powered by (new) -->
+    <div class="powered-by">
+      <span>Powered by</span>
+      <img src="scaleio.svg" alt="ScaleIO">
+    </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
