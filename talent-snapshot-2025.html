@@ -23,9 +23,9 @@
       --logoW: 160px;
       --logoH: 42px;
 
-      /* ✅ Pole Star Green (darker, in-line with the page) */
-      --psgGreenBg: rgba(18, 92, 75, .55);     /* deep green wash */
-      --psgGreenBorder: rgba(255,255,255,.14); /* soft white-ish border */
+      /* ✅ Teamtailor mini-cards: same green as bg, slightly darker overlay */
+      --ttBgOverlay: rgba(0, 0, 0, .18);      /* darkens the same green */
+      --ttBorder: rgba(255,255,255,.14);      /* soft white-ish border */
     }
 
     *{ box-sizing:border-box; }
@@ -267,11 +267,23 @@
     .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    /* ✅ Teamtailor cards: remove gradient, darker PSG green, white-ish border */
+    /* ✅ Teamtailor mini-cards: same bg green, slightly darker overlay (NO gradient) */
     .big-metric.green{
-      background: var(--psgGreenBg);
-      border: 1px solid var(--psgGreenBorder);
-      box-shadow: 0 18px 40px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
+      background: rgba(12,47,51,1);      /* same as page background */
+      border: 1px solid var(--ttBorder);
+      position:relative;
+      overflow:hidden;
+    }
+    .big-metric.green::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: var(--ttBgOverlay);    /* darker overlay */
+      pointer-events:none;
+    }
+    .big-metric.green > *{
+      position:relative;                 /* ensure text sits above overlay */
+      z-index:1;
     }
 
     /* Jobs */
@@ -546,3 +558,4 @@
   </script>
 </body>
 </html>
+
