@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Talent Snapshot 2025</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0c2f33;
+      --accent:#f78e62;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.65);
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; background:var(--bg); }
+    body{
+      margin:0; padding:28px;
+      font-family:"Inter Tight", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      overflow-x:hidden;
+      position:relative;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(247,142,98,.18), transparent 60%),
+        radial-gradient(700px 520px at 85% 80%, rgba(247,142,98,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%);
+    }
+    .wrap{ position:relative; z-index:1; max-width:1200px; margin:0 auto; display:grid; gap:20px; padding-bottom:40px; }
+
+    .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .brand img{ height:46px; width:auto; display:block; }
+    h1{
+      font-family:"Unbounded", sans-serif;
+      font-weight:600;
+      font-size:clamp(20px,3vw,30px);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin:0;
+    }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .pill-link{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      color:rgba(255,255,255,.78);
+      font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+      text-decoration:none;
+      transition:opacity .2s ease, transform .2s ease, border-color .2s ease;
+      opacity:.9;
+      white-space:nowrap;
+    }
+    .pill-link:hover{ opacity:1; transform: translateY(-1px); border-color: rgba(247,142,98,.35); color:#fff; }
+
+    .accent-line{
+      height:3px; width:min(520px, 78vw);
+      background:linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin:6px auto 0;
+      border-radius:999px; opacity:.95;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
+      transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 22px 60px rgba(0,0,0,.42);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    h2{
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 12px 0;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .kpi{ text-align:center; }
+    .kpi .label{ font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
+    .kpi .value{ margin-top:10px; font-size:clamp(28px,4vw,36px); font-weight:900; }
+
+    .split{
+      display:grid; grid-template-columns:1.2fr .8fr; gap:16px;
+      align-items:stretch;
+    }
+    .mini-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .big-metric{
+      border:1px solid rgba(247,142,98,.55);
+      background: linear-gradient(135deg, rgba(247,142,98,.42) 0%, rgba(247,142,98,.20) 55%, rgba(0,0,0,.12) 100%);
+      border-radius:14px;
+      padding:14px;
+      display:flex; flex-direction:column; justify-content:center; gap:6px;
+      min-height:92px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06) inset;
+    }
+    .big-metric .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.70); }
+    .big-metric .v{ font-size:26px; font-weight:900; line-height:1.05; }
+    .big-metric .s{ font-size:12px; color:rgba(255,255,255,.72); letter-spacing:.02em; }
+
+    .chart-wrap{
+      height:240px;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(247,142,98,.15), rgba(247,142,98,.05));
+      border:1px solid rgba(255,255,255,.08);
+      padding:12px 16px;
+      overflow:hidden;
+    }
+    canvas{ width:100% !important; height:100% !important; display:block; }
+
+    .legend{ margin-top:10px; display:grid; gap:8px; }
+    .legend-item{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.10); font-size:12px; color:rgba(255,255,255,.88);
+    }
+    .legend-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .legend-dot{ width:10px; height:10px; border-radius:999px; box-shadow:0 0 0 4px rgba(255,255,255,.05); flex:0 0 auto; }
+    .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
+    .legend-pct{ font-weight:900; letter-spacing:.04em; }
+
+    .table{
+      display:grid;
+      gap:10px;
+    }
+    .row{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:14px;
+      padding:12px 0;
+      border-bottom:1px solid var(--stroke);
+    }
+    .row:last-child{ border-bottom:none; }
+    .job{ font-weight:800; }
+    .nums{ display:flex; gap:12px; align-items:center; color:rgba(255,255,255,.88); font-size:12px; }
+    .badge{
+      padding:6px 10px; border-radius:999px;
+      font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.12);
+      white-space:nowrap;
+    }
+
+    @media (max-width:900px){
+      .kpi-grid{ grid-template-columns:1fr 1fr; }
+      .split{ grid-template-columns:1fr; }
+      .mini-grid{ grid-template-columns:1fr; }
+      .chart-wrap{ height:260px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img src="PSG Logo - White With Orange (1).png" alt="Pole Star Global" />
+        <h1>Talent Snapshot 2025</h1>
+      </div>
+      <div class="actions">
+        <a class="pill-link" href="index.html">Back to Dashboard</a>
+        <a class="pill-link" href="2025%20TALENT%20SNAPSHOT%20.pdf" target="_blank" rel="noopener">Open PDF</a>
+      </div>
+    </div>
+
+    <div class="accent-line"></div>
+
+    <!-- KPI: Snapshot in numbers -->
+    <div class="card">
+      <h2>Snapshot in numbers</h2>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="label">External hires</div><div class="value" id="kpiExternal">44</div></div>
+        <div class="kpi"><div class="label">Interns hired</div><div class="value" id="kpiInterns">4</div></div>
+        <div class="kpi"><div class="label">Internal hires</div><div class="value" id="kpiInternal">3</div></div>
+        <div class="kpi"><div class="label">Countries</div><div class="value" id="kpiCountries">5</div></div>
+      </div>
+
+      <div style="margin-top:16px;" class="mini-grid">
+        <div class="big-metric">
+          <div class="k">Net saving vs agency hiring</div>
+          <div class="v" id="kpiSavings">$428,000</div>
+          <div class="s">Estimated net saving reported in snapshot</div>
+        </div>
+
+        <div class="big-metric">
+          <div class="k">Gender split (hires)</div>
+          <div class="v"><span style="color:#fff;font-weight:900;">58%</span> <span style="opacity:.7;">Male</span> &nbsp;•&nbsp; <span style="color:#fff;font-weight:900;">42%</span> <span style="opacity:.7;">Female</span></div>
+          <div class="s">Share of hires by gender</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <!-- Candidate sources -->
+      <div class="card">
+        <h2>Candidate sources</h2>
+        <div class="chart-wrap">
+          <canvas id="sourcesChart" aria-label="Candidate sources chart"></canvas>
+        </div>
+        <div id="sourcesLegend" class="legend"></div>
+      </div>
+
+      <!-- Teamtailor impact -->
+      <div class="card">
+        <h2>Since implementing Teamtailor</h2>
+        <div class="mini-grid">
+          <div class="big-metric"><div class="k">Career site views</div><div class="v">19k</div></div>
+          <div class="big-metric"><div class="k">Applicants</div><div class="v">1.4k</div></div>
+          <div class="big-metric"><div class="k">Job ad conversion</div><div class="v">21%</div><div class="s">to applications</div></div>
+          <div class="big-metric"><div class="k">Interviews</div><div class="v">266</div></div>
+          <div class="big-metric"><div class="k">Time to offer</div><div class="v">32 <span style="font-size:12px;letter-spacing:.10em;text-transform:uppercase;opacity:.78;">days</span></div></div>
+          <div class="big-metric"><div class="k">Activities performed</div><div class="v">3.8k</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top performing jobs -->
+    <div class="card">
+      <h2>Top performing jobs</h2>
+      <div class="table" aria-label="Top performing jobs list">
+        <div class="row">
+          <div style="min-width:0;">
+            <div class="job">Data Engineer</div>
+            <div style="color:rgba(255,255,255,.65);font-size:12px;margin-top:6px;">Highest interest role last year</div>
+          </div>
+          <div class="nums">
+            <span class="badge">Views 3008</span>
+            <span class="badge">Apps 454</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="min-width:0;">
+            <div class="job">Customer Support – Panama</div>
+          </div>
+          <div class="nums">
+            <span class="badge">Views 1227</span>
+            <span class="badge">Apps 176</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="min-width:0;">
+            <div class="job">RevOps Analyst</div>
+          </div>
+          <div class="nums">
+            <span class="badge">Views 708</span>
+            <span class="badge">Apps 62</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const sources = [
+      { name: "LinkedIn", pct: 35 },
+      { name: "Indeed", pct: 20 },
+      { name: "AI", pct: 11 },
+      { name: "Sourced", pct: 9 },
+      { name: "Glassdoor", pct: 8 },
+      { name: "Google", pct: 1 },
+      { name: "Referrals", pct: 0.9 },  // "<1%"
+      { name: "Other", pct: 16 }        // "<16%" shown as 16 for charting
+    ];
+
+    function modernPalette(n) {
+      const base = [
+        "rgba(247,142,98,.95)",
+        "rgba(34,211,238,.85)",
+        "rgba(56,189,248,.85)",
+        "rgba(129,140,248,.85)",
+        "rgba(94,234,212,.80)",
+        "rgba(167,139,250,.80)",
+        "rgba(110,231,183,.80)",
+        "rgba(251,191,36,.75)"
+      ];
+      const out = [];
+      for (let i = 0; i < n; i++) out.push(base[i % base.length]);
+      return out;
+    }
+
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    function renderLegend(items, colors) {
+      const el = document.getElementById("sourcesLegend");
+      el.innerHTML = items.map((it, idx) => `
+        <div class="legend-item">
+          <div class="legend-left">
+            <span class="legend-dot" style="background:${colors[idx]};"></span>
+            <span class="legend-name">${esc(it.name)}</span>
+          </div>
+          <span class="legend-pct">${it.label}</span>
+        </div>
+      `).join("");
+    }
+
+    const canvas = document.getElementById("sourcesChart");
+    const colors = modernPalette(sources.length);
+
+    // Keep the "<" labels where relevant, but chart with numeric approximations.
+    const legendItems = sources.map(s => ({
+      name: s.name,
+      label: (s.name === "Referrals") ? "<1%" : (s.name === "Other") ? "<16%" : `${s.pct}%`
+    }));
+
+    renderLegend(legendItems, colors);
+
+    new Chart(canvas.getContext("2d"), {
+      type: "doughnut",
+      data: {
+        labels: sources.map(s => s.name),
+        datasets: [{
+          data: sources.map(s => s.pct),
+          backgroundColor: colors,
+          borderColor: "rgba(255,255,255,.10)",
+          borderWidth: 1,
+          spacing: 3,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "46%",
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.label}: ${legendItems[ctx.dataIndex].label}`
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
