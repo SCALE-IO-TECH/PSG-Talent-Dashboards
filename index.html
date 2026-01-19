@@ -56,7 +56,7 @@
     }
 
     .dashboard{
-      position:relative;
+      position:relative; /* ✅ needed for snapshot positioning */
       z-index:1;
       max-width:1200px;
       margin:0 auto;
@@ -481,11 +481,11 @@
       .card:hover{ transform:none !important; }
     }
 
-    /* ===== Talent Snapshot Link Card (UPDATED TITLE) ===== */
+    /* ===== Talent Snapshot Link Card (ALIGNED TO DASHBOARD) ===== */
     .snapshot-link{
-      position:fixed;
-      top:96px;              /* not hugging the top */
-      right:28px;
+      position:absolute;      /* ✅ changed from fixed */
+      top:18px;
+      right:0;                /* ✅ aligns to dashboard/card right edge */
       z-index:20;
     }
 
@@ -541,6 +541,49 @@
         justify-content:center;
       }
     }
+
+    /* ===== Live Roles Filters (Location + Stage) ===== */
+    .live-filters{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:flex-end;
+      margin:0 0 12px;
+    }
+
+    .filter{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:160px;
+    }
+
+    .filter span{
+      font-size:10px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+      font-weight:800;
+    }
+
+    .filter select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      color: rgba(255,255,255,.90);
+      font-family: inherit;
+      font-weight:700;
+      outline:none;
+    }
+
+    .filter select:focus{
+      border-color: rgba(247,142,98,.45);
+      box-shadow: 0 0 0 2px rgba(247,142,98,.15);
+    }
   </style>
 </head>
 
@@ -555,15 +598,15 @@
     />
   </div>
 
-  <!-- Talent Snapshot linked card (top-right) -->
-  <div class="snapshot-link" aria-label="Talent Snapshot link">
-    <a href="talent-snapshot-2025.html" class="snapshot-card">
-      <div class="snapshot-title">Talent Snapshot <span class="snapshot-year">2025</span></div>
-      <div class="snapshot-sub">Hiring outcomes &amp; impact</div>
-    </a>
-  </div>
-
   <div class="dashboard">
+
+    <!-- ✅ Talent Snapshot linked card (top-right, aligned to dashboard) -->
+    <div class="snapshot-link" aria-label="Talent Snapshot link">
+      <a href="talent-snapshot-2025.html" class="snapshot-card">
+        <div class="snapshot-title">Talent Snapshot <span class="snapshot-year">2025</span></div>
+        <div class="snapshot-sub">Hiring outcomes &amp; impact</div>
+      </a>
+    </div>
 
     <!-- Header + boat -->
     <div class="topScene">
@@ -604,6 +647,24 @@
     <div class="two-col">
       <div class="card">
         <h2>Live Roles</h2>
+
+        <!-- ✅ Filters: Location + Stage ONLY -->
+        <div class="live-filters" id="liveRolesFilters" aria-label="Live roles filters">
+          <label class="filter">
+            <span>Location</span>
+            <select id="liveFilterLocation">
+              <option value="">All</option>
+            </select>
+          </label>
+
+          <label class="filter">
+            <span>Stage</span>
+            <select id="liveFilterStage">
+              <option value="">All</option>
+            </select>
+          </label>
+        </div>
+
         <div id="liveRolesList"></div>
       </div>
 
