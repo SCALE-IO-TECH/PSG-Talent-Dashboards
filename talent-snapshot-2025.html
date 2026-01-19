@@ -23,9 +23,15 @@
       --logoW: 160px;
       --logoH: 42px;
 
-      /* ✅ Teamtailor mini-cards: same green as bg, slightly darker overlay */
-      --ttBgOverlay: rgba(0, 0, 0, .18);      /* darkens the same green */
-      --ttBorder: rgba(255,255,255,.14);      /* soft white-ish border */
+      /* Teamtailor mini-cards: same bg green, slightly darker overlay */
+      --ttBgOverlay: rgba(0, 0, 0, .18);
+      --ttBorder: rgba(255,255,255,.14);
+
+      /* ✅ Spacing controls */
+      --spaceLogoToLine: 12px;   /* extra space between logo and orange line */
+      --spaceLineToTitle: 14px;  /* space between line and title */
+      --spaceTitleToCards: 16px; /* extra space before first card starts */
+      --spaceH2ToBody: 18px;     /* space between section heading and its first content */
     }
 
     *{ box-sizing:border-box; }
@@ -64,6 +70,7 @@
       align-items:flex-start;
       margin-top:6px;
       padding-top:2px;
+      margin-bottom: var(--spaceTitleToCards); /* ✅ more space before first card */
     }
     .top-actions{
       position:absolute;
@@ -103,7 +110,7 @@
       width: var(--logoW);
       display:flex;
       justify-content:center;
-      padding:14px 0 10px;
+      padding:14px 0 0; /* ✅ remove bottom padding so spacing controlled below */
     }
     .logo-wrap img{
       height: var(--logoH);
@@ -115,7 +122,7 @@
       height:3px;
       width: var(--logoW);
       background:linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin:0 auto 14px;
+      margin: var(--spaceLogoToLine) auto var(--spaceLineToTitle); /* ✅ more space both sides */
       border-radius:999px;
       opacity:.95;
     }
@@ -126,7 +133,7 @@
       font-size:clamp(20px,3vw,30px);
       letter-spacing:.14em;
       text-transform:uppercase;
-      margin:0;
+      margin:0 0 0; /* keep tight; topbar margin-bottom handles space to cards */
       line-height:1.15;
     }
 
@@ -172,7 +179,8 @@
       font-weight:900;
     }
 
-    .snapshot-body{ margin-top:16px; }
+    /* ✅ more space under "Snapshot in numbers" before first stats row */
+    .snapshot-body{ margin-top: var(--spaceH2ToBody); }
 
     .mini-grid{
       display:grid;
@@ -267,9 +275,9 @@
     .legend-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.02em; }
     .legend-pct{ font-weight:900; letter-spacing:.04em; }
 
-    /* ✅ Teamtailor mini-cards: same bg green, slightly darker overlay (NO gradient) */
+    /* Teamtailor mini-cards: same bg green, slightly darker overlay (NO gradient) */
     .big-metric.green{
-      background: rgba(12,47,51,1);      /* same as page background */
+      background: rgba(12,47,51,1);
       border: 1px solid var(--ttBorder);
       position:relative;
       overflow:hidden;
@@ -278,11 +286,11 @@
       content:"";
       position:absolute;
       inset:0;
-      background: var(--ttBgOverlay);    /* darker overlay */
+      background: var(--ttBgOverlay);
       pointer-events:none;
     }
     .big-metric.green > *{
-      position:relative;                 /* ensure text sits above overlay */
+      position:relative;
       z-index:1;
     }
 
@@ -558,4 +566,3 @@
   </script>
 </body>
 </html>
-
