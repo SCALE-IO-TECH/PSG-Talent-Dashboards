@@ -16,191 +16,7 @@ const TIME_TO_OFFER_GID   = "300572217";  // Time_To
 const PUB_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRI6ijLxl_6gvJVxsLK7ChUyJOcDmpeVg0hkSAYgLSsgTzeuoHQyVrMq77afuJ1YfLwtOUAKwfNGqkJ/pub?output=csv&gid=";
 
-/* ===========================
-   i18n (ENG / ESP / FRA)
-   =========================== */
-const I18N = {
-  en: {
-    hiring_dashboard: "Hiring Dashboard",
-    live_roles: "Live Roles",
-    on_hold: "On Hold",
-    offers: "Offers",
-    hires: "Hires",
-    candidate_sources: "Candidate Sources",
-    new_starters: "New Starters",
-    progress: "Progress",
-    challenges: "Challenges",
-    key_focus: "Key Focus",
-    pipeline_health: "Pipeline Health",
-    time_to_offer: "Time to Offer",
-    target: "Target",
-    current: "Current",
-    expected: "Expected",
-    loading: "Loading…",
-    no_data: "No data",
-    check_headers: "Check headers",
-    applicants: "applicants",
-    based_on_last_five_offers: "Based on our last five offers.",
-    estimated_next_role: "Estimated time from sign-off to offer extended for the next approved role.",
-    management_handbook: "Management Handbook",
-    manager_guidelines: "Manager Guidelines",
-    powered_by: "Powered by",
-    poor: "Poor",
-    needs_work: "Needs work",
-    ok: "OK",
-    good: "Good",
-    excellent: "Excellent",
-    days: "days",
-    offer_stage: "Offer",
-    hired_stage: "Hired"
-  },
-  es: {
-    hiring_dashboard: "Panel de Contratación",
-    live_roles: "Vacantes Activas",
-    on_hold: "En Pausa",
-    offers: "Ofertas",
-    hires: "Contrataciones",
-    candidate_sources: "Fuentes de Candidatos",
-    new_starters: "Nuevas Incorporaciones",
-    progress: "Progreso",
-    challenges: "Desafíos",
-    key_focus: "Enfoque Clave",
-    pipeline_health: "Salud del Pipeline",
-    time_to_offer: "Tiempo hasta Oferta",
-    target: "Objetivo",
-    current: "Actual",
-    expected: "Previsto",
-    loading: "Cargando…",
-    no_data: "Sin datos",
-    check_headers: "Revisa los encabezados",
-    applicants: "candidatos",
-    based_on_last_five_offers: "Basado en nuestras últimas cinco ofertas.",
-    estimated_next_role: "Tiempo estimado desde aprobación hasta oferta para el próximo puesto aprobado.",
-    management_handbook: "Manual de Gestión",
-    manager_guidelines: "Guía para Managers",
-    powered_by: "Con tecnología de",
-    poor: "Malo",
-    needs_work: "Mejorable",
-    ok: "Aceptable",
-    good: "Bueno",
-    excellent: "Excelente",
-    days: "días",
-    offer_stage: "Oferta",
-    hired_stage: "Contratado"
-  },
-  fr: {
-    hiring_dashboard: "Tableau de Recrutement",
-    live_roles: "Postes Ouverts",
-    on_hold: "En Pause",
-    offers: "Offres",
-    hires: "Embauches",
-    candidate_sources: "Sources de Candidats",
-    new_starters: "Nouvelles Arrivées",
-    progress: "Progrès",
-    challenges: "Défis",
-    key_focus: "Priorité Clé",
-    pipeline_health: "Santé du Pipeline",
-    time_to_offer: "Délai jusqu’à l’Offre",
-    target: "Cible",
-    current: "Actuel",
-    expected: "Prévu",
-    loading: "Chargement…",
-    no_data: "Aucune donnée",
-    check_headers: "Vérifie les en-têtes",
-    applicants: "candidats",
-    based_on_last_five_offers: "Basé sur nos cinq dernières offres.",
-    estimated_next_role: "Délai estimé entre validation et offre pour le prochain poste approuvé.",
-    management_handbook: "Manuel de Management",
-    manager_guidelines: "Directives Managers",
-    powered_by: "Propulsé par",
-    poor: "Faible",
-    needs_work: "À améliorer",
-    ok: "Correct",
-    good: "Bon",
-    excellent: "Excellent",
-    days: "jours",
-    offer_stage: "Offre",
-    hired_stage: "Embauché"
-  }
-};
-
-const LANG_META = {
-  en: { code: "ENG", flag: "🇬🇧", htmlLang: "en" },
-  es: { code: "ESP", flag: "🇪🇸", htmlLang: "es" },
-  fr: { code: "FRA", flag: "🇫🇷", htmlLang: "fr" }
-};
-
-let currentLang = "en";
-
-function t(key) {
-  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key;
-}
-
-function applyI18n() {
-  if (document && document.documentElement) {
-    document.documentElement.lang = LANG_META[currentLang]?.htmlLang || "en";
-  }
-
-  document.querySelectorAll("[data-i18n]").forEach((el) => {
-    const key = el.getAttribute("data-i18n");
-    if (!key) return;
-    el.textContent = t(key);
-  });
-
-  document.querySelectorAll("[data-lang]").forEach((btn) => {
-    btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
-    btn.setAttribute("aria-pressed", btn.getAttribute("data-lang") === currentLang ? "true" : "false");
-  });
-
-  const empty = document.getElementById("candidateSourcesEmpty");
-  if (empty && empty.style.display !== "none") {
-    const raw = (empty.textContent || "").trim();
-    const known = [
-      "Loading…","No data","Check headers",
-      "Cargando…","Sin datos","Revisa los encabezados",
-      "Chargement…","Aucune donnée","Vérifie les en-têtes"
-    ];
-    if (!raw || known.includes(raw)) empty.textContent = t("loading");
-  }
-}
-
-function setLanguage(lang) {
-  if (!I18N[lang]) return;
-  currentLang = lang;
-  try { localStorage.setItem("ps_lang", lang); } catch(e) {}
-  applyI18n();
-
-  // Refresh any text that is generated from data
-  loadLiveRoles().catch(()=>{});
-  loadCandidateSourcesChart().catch(()=>{});
-  loadTimeToOffer().catch(()=>{});
-
-  // ✅ NEW: refresh sheet-driven text lists in the chosen language (if language columns exist)
-  loadTextListFromSheet(PROGRESS_GID, "progressList").catch(()=>{});
-  loadTextListFromSheet(CHALLENGES_GID, "challengesList").catch(()=>{});
-  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList").catch(()=>{});
-}
-
-function initLanguageSwitcher() {
-  try {
-    const saved = localStorage.getItem("ps_lang");
-    if (saved && I18N[saved]) currentLang = saved;
-  } catch(e) {}
-
-  document.querySelectorAll("[data-lang]").forEach((btn) => {
-    const lang = btn.getAttribute("data-lang");
-    const meta = LANG_META[lang];
-    if (!meta) return;
-    btn.textContent = `${meta.flag} ${meta.code}`;
-    btn.addEventListener("click", () => setLanguage(lang));
-  });
-
-  applyI18n();
-}
-
-/* ===========================
-   CSV PARSER
-   =========================== */
+// ===== CSV PARSER =====
 function csvToRows(text) {
   const rows = [];
   let row = [];
@@ -236,33 +52,11 @@ function toNumber(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
-/* ===========================
-   Stage translation (sheet-driven)
-   - Keeps CSS class logic working
-   - Translates Offer/Hired in UI language
-   =========================== */
-function canonicalStage(stage) {
-  const s = String(stage || "").trim().toLowerCase();
-
-  // canonical english
-  if (s === "offer" || s === "offre" || s === "oferta") return "offer";
-  if (s === "hired" || s === "embauché" || s === "embauche" || s === "contratado") return "hired";
-
-  return s;
-}
-
 function stageClass(stage) {
-  const c = canonicalStage(stage);
-  if (c === "offer") return "offer";
-  if (c === "hired") return "hired";
+  const s = String(stage || "").trim().toLowerCase();
+  if (s === "offer") return "offer";
+  if (s === "hired") return "hired";
   return "";
-}
-
-function displayStage(stageRaw) {
-  const c = canonicalStage(stageRaw);
-  if (c === "offer") return t("offer_stage");
-  if (c === "hired") return t("hired_stage");
-  return String(stageRaw || "").trim();
 }
 
 function esc(s) {
@@ -329,7 +123,7 @@ async function loadLiveRoles() {
     const team = (r[idx("Team")] ?? "").trim();
     const location = (r[idx("Location")] ?? "").trim();
     const applicants = toNumber(r[idx("Applicants")]);
-    const stageRaw = (r[idx("Current_Stage")] ?? "").trim();
+    const stage = (r[idx("Current_Stage")] ?? "").trim();
 
     const el = document.createElement("div");
     el.className = "row";
@@ -339,10 +133,10 @@ async function loadLiveRoles() {
         <div class="meta">
           ${team ? `<span class="team">${esc(team)}</span>` : ``}
           ${location ? `<span class="pill">${esc(location)}</span>` : ``}
-          <span>${applicants} ${esc(t("applicants"))}</span>
+          <span>${applicants} applicants</span>
         </div>
       </div>
-      <span class="stage ${stageClass(stageRaw)}">${esc(displayStage(stageRaw) || "—")}</span>
+      <span class="stage ${stageClass(stage)}">${esc(stage || "—")}</span>
     `;
     list.appendChild(el);
   });
@@ -426,12 +220,10 @@ async function loadCandidateSourcesChart() {
   const canvas = document.getElementById("candidateSourcesChart");
   if (!canvas) return;
 
-  if (empty) empty.textContent = t("loading");
-
   const text = await fetchCsvByGid(CANDIDATE_SOURCES_GID);
   const rows = csvToRows(text.trim());
   if (rows.length < 2) {
-    if (empty) empty.textContent = t("no_data");
+    if (empty) empty.textContent = "No data";
     return;
   }
 
@@ -440,7 +232,7 @@ async function loadCandidateSourcesChart() {
   const iAmount = pickIndex(headers, ["amount"]);
 
   if (iSource < 0 || iAmount < 0) {
-    if (empty) empty.textContent = t("check_headers");
+    if (empty) empty.textContent = "Check headers";
     return;
   }
 
@@ -454,7 +246,7 @@ async function loadCandidateSourcesChart() {
 
   const total = raw.reduce((s, x) => s + x.amount, 0);
   if (!total) {
-    if (empty) empty.textContent = t("no_data");
+    if (empty) empty.textContent = "No data";
     return;
   }
 
@@ -517,32 +309,6 @@ function renderSimpleList(containerId, items) {
   });
 }
 
-/* ✅ NEW: Try to pick a language column if it exists (en/es/fr),
-   otherwise keep original behavior (first non-empty cell). */
-function pickLangColumnIndex(headers) {
-  const norm = (s) =>
-    String(s || "")
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "")
-      .replace(/[_\-]+/g, "");
-
-  const H = headers.map(norm);
-
-  const candidates = {
-    en: ["en","eng","english","anglais","ingles"],
-    es: ["es","esp","spanish","espanol","español","castellano"],
-    fr: ["fr","fra","french","francais","français"]
-  };
-
-  const list = candidates[currentLang] || candidates.en;
-  for (const c of list) {
-    const i = H.indexOf(norm(c));
-    if (i >= 0) return i;
-  }
-  return -1;
-}
-
 async function loadTextListFromSheet(gid, containerId) {
   const text = await fetchCsvByGid(gid);
   const rows = csvToRows(text.trim());
@@ -551,25 +317,11 @@ async function loadTextListFromSheet(gid, containerId) {
     return;
   }
 
-  const headers = rows[0].map(h => String(h).trim());
-  const body = rows.slice(1);
-
-  const langCol = pickLangColumnIndex(headers);
+  const body = rows.slice(1); // skip header row
   const items = [];
 
   for (const r of body) {
-    let cell = "";
-
-    // Use language column if present
-    if (langCol >= 0) {
-      cell = String(r[langCol] ?? "").trim();
-    }
-
-    // Fallback to original behavior (first non-empty cell in row)
-    if (!cell) {
-      cell = (r.find(v => String(v).trim() !== "") ?? "").trim();
-    }
-
+    const cell = (r.find(v => String(v).trim() !== "") ?? "").trim();
     if (cell) items.push(cell);
   }
 
@@ -597,6 +349,7 @@ async function loadPipelineHealth() {
   ]);
   if (iPH < 0) return;
 
+  // find first non-empty pipeline_health value anywhere in the rows
   let chosen = "";
   for (const r of rows) {
     const v = String(r[iPH] ?? "").trim();
@@ -637,6 +390,7 @@ function setupDelayedTooltipOnElement(el, tipEl, delayMs) {
   el.addEventListener("blur", () => { if (tmr) clearTimeout(tmr); tmr = null; hide(); });
 }
 
+/* formats "35" or "35 days" as: 35 <span class="unit">days</span> */
 function setDaysMetric(el, rawVal) {
   if (!el) return;
   const raw = String(rawVal ?? "").trim();
@@ -644,7 +398,7 @@ function setDaysMetric(el, rawVal) {
 
   const m = raw.match(/^(\d+(?:\.\d+)?)\s*(days?|d)?$/i);
   if (m) {
-    el.innerHTML = `${esc(m[1])} <span class="unit">${esc(t("days"))}</span>`;
+    el.innerHTML = `${esc(m[1])} <span class="unit">days</span>`;
     return;
   }
 
@@ -692,18 +446,14 @@ async function loadTimeToOffer() {
 }
 
 // ===== INIT =====
-window.addEventListener("DOMContentLoaded", () => {
-  initLanguageSwitcher();
-
-  Promise.all([
-    loadStatusKpis(),
-    loadLiveRoles(),
-    loadNewStarters(),
-    loadCandidateSourcesChart(),
-    loadTextListFromSheet(PROGRESS_GID, "progressList"),
-    loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
-    loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
-    loadPipelineHealth(),
-    loadTimeToOffer()
-  ]).catch(err => console.error(err));
-});
+Promise.all([
+  loadStatusKpis(),
+  loadLiveRoles(),
+  loadNewStarters(),
+  loadCandidateSourcesChart(),
+  loadTextListFromSheet(PROGRESS_GID, "progressList"),
+  loadTextListFromSheet(CHALLENGES_GID, "challengesList"),
+  loadTextListFromSheet(KEY_FOCUS_GID, "keyFocusList"),
+  loadPipelineHealth(),
+  loadTimeToOffer()
+]).catch(err => console.error(err));
