@@ -12,6 +12,29 @@
     window.scrollTo(0,0);
   </script>
 
+  <!-- ✅ Apply saved Google Translate language EARLY (before Translate loads) -->
+  <script>
+    (function () {
+      function setGoogTransCookie(lang) {
+        // Google Translate uses a cookie called "googtrans" like: /en/es
+        var v = (lang === "en") ? "/en/en" : ("/en/" + lang);
+        document.cookie = "googtrans=" + v + ";path=/";
+        // try also setting on current domain (helps some hosting setups)
+        try {
+          document.cookie = "googtrans=" + v + ";path=/;domain=" + location.hostname;
+        } catch(e) {}
+      }
+
+      try {
+        var saved = localStorage.getItem("ps_lang");
+        if (saved && (saved === "en" || saved === "es" || saved === "fr")) {
+          setGoogTransCookie(saved);
+        }
+      } catch(e) {}
+      window.__setGoogTransCookie = setGoogTransCookie;
+    })();
+  </script>
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -395,7 +418,7 @@
       font-weight:800;
     }
 
-    /* ✅ Time-to-offer (gradient orange + small days close to number) */
+    /* ✅ Time-to-offer */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -473,8 +496,7 @@
       .metric-grid{ grid-template-columns:1fr; }
     }
 
-    /* ✅ Custom language buttons (top right)
-       IMPORTANT: mark as notranslate so Google doesn't rewrite them */
+    /* ✅ Custom language buttons (top right) */
     .lang-switch{
       position:absolute;
       top:16px;
@@ -508,20 +530,15 @@
       border-color: transparent;
     }
 
-    /* ✅ Strongly hide Google Translate injected UI */
+    /* ✅ Hide Google Translate UI/banner completely */
     #google_translate_element{ display:none !important; }
-
-    /* Hide the top banner iframe and gadget */
-    .goog-te-banner-frame{ display:none !important; }
-    .goog-te-gadget{ display:none !important; }
-    .goog-logo-link{ display:none !important; }
-
-    /* Some sites get a banner placeholder DIV */
-    #goog-gt-tt, .goog-te-balloon-frame { display:none !important; }
-    .goog-text-highlight{ background: transparent !important; box-shadow:none !important; }
-
-    /* Google sometimes pushes body down */
-    body{ top:0 !important; position:relative !important; }
+    .goog-te-banner-frame,
+    .goog-te-gadget,
+    .goog-logo-link,
+    .goog-te-gadget span{
+      display:none !important;
+    }
+    body{ top:0 !important; }
 
     @media (prefers-reduced-motion: reduce){
       .boatLayer{ display:none !important; }
@@ -551,9 +568,9 @@
 
       <!-- ✅ Custom Language Buttons (protected from translation) -->
       <div class="lang-switch notranslate" translate="no" aria-label="Language switcher">
-        <button class="lang-btn" data-lang="en" type="button" translate="no">🇬🇧 ENG</button>
-        <button class="lang-btn" data-lang="es" type="button" translate="no">🇪🇸 ESP</button>
-        <button class="lang-btn" data-lang="fr" type="button" translate="no">🇫🇷 FRA</button>
+        <button class="lang-btn notranslate" translate="no" data-lang="en" type="button"><span translate="no">🇬🇧</span> <span translate="no">ENG</span></button>
+        <button class="lang-btn notranslate" translate="no" data-lang="es" type="button"><span translate="no">🇪🇸</span> <span translate="no">ESP</span></button>
+        <button class="lang-btn notranslate" translate="no" data-lang="fr" type="button"><span translate="no">🇫🇷</span> <span translate="no">FRA</span></button>
       </div>
 
       <div class="boatLayer" aria-hidden="true" id="boatLayer">
@@ -947,97 +964,87 @@
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- ✅ Custom buttons drive Google Translate (no dropdown / no banner) -->
+  <!-- ✅ Custom buttons drive Google Translate (cookie method, Safari-safe, no dropdown usage) -->
   <script>
-    // Helper: find the select injected by Google Translate
-    function getGtSelect(){
-      return document.querySelector('select.goog-te-combo');
-    }
+    (function () {
+      var buttons = document.querySelectorAll(".lang-btn");
 
-    // Force-hide any injected banner/iframes (Google sometimes re-adds them)
-    function nukeGoogleUi(){
-      // Remove banner iframe if present
-      document.querySelectorAll('.goog-te-banner-frame').forEach(el => el.style.display = 'none');
-      // Remove tooltip container if present
-      const tt = document.getElementById('goog-gt-tt');
-      if (tt) tt.style.display = 'none';
-      // Prevent body push-down
-      document.body.style.top = '0px';
-    }
-
-    // Apply language (with reliable retries until select exists)
-    function applyGoogleLanguage(lang){
-      const sel = getGtSelect();
-      if (!sel) return false;
-
-      sel.value = lang;
-      sel.dispatchEvent(new Event('change', { bubbles:true }));
-      nukeGoogleUi();
-      return true;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const buttons = Array.from(document.querySelectorAll(".lang-btn"));
-
-      // Lock original labels so Google can't “translate” them
-      buttons.forEach(btn => {
-        if (!btn.dataset.label) btn.dataset.label = btn.textContent;
-      });
-
-      const setActive = (lang) => {
-        buttons.forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
-      };
-
-      // Re-apply labels (in case Google tries to mutate them)
-      const restoreButtonLabels = () => {
-        buttons.forEach(b => {
-          if (b.dataset.label && b.textContent !== b.dataset.label) {
-            b.textContent = b.dataset.label;
-          }
+      function activate(lang) {
+        buttons.forEach(function (b) {
+          b.classList.toggle("active", (b.getAttribute("data-lang") === lang));
         });
-      };
+      }
 
-      // Observe DOM mutations and keep Google UI hidden + buttons intact
-      const mo = new MutationObserver(() => {
-        nukeGoogleUi();
-        restoreButtonLabels();
-      });
-      mo.observe(document.documentElement, { childList:true, subtree:true });
+      function setLanguage(lang) {
+        if (!(lang === "en" || lang === "es" || lang === "fr")) lang = "en";
 
-      const saved = (() => {
-        try { return localStorage.getItem("ps_lang") || "en"; } catch(e) { return "en"; }
-      })();
+        activate(lang);
 
-      setActive(saved);
+        try { localStorage.setItem("ps_lang", lang); } catch(e) {}
 
-      // Click handler
-      buttons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          const lang = btn.getAttribute("data-lang") || "en";
-          setActive(lang);
-          restoreButtonLabels();
-          try { localStorage.setItem("ps_lang", lang); } catch(e) {}
+        if (window.__setGoogTransCookie) {
+          window.__setGoogTransCookie(lang);
+        } else {
+          // fallback
+          var v = (lang === "en") ? "/en/en" : ("/en/" + lang);
+          document.cookie = "googtrans=" + v + ";path=/";
+          try { document.cookie = "googtrans=" + v + ";path=/;domain=" + location.hostname; } catch(e){}
+        }
 
-          // Retry until widget is ready (fixes “needs multiple clicks”)
-          let tries = 0;
-          const timer = setInterval(() => {
-            tries++;
-            if (applyGoogleLanguage(lang) || tries > 40) clearInterval(timer);
-          }, 120);
-        }, { passive:true });
+        // ✅ Reload is what makes this reliable across Safari/Chrome and avoids the dropdown bugs
+        location.reload();
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          setLanguage(btn.getAttribute("data-lang") || "en");
+        });
       });
 
-      // Apply saved language on load (wait for select injection)
-      let tries = 0;
-      const timer = setInterval(() => {
-        tries++;
-        if (applyGoogleLanguage(saved) || tries > 60) clearInterval(timer);
-      }, 120);
+      // Apply saved state for active styling
+      var saved = "en";
+      try {
+        saved = localStorage.getItem("ps_lang") || "en";
+      } catch(e) {}
+      activate(saved);
 
-      // Run once immediately too
-      nukeGoogleUi();
-      restoreButtonLabels();
-    });
+      // Extra hard-kill of Google UI if it appears (some browsers inject late)
+      function killGoogleUi() {
+        try {
+          var banner = document.querySelector(".goog-te-banner-frame");
+          if (banner && banner.parentNode) banner.parentNode.removeChild(banner);
+        } catch(e){}
+
+        // remove any translate iframes
+        var iframes = document.querySelectorAll('iframe');
+        iframes.forEach(function (f) {
+          try {
+            var src = (f.getAttribute("src") || "");
+            if (src.indexOf("translate") !== -1) {
+              f.style.display = "none";
+              f.style.visibility = "hidden";
+              f.style.height = "0";
+            }
+          } catch(e){}
+        });
+
+        // ensure body isn't pushed down
+        document.body.style.top = "0px";
+      }
+
+      // run a few times after load
+      window.addEventListener("load", function () {
+        killGoogleUi();
+        var n = 0;
+        var t = setInterval(function () {
+          n++;
+          killGoogleUi();
+          if (n > 20) clearInterval(t);
+        }, 250);
+      });
+    })();
   </script>
 
 </body>
