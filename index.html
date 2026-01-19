@@ -12,29 +12,6 @@
     window.scrollTo(0,0);
   </script>
 
-  <!-- ✅ Apply saved Google Translate language EARLY (before Translate loads) -->
-  <script>
-    (function () {
-      function setGoogTransCookie(lang) {
-        // Google Translate uses a cookie called "googtrans" like: /en/es
-        var v = (lang === "en") ? "/en/en" : ("/en/" + lang);
-        document.cookie = "googtrans=" + v + ";path=/";
-        // try also setting on current domain (helps some hosting setups)
-        try {
-          document.cookie = "googtrans=" + v + ";path=/;domain=" + location.hostname;
-        } catch(e) {}
-      }
-
-      try {
-        var saved = localStorage.getItem("ps_lang");
-        if (saved && (saved === "en" || saved === "es" || saved === "fr")) {
-          setGoogTransCookie(saved);
-        }
-      } catch(e) {}
-      window.__setGoogTransCookie = setGoogTransCookie;
-    })();
-  </script>
-
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -418,7 +395,7 @@
       font-weight:800;
     }
 
-    /* ✅ Time-to-offer */
+    /* ✅ Time-to-offer (gradient orange + small days close to number) */
     .metric-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -532,13 +509,34 @@
 
     /* ✅ Hide Google Translate UI/banner completely */
     #google_translate_element{ display:none !important; }
-    .goog-te-banner-frame,
+
+    /* ✅ Hard-hide the Google top banner iframe */
+    iframe.goog-te-banner-frame,
+    .goog-te-banner-frame {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      width: 0 !important;
+      border: 0 !important;
+    }
+
+    /* ✅ Google sometimes pushes the page down (margin-top on html/body) */
+    html, body {
+      margin-top: 0 !important;
+      top: 0 !important;
+    }
+
+    /* ✅ Hide other injected translate UI bits */
+    .goog-te-menu-frame,
+    .goog-te-balloon-frame,
     .goog-te-gadget,
     .goog-logo-link,
-    .goog-te-gadget span{
-      display:none !important;
+    .goog-te-gadget span,
+    #goog-gt-tt,
+    .goog-tooltip,
+    .goog-tooltip:hover {
+      display: none !important;
     }
-    body{ top:0 !important; }
 
     @media (prefers-reduced-motion: reduce){
       .boatLayer{ display:none !important; }
@@ -566,11 +564,11 @@
     <!-- Header + boat -->
     <div class="topScene">
 
-      <!-- ✅ Custom Language Buttons (protected from translation) -->
-      <div class="lang-switch notranslate" translate="no" aria-label="Language switcher">
-        <button class="lang-btn notranslate" translate="no" data-lang="en" type="button"><span translate="no">🇬🇧</span> <span translate="no">ENG</span></button>
-        <button class="lang-btn notranslate" translate="no" data-lang="es" type="button"><span translate="no">🇪🇸</span> <span translate="no">ESP</span></button>
-        <button class="lang-btn notranslate" translate="no" data-lang="fr" type="button"><span translate="no">🇫🇷</span> <span translate="no">FRA</span></button>
+      <!-- ✅ Custom Language Buttons -->
+      <div class="lang-switch" aria-label="Language switcher">
+        <button class="lang-btn" data-lang="en" type="button">🇬🇧 ENG</button>
+        <button class="lang-btn" data-lang="es" type="button">🇪🇸 ESP</button>
+        <button class="lang-btn" data-lang="fr" type="button">🇫🇷 FRA</button>
       </div>
 
       <div class="boatLayer" aria-hidden="true" id="boatLayer">
@@ -964,87 +962,101 @@
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- ✅ Custom buttons drive Google Translate (cookie method, Safari-safe, no dropdown usage) -->
+  <!-- ✅ Custom buttons drive Google Translate (no dropdown) + force-hide banner (Chrome/Safari) -->
   <script>
-    (function () {
-      var buttons = document.querySelectorAll(".lang-btn");
+    function setGoogleLanguage(lang){
+      const select = document.querySelector('select.goog-te-combo');
+      if (!select) return false;
+      select.value = lang;
+      select.dispatchEvent(new Event('change'));
+      return true;
+    }
 
-      function activate(lang) {
-        buttons.forEach(function (b) {
-          b.classList.toggle("active", (b.getAttribute("data-lang") === lang));
+    function killGoogleUi() {
+      // Remove / hide the top banner iframe
+      try {
+        document.querySelectorAll("iframe.goog-te-banner-frame").forEach(function (f) {
+          f.style.display = "none";
+          f.style.visibility = "hidden";
+          f.style.height = "0";
+          f.style.width = "0";
+          f.style.border = "0";
         });
-      }
+      } catch(e){}
 
-      function setLanguage(lang) {
-        if (!(lang === "en" || lang === "es" || lang === "fr")) lang = "en";
+      // Sometimes Google adds margin-top or top offsets
+      try {
+        document.documentElement.style.marginTop = "0px";
+        document.body.style.marginTop = "0px";
+        document.body.style.top = "0px";
+        document.body.style.position = "static";
+      } catch(e){}
 
-        activate(lang);
+      // Kill tooltip/bubble elements if they appear
+      [
+        "#goog-gt-tt",
+        ".goog-tooltip",
+        ".goog-tooltip:hover",
+        ".goog-te-balloon-frame",
+        ".goog-te-menu-frame"
+      ].forEach(function(sel){
+        try {
+          document.querySelectorAll(sel).forEach(function(el){
+            el.style.display = "none";
+            el.style.visibility = "hidden";
+          });
+        } catch(e){}
+      });
+    }
 
-        try { localStorage.setItem("ps_lang", lang); } catch(e) {}
+    document.addEventListener("DOMContentLoaded", () => {
+      const buttons = document.querySelectorAll(".lang-btn");
 
-        if (window.__setGoogTransCookie) {
-          window.__setGoogTransCookie(lang);
-        } else {
-          // fallback
-          var v = (lang === "en") ? "/en/en" : ("/en/" + lang);
-          document.cookie = "googtrans=" + v + ";path=/";
-          try { document.cookie = "googtrans=" + v + ";path=/;domain=" + location.hostname; } catch(e){}
-        }
+      const activate = (lang) => {
+        buttons.forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
+      };
 
-        // ✅ Reload is what makes this reliable across Safari/Chrome and avoids the dropdown bugs
-        location.reload();
-      }
-
-      buttons.forEach(function (btn) {
-        btn.addEventListener("click", function (e) {
+      buttons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          setLanguage(btn.getAttribute("data-lang") || "en");
-        });
+
+          const lang = btn.getAttribute("data-lang") || "en";
+          activate(lang);
+          try { localStorage.setItem("ps_lang", lang); } catch(e) {}
+
+          // If translate hasn't injected the select yet, retry a few times quickly
+          let tries = 0;
+          const timer = setInterval(() => {
+            tries++;
+            killGoogleUi();
+            if (setGoogleLanguage(lang) || tries > 35) clearInterval(timer);
+          }, 120);
+        }, { passive:false });
       });
 
-      // Apply saved state for active styling
-      var saved = "en";
-      try {
-        saved = localStorage.getItem("ps_lang") || "en";
-      } catch(e) {}
+      const saved = (() => {
+        try { return localStorage.getItem("ps_lang") || "en"; } catch(e) { return "en"; }
+      })();
       activate(saved);
 
-      // Extra hard-kill of Google UI if it appears (some browsers inject late)
-      function killGoogleUi() {
-        try {
-          var banner = document.querySelector(".goog-te-banner-frame");
-          if (banner && banner.parentNode) banner.parentNode.removeChild(banner);
-        } catch(e){}
-
-        // remove any translate iframes
-        var iframes = document.querySelectorAll('iframe');
-        iframes.forEach(function (f) {
-          try {
-            var src = (f.getAttribute("src") || "");
-            if (src.indexOf("translate") !== -1) {
-              f.style.display = "none";
-              f.style.visibility = "hidden";
-              f.style.height = "0";
-            }
-          } catch(e){}
-        });
-
-        // ensure body isn't pushed down
-        document.body.style.top = "0px";
-      }
-
-      // run a few times after load
-      window.addEventListener("load", function () {
+      // apply saved language after translate loads
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
         killGoogleUi();
-        var n = 0;
-        var t = setInterval(function () {
-          n++;
-          killGoogleUi();
-          if (n > 20) clearInterval(t);
-        }, 250);
-      });
-    })();
+        if (setGoogleLanguage(saved) || tries > 45) clearInterval(timer);
+      }, 150);
+
+      // keep killing the UI banner periodically (some browsers re-inject)
+      setInterval(killGoogleUi, 400);
+
+      // If Google tries to re-inject the banner or re-apply top offsets, undo it immediately
+      try {
+        const mo = new MutationObserver(() => killGoogleUi());
+        mo.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+      } catch(e) {}
+    });
   </script>
 
 </body>
